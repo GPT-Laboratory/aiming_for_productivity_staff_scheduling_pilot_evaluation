@@ -26,6 +26,10 @@ import check_schedule as cs      # noqa: E402
 SYSTEM = ("You are solving a staff scheduling task by reasoning alone. You have no tools: you cannot run code, "
           "call a solver or look anything up. Do not write a program. Think the problem through carefully and "
           "then give the finished schedule yourself.")
+# Same output cap as the code model in the multi-agent runs (see mas_harness/run_headless.py).
+LIMIT = ("Each of your replies is limited to {n} output tokens, counting any reasoning as well; anything "
+         "beyond that is cut off. Use the tokens sparingly: keep the reasoning short and make sure the complete "
+         "final csv block fits.")
 
 
 def sheets_as_text(xlsx):
@@ -129,7 +133,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("case", choices=CASE); ap.add_argument("runs", type=int)
     ap.add_argument("--model", default="openai/gpt-6.1-terra-pro"); ap.add_argument("--max-turns", type=int, default=4)
-    ap.add_argument("--max-tokens", type=int, default=30000); ap.add_argument("--tag", default="")
+    ap.add_argument("--max-tokens", type=int, default=16384); ap.add_argument("--tag", default="")
     ap.add_argument("--sim-user", action="store_true",
                     help="After each format-valid answer the simulated manager accepts it or asks for a revision (max 3).")
     ap.add_argument("--max-reviews", type=int, default=3)
@@ -144,8 +148,8 @@ def main():
     for n in range(1, a.runs + 1):
         out = REPO / "runs" / f"{dt.datetime.now():%Y%m%d-%H%M%S}_direct{a.case}{a.tag}_r{n:02d}"
         out.mkdir(parents=True)
-        msgs = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": task()}]
-        log = {"case": a.case, "model": a.model, "max_turns": a.max_turns, "turns": [], "started": dt.datetime.now().isoformat(timespec="seconds")}
+        msgs = [{"role": "system", "content": SYSTEM + " " + LIMIT.format(n=a.max_tokens)}, {"role": "user", "content": task()}]
+        log = {"case": a.case, "model": a.model, "max_turns": a.max_turns, "max_tokens": a.max_tokens, "turns": [], "started": dt.datetime.now().isoformat(timespec="seconds")}
         parsed, errs, t0 = None, ["no answer"], time.time()
         sim, reviews, fmt_fails, last_valid = None, 0, 0, None
         if a.sim_user:
@@ -156,14 +160,16 @@ def main():
             try:
                 r = client.chat.completions.create(model=a.model, messages=msgs, max_tokens=a.max_tokens)
                 text = r.choices[0].message.content or ""
+                finish = r.choices[0].finish_reason
                 usage = r.usage.model_dump() if r.usage else {}
             except Exception as exc:
                 log["turns"].append({"turn": turn, "api_error": repr(exc)[:300]}); break
             (out / f"answer_turn{turn}.md").write_text(text, encoding="utf-8")
             parsed, errs = validate(text)
-            log["turns"].append({"turn": turn, "validity_errors": errs, "answer_chars": len(text),
+            log["turns"].append({"turn": turn, "validity_errors": errs, "answer_chars": len(text), "finish_reason": finish,
                                  "completion_tokens": usage.get("completion_tokens"), "prompt_tokens": usage.get("prompt_tokens")})
-            print(f"[direct {a.case} r{n}] turn {turn}: {len(errs)} validity errors", flush=True)
+            print(f"[direct {a.case} r{n}] turn {turn}: {len(errs)} validity errors"
+                  + (" (cut off at the output cap)" if finish == "length" else ""), flush=True)
             if not errs:
                 last_valid = parsed
                 if sim is None or reviews >= a.max_reviews:

@@ -196,7 +196,7 @@ uv run --no-project --python 3.11 --with-requirements requirements.txt direct_ll
 uv run --no-project --python 3.11 --with-requirements requirements.txt direct_llm/direct_llm.py C 3
 ```
 
-* **Setup.** The model receives the task description and the data serialised the same way the MAS serialises Excel files. It is told it has no tools and must not write a program. It is also given a fixed answer format; for D this includes the convention for reading the table.
+* **Setup.** The model receives the task description and the data serialised the same way the MAS serialises Excel files. It is told it has no tools and must not write a program. Each reply is capped at 16384 output tokens, reasoning included (the same cap as the MAS code model in the harness), and the system prompt says so, so that the model budgets its reasoning. Earlier direct runs used a cap of 30000 and did not mention it. It is also given a fixed answer format; for D this includes the convention for reading the table.
 * **Revision loop.** After each answer, a structural check looks only at format: the table parses, names are known, nobody is in two shifts at once, all weeks are present. Any problems are sent back, with at most 4 answers. The rule checkers run only afterwards, and their results are never shown to the model.
 * **Configuration.** The model defaults to `openai/gpt-6.1-terra-pro`; change it with `--model`. The provider comes from `OPENAI_API_BASE` in `.env`.
 
