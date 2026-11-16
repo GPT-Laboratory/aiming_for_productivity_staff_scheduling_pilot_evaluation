@@ -32,6 +32,14 @@ LIMIT = ("Each of your replies is limited to {n} output tokens, counting any rea
          "final csv block fits.")
 
 
+def load_skill(path):
+    """A SKILL.md as the model would see it once loaded: frontmatter and HTML comments removed."""
+    text = Path(path).read_text(encoding="utf-8")
+    text = re.sub(r"\A---\n.*?\n---\n", "", text, flags=re.S)
+    text = re.sub(r"<!--.*?-->\n?", "", text, flags=re.S)
+    return "\n\nThe following skill is loaded for this task:\n\n" + text.strip()
+
+
 def sheets_as_text(xlsx):
     """Same serialisation the multi-agent system uses for uploaded Excel files."""
     parts = []
@@ -137,6 +145,8 @@ def main():
     ap.add_argument("--sim-user", action="store_true",
                     help="After each format-valid answer the simulated manager accepts it or asks for a revision (max 3).")
     ap.add_argument("--max-reviews", type=int, default=3)
+    ap.add_argument("--skill", help="SKILL.md appended to the system prompt, "
+                    "e.g. direct_llm/skills/finnish-daycare-scheduling/SKILL.md")
     a = ap.parse_args()
     load_dotenv(REPO / ".env")
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"], base_url=os.getenv("OPENAI_API_BASE"), timeout=900)
@@ -148,8 +158,9 @@ def main():
     for n in range(1, a.runs + 1):
         out = REPO / "runs" / f"{dt.datetime.now():%Y%m%d-%H%M%S}_direct{a.case}{a.tag}_r{n:02d}"
         out.mkdir(parents=True)
-        msgs = [{"role": "system", "content": SYSTEM + " " + LIMIT.format(n=a.max_tokens)}, {"role": "user", "content": task()}]
-        log = {"case": a.case, "model": a.model, "max_turns": a.max_turns, "max_tokens": a.max_tokens, "turns": [], "started": dt.datetime.now().isoformat(timespec="seconds")}
+        system = SYSTEM + " " + LIMIT.format(n=a.max_tokens) + (load_skill(a.skill) if a.skill else "")
+        msgs = [{"role": "system", "content": system}, {"role": "user", "content": task()}]
+        log = {"case": a.case, "model": a.model, "max_turns": a.max_turns, "max_tokens": a.max_tokens, "skill": a.skill, "turns": [], "started": dt.datetime.now().isoformat(timespec="seconds")}
         parsed, errs, t0 = None, ["no answer"], time.time()
         sim, reviews, fmt_fails, last_valid = None, 0, 0, None
         if a.sim_user:
@@ -199,6 +210,7 @@ def main():
                 log["checker"] = score(parsed, out)
             except Exception as exc:
                 log["checker_error"] = repr(exc)[:300]
+        (out / "system.txt").write_text(msgs[0]["content"], encoding="utf-8")
         (out / "prompt.txt").write_text(msgs[1]["content"], encoding="utf-8")
         (out / "result.json").write_text(json.dumps(log, indent=1, ensure_ascii=False, default=str), encoding="utf-8")
         c = log.get("checker", {})
