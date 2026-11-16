@@ -140,15 +140,16 @@ CASE = {"D": (d_task, d_validate, d_score), "C": (c_task, c_validate, c_score)}
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("case", choices=CASE); ap.add_argument("runs", type=int)
-    ap.add_argument("--model", default="openai/gpt-6.1-terra-pro"); ap.add_argument("--max-turns", type=int, default=4)
+    ap.add_argument("--model", help="default: DIRECT_LLM_MODEL, else openai/gpt-6.1-terra-pro"); ap.add_argument("--max-turns", type=int, default=4)
     ap.add_argument("--max-tokens", type=int, default=16384); ap.add_argument("--tag", default="")
     ap.add_argument("--sim-user", action="store_true",
                     help="After each format-valid answer the simulated manager accepts it or asks for a revision (max 3).")
     ap.add_argument("--max-reviews", type=int, default=3)
     ap.add_argument("--skill", help="SKILL.md appended to the system prompt, "
                     "e.g. direct_llm/skills/finnish-daycare-scheduling/SKILL.md")
-    a = ap.parse_args()
     load_dotenv(REPO / ".env")
+    ap.set_defaults(model=os.getenv("DIRECT_LLM_MODEL", "openai/gpt-6.1-terra-pro"))
+    a = ap.parse_args()
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"], base_url=os.getenv("OPENAI_API_BASE"), timeout=900)
     task, validate, score = CASE[a.case]
     if a.sim_user:
@@ -160,7 +161,8 @@ def main():
         out.mkdir(parents=True)
         system = SYSTEM + " " + LIMIT.format(n=a.max_tokens) + (load_skill(a.skill) if a.skill else "")
         msgs = [{"role": "system", "content": system}, {"role": "user", "content": task()}]
-        log = {"case": a.case, "model": a.model, "max_turns": a.max_turns, "max_tokens": a.max_tokens, "skill": a.skill, "turns": [], "started": dt.datetime.now().isoformat(timespec="seconds")}
+        log = {"case": a.case, "model": a.model, "max_turns": a.max_turns, "max_tokens": a.max_tokens, "skill": a.skill,
+               "api_base": os.getenv("OPENAI_API_BASE") or "https://api.openai.com/v1 (default)", "turns": [], "started": dt.datetime.now().isoformat(timespec="seconds")}
         parsed, errs, t0 = None, ["no answer"], time.time()
         sim, reviews, fmt_fails, last_valid = None, 0, 0, None
         if a.sim_user:

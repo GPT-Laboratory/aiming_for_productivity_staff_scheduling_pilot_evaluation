@@ -146,7 +146,9 @@ Prerequisites:
    # edit .env: set OPENAI_API_KEY; keep OPENAI_API_BASE for OpenRouter, or delete it for OpenAI
    ```
 
-   With OpenAI directly, also delete the two `HEADLESS_LLM_*` lines, because OpenAI model ids have no `openai/` prefix.
+   With OpenAI directly, also change the model ids, because OpenAI model ids have no `openai/` prefix.
+
+   To use a second provider (for example Azure for one model), put its settings in `.env.<name>` and prefix a command with `UV_ENV_FILE=.env.<name>`. This works for the MAS harness and the direct-LLM script alike. Values in that file take precedence over `.env`, and each run records its endpoint and models.
 
 3. Check that the MAS runs end to end with the small cutting-stock task. It takes about 2–3 minutes and costs about one cent.
 
