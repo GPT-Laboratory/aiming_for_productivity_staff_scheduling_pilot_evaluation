@@ -226,3 +226,6 @@ mas2025/
 generated/
 *.export.csv
 openrouter_activity*.csv
+
+# Local notes for Claude Code
+CLAUDE.local.md
