@@ -32,6 +32,8 @@ No personal data is included. See [Data and anonymisation](#data-and-anonymisati
 | MAS 2025 version, gpt-4o / gpt-4o-mini, datasets A–D (plus 2 C reruns with the counter fix) | 12 + 2 | 28 + 1 | 11 + 1 | 0 |
 | Direct prompt, `openai/gpt-6.1-terra-pro`, dataset D | 5 | – | – | 5 valid tables |
 | Direct prompt, `openai/gpt-6.1-terra-pro`, dataset C | 3 | – | – | 3 satisfy all 11 rules |
+| Direct prompt, current prompt, without / with the domain skill, dataset D | 5 / 5 | – | – | 5 / 5 valid tables; mean 11.5 / 34.5 missing staff-hours a week |
+| Direct prompt, current prompt, without / with the domain skill, dataset C | 3 / 3 | – | – | 3 / 3 satisfy all 11 rules |
 
 * **The MAS produced no usable roster.** The typical failures were infeasible models caused by the generated code's own bugs, schedules that are structurally impossible, output at the wrong decision level, and the input history reprinted instead of new weeks. 55 of 98 code executions crashed, and 3 of 16 runs stopped at LangGraph's 25-step limit.
 * **The MAS's self-assessment was unreliable.** It declared success in 25 of 43 rounds, none of which was usable.
@@ -41,6 +43,9 @@ No personal data is included. See [Data and anonymisation](#data-and-anonymisati
   * On dataset C, all 3 runs satisfied every rule on the first answer.
   * On dataset D, all 5 runs produced valid tables with 10.9–14.5 missing staff-hours a week (mean 12.8). For comparison, the best known schedule has 10.9, the company's own rotation replayed has 17.4 and random rotations about 20.7.
   * The weak point was rotation: the same person stayed in the same shift in consecutive weeks 4–8 times per run.
+  * Repeated with the current prompt (16384-token cap stated in it): C 3/3 satisfied every rule again; D 5/5 valid with 10.9–12.8 missing staff-hours a week (mean 11.5), same-shift repeats 6–10. gpt-4o on the same prompt: D 16.0–39.6, C 0/3 meeting all rules.
+* **The domain skill made D worse.** With `--skill`, the newer model still satisfied every rule on C (3/3), but on D it left the part-time assistant unscheduled in every week of all 5 runs: three full shifts would exceed the assistant's 19:08 weekly target, and the skill says part-time staff work only their contracted hours. Missing staff-hours rose to 34.1–35.6 a week (mean 34.5), three times the runs without the skill. The model explained the omission and listed the resulting gaps, as the skill asks, but it put the hour target before the ratio, against the skill's own priority order. For gpt-4o the skill made no clear difference (D 19.7–39.7, C 0/3).
+* **A simulated manager did not improve the direct answers.** With the persona of `mas_harness/sim_user/SKILL.md` reviewing each answer, C was accepted in 2 of 3 trials; in the third the manager gave up because the roster stayed a long CSV list with staff IDs, although it met every rule. On D the manager accepted neither completed trial (13.1 and 13.3 missing staff-hours a week, about the same as without the manager); a third trial was stopped and is not counted.
 * **Cost was not the limiting factor.** A MAS run with gpt-4o cost $0.04–0.18, a MAS run with the newer model about $1.10, and a direct-prompt run about $0.05.
 
 Our interpretation is that the fixed generate–run–describe workflow was the main bottleneck, more than model capability. Nothing in the loop checks the result against the rules, and information is lost between agents. These conclusions rest on synthetic data and a rule checker, not on validation by the daycare.
@@ -214,7 +219,7 @@ uv run --no-project --python 3.11 --with-requirements requirements.txt direct_ll
 | `results/experiments_summary.csv` | per experiment: runs, completed, stopped at step limit, code executions and failures, analysed rounds, rounds self-rated as achieved, usable schedules |
 | `results/mas_round_classification.csv` | every analysed MAS round classified by failure type, with the MAS's own verdict and a short note |
 | `results/mas2025_round_classification.csv` | the same for the 2025 version, plus how faithfully each round's program re-executed (see below) |
-| `results/direct_llm_runs.csv` | direct-LLM runs with checker scores |
+| `results/direct_llm_runs.csv` | direct-LLM runs with checker scores. Run names give the variant: `direct` (first runs, 30000-token cap), `noskill` and `skill` (current prompt, without and with `--skill`), `gpt-4o_*` (gpt-4o on the same prompt), `sim` (reviewed by the simulated manager) |
 | `results/cost_by_experiment.csv` | API calls, tokens and cost per experiment, from the OpenRouter activity export of 16 Nov 2026, split by timestamp; the export ends before the last 4 direct runs |
 | `results/scoresheet_template.csv` | blank rubric for human evaluators, one row per MAS round |
 
