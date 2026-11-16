@@ -383,12 +383,40 @@ def main():
     if os.getenv("HEADLESS_LLM_CODE_MODEL"):
         common.llm_code.model_name = os.environ["HEADLESS_LLM_CODE_MODEL"]
 
+    # Output cap of the code model. MAS 2025 hard-codes max_tokens=4096 (the original
+    # gpt-4o output limit); current gpt-4o allows 16384, and a whole program is returned
+    # inside one structured (JSON) reply, so 4096 can cut it off. Raise the cap to
+    # HEADLESS_LLM_CODE_MAX_TOKENS (default 16384). MAS 2024 sets no cap; it is left
+    # alone unless the variable is set explicitly.
+    mas_cap = getattr(common.llm_code, "max_tokens", None)
+    if os.getenv("HEADLESS_LLM_CODE_MAX_TOKENS") or mas_cap is not None:
+        common.llm_code.max_tokens = int(os.getenv("HEADLESS_LLM_CODE_MAX_TOKENS", "16384"))
+
+    # Record every LLM reply that stopped at the output cap (finish_reason "length").
+    from langchain_core.callbacks import BaseCallbackHandler
+
+    class TruncationLog(BaseCallbackHandler):
+        def on_llm_end(self, response, **kwargs):
+            for gens in response.generations:
+                for g in gens:
+                    info = dict(g.generation_info or {})
+                    msg = getattr(g, "message", None)
+                    info.update(getattr(msg, "response_metadata", None) or {})
+                    if info.get("finish_reason") == "length":
+                        model = info.get("model_name", "?")
+                        rec.event("llm_truncated", model=model)
+                        print(f"[headless] WARNING: {model} reply cut off at the output cap", flush=True)
+
+    for m in (common.llm, common.llm_code):
+        m.callbacks = [*(m.callbacks or []), TruncationLog()]
+
     summary = {
         "name": args.name,
         "started": dt.datetime.now().isoformat(timespec="seconds"),
         "git": git_info(),
         "python": platform.python_version(),
         "models": {"llm": common.llm.model_name, "llm_code": common.llm_code.model_name},
+        "llm_code_max_tokens": {"mas": mas_cap, "used": getattr(common.llm_code, "max_tokens", None)},
         "api_base": os.getenv("OPENAI_API_BASE") or "https://api.openai.com/v1 (default)",
         "attachments": [f.name for f in attachments],
         "optimization_rounds_requested": None if args.sim_user else args.optimization_rounds,
