@@ -177,8 +177,10 @@ def install_chainlit_shim(rec: Recorder, optimization_rounds: int):
             return self
 
     class Action:
-        def __init__(self, name=None, value=None, label=None, **kwargs):
-            self.name, self.value, self.label = name, value, label
+        def __init__(self, name=None, value=None, label=None, payload=None, **kwargs):
+            # Chainlit 1.x passes value=..., Chainlit 2.x payload={"value": ...}
+            self.name, self.label = name, label
+            self.value = value if value is not None else (payload or {}).get("value", name)
 
     class AskActionMessage:
         def __init__(self, content="", actions=None, **kwargs):
@@ -205,7 +207,7 @@ def install_chainlit_shim(rec: Recorder, optimization_rounds: int):
             rec.decisions.append(entry)
             rec.event("decision", **entry)
             print(f"[headless] decision: {self.content!r} -> {choice}", flush=True)
-            return {"name": choice, "value": choice}
+            return {"name": choice, "value": choice, "payload": {"value": choice}}
 
     class AskUserMessage:
         """Free-text question (added by mas_eval_patches.diff). Fixed policy: no feedback."""
@@ -324,6 +326,9 @@ def main():
     rec = Recorder(run_dir)
     cl = install_chainlit_shim(rec, args.optimization_rounds)
 
+    # The 2025 MAS builds a Claude client at import time although no agent uses it;
+    # ChatAnthropic refuses to start without a key, so give it a placeholder.
+    os.environ.setdefault("CLAUDE_API_KEY", "placeholder-not-used-by-any-agent")
     import main as pipeline  # original module: builds and compiles the graph
     from agents import common
 
@@ -388,8 +393,8 @@ def main():
     # loop, so the wall-clock limit is enforced from a separate thread.
     def watchdog():
         finalize("timeout", f"exceeded {args.timeout}s")
-        subprocess.run(["docker-compose", "kill"], cwd=GENERATED if GENERATED.exists() else REPO)
-        subprocess.run(["docker-compose", "down"], cwd=GENERATED if GENERATED.exists() else REPO)
+        subprocess.run(["docker", "compose", "kill"], cwd=GENERATED if GENERATED.exists() else REPO)
+        subprocess.run(["docker", "compose", "down"], cwd=GENERATED if GENERATED.exists() else REPO)
         os._exit(124)
 
     timer = threading.Timer(args.timeout, watchdog)

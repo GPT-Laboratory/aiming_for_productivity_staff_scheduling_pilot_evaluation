@@ -1,0 +1,14 @@
+# Runtime dependencies of the 2025 MAS (heuristic-multi-agent-system, commit e8c2077).
+# Its own requirements.txt is a pip freeze that does not resolve: chainlit 2.4.0 needs a newer
+# uptrace, langchain-anthropic 0.3.9 a newer langchain-core, and two lines are merged. So the
+# direct imports are listed here and resolved as of the commit date (run.sh passes
+# --exclude-newer 2025-05-06). chainlit is not needed: the harness replaces it.
+python-dotenv
+pandas
+openpyxl
+pydantic
+langchain
+langchain-core
+langchain-openai
+langchain-anthropic==0.3.9
+langgraph

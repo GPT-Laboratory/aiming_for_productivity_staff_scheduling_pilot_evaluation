@@ -222,6 +222,7 @@ __marimo__/
 # Evaluation outputs and local checkouts
 runs/
 mas/
+mas2025/
 generated/
 *.export.csv
 openrouter_activity*.csv

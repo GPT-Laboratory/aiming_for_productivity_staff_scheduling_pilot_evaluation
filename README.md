@@ -125,6 +125,20 @@ Prerequisites:
 
    The original results were produced without this patch.
 
+   The MAS has a 2025 successor, [heuristic-multi-agent-system](https://github.com/JoniHonkanen/heuristic-multi-agent-system) (Feb–May 2025), which adds problem classification, a heuristic agent and problem-specific instructions, including instructions for shift scheduling. To run it instead, clone it and point `MAS_DIR` at it:
+
+   ```bash
+   git clone https://github.com/JoniHonkanen/heuristic-multi-agent-system.git mas2025
+   git -C mas2025 checkout e8c2077
+   git -C mas2025 apply ../mas_harness/mas2025_eval_patches.diff   # Compose V2 and the PuLP/numpy fix only
+   export MAS_DIR=$PWD/mas2025
+   ```
+
+   Three things differ when it runs:
+   * `run.sh` detects it and installs `mas_harness/requirements-mas2025.txt`, resolved as of its commit date. Its own `requirements.txt` is a pip freeze that does not resolve.
+   * The harness supports its Chainlit 2 button format.
+   * The harness gives its unused Claude client a placeholder key, because the client refuses to start without one.
+
 2. Configure the API access:
 
    ```bash
