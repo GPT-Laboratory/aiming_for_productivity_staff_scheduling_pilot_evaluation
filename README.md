@@ -1,12 +1,17 @@
 # AIming for productivity? Staff scheduling pilot: evaluation
 
-In this pilot of the *AIming for productivity?* (*vAI:lla tuottavuutta?*) project, a multi-agent
+<img src="images/eu_co_funded_en.jpg" alt="Co-funded by the European Union" width="400">
+
+In this pilot of the ERDF-funded [*AIming for productivity?* (*vAI:lla tuottavuutta?*)](https://projektit.seamk.fi/alykkaat-teknologiat/vailla-tuottavuutta/) project, a multi-agent
 system (MAS) was evaluated on weekly staff rostering for a Finnish daycare. The MAS turns a task
 description and attached Excel data into Python optimisation code, runs it in Docker, analyses the
-output and iterates.
+output and iterates as needed or requested by the user.
 
-The MAS was developed by Joni Honkanen in the AKKE-funded GPT-Lab Seinäjoki project:
-<https://github.com/JoniHonkanen/ucs-llm-code-docker-optimizer>. It is not part of this repository.
+The MAS was originally developed by Joni Honkanen in the AKKE-funded GPT-Lab Seinäjoki project:
+<https://github.com/JoniHonkanen/ucs-llm-code-docker-optimizer>. Development of the tool was not part of the
+*AIming for productivity?* (*vAI:lla tuottavuutta?*) project and it is not part of this repository. However,
+adapting the MAS tool to this purpose and its evaluation were done in *AIming for productivity?* 
+(*vAI:lla tuottavuutta?*). 
 
 This repository contains everything used to evaluate it, except the MAS itself:
 
@@ -82,9 +87,9 @@ uv run --no-project --python 3.11 --with-requirements requirements.txt datasets/
 
 Prerequisites:
 * Linux (the harness was used on Ubuntu 20.04);
-* [uv](https://docs.astral.sh/uv/), which provides Python 3.11 and the dependencies on the fly, so no virtual environment needs to be maintained;
+* [uv](https://docs.astral.sh/uv/), which provides Python 3.11 and the dependencies on the fly;
 * Docker with the Compose V2 plugin (`docker compose version`), needed only for the MAS experiments;
-* an API key for [OpenRouter](https://openrouter.ai/) (as used here) or OpenAI.
+* an API key for OpenAI LLM models.
 
 1. Clone this repository and the MAS at the evaluated commit. The harness expects the MAS in `./mas`, or wherever `MAS_DIR` points.
 
@@ -176,7 +181,7 @@ python3 analysis/cost_by_experiment.py openrouter_activity.csv --runs runs --utc
 
 ## Data and anonymisation
 
-* **Children and staff.** No real child data was used. All child records and staff profiles (groups, roles, hours, vacations) in datasets B, C and D are synthetic.
+* **Children and staff.** No real child data was shared nor used. All child records and staff profiles (groups, roles, hours, vacations) in datasets B, C and D are synthetic.
 * **Staff names.** Staff names in the company's rotation table were replaced with `Staff01`–`Staff11` before anything was sent to an LLM provider. For publication the pseudonyms were randomly relabelled again, so their numbering carries no information about the real names, and the role label was translated to `Assistant`. The synthetic staff profiles were relabelled with them, so every computed figure is unchanged. No mapping exists in this repository.
 * **Company data.** The shift slot times and the rotation pattern are the company's, published in pseudonymised form. Neither the company nor the daycare is named. The rotation file and its sheet were renamed to English (`shift_rotation.xlsx`, `Shift rotation`), and a Finnish free-text note in it was translated.
 * **Group names.** The three group names in the original prompt were replaced *after the runs* with Robin, Finch and Lark, consistently in the prompts and datasets.
@@ -187,7 +192,6 @@ python3 analysis/cost_by_experiment.py openrouter_activity.csv --runs runs --utc
 
 * The datasets are synthetic. The checkers measure the written rules, not whether the daycare would accept a roster. That requires the company's validation, which is pending.
 * For dataset D, the best-known reference was found heuristically and is not a proven optimum. The human-baseline figure depends on the synthetic group assignment.
-* gpt-4o and gpt-4o-mini were called through OpenRouter in November 2026 and may differ from the versions used during the pilot in spring 2025.
 * The human decisions in the MAS were fixed, so the effect of interactive steering was not measured.
 * There were 3–5 runs per condition: enough to show consistent failure or success, not to estimate exact rates.
 
