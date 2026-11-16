@@ -29,11 +29,13 @@ No personal data is included. See [Data and anonymisation](#data-and-anonymisati
 |---|---|---|---|---|
 | MAS, gpt-4o / gpt-4o-mini, datasets A–D | 16 | 43 | 25 | 0 |
 | MAS with `openai/gpt-6.1-terra-pro` as both models, dataset D | 3 | 3 | 0 | 0 |
+| MAS 2025 version, gpt-4o / gpt-4o-mini, datasets A–D (plus 2 C reruns with the counter fix) | 12 + 2 | 28 + 1 | 11 + 1 | 0 |
 | Direct prompt, `openai/gpt-6.1-terra-pro`, dataset D | 5 | – | – | 5 valid tables |
 | Direct prompt, `openai/gpt-6.1-terra-pro`, dataset C | 3 | – | – | 3 satisfy all 11 rules |
 
 * **The MAS produced no usable roster.** The typical failures were infeasible models caused by the generated code's own bugs, schedules that are structurally impossible, output at the wrong decision level, and the input history reprinted instead of new weeks. 55 of 98 code executions crashed, and 3 of 16 runs stopped at LangGraph's 25-step limit.
 * **The MAS's self-assessment was unreliable.** It declared success in 25 of 43 rounds, none of which was usable.
+* **The 2025 version of the MAS did no better.** It has shift-scheduling instructions written for this kind of task, and it classified every run as shift scheduling and chose a heuristic. Of its 28 analysed rounds, 12 reprinted the input history without new weeks, 11 were structurally impossible (for example the same two people in every shift, or one name per row), 3 were at the wrong decision level (groups instead of names), 1 broke the critical rules badly and 1 produced nothing. On dataset C, 68–79% of group time was understaffed and nobody worked the contracted 38 h 15 min. 54 of 82 code executions failed. It rated 11 rounds as achieved. In 15 rounds the program wrote the roster to an Excel file and printed only a confirmation such as "saved to …xlsx". The output analyser sees only the printed output, so it never saw these rosters, yet it rated 9 of them as achieved. Two runs crashed on a routing bug in the MAS (see [Setup](#setup)); with the fix, one rerun stopped at the step limit. The other produced one round (46% of group time understaffed, rated achieved) and then hit the 25-minute timeout while a generated heuristic ran.
 * **A newer model did not help inside the MAS.** It wrote 390–510-line programs that recognised missing policy decisions, but the fixed workflow gave it no way to ask about them or to fix its Docker environment. All three runs stopped at the step limit.
 * **The same newer model prompted directly solved the task.**
   * On dataset C, all 3 runs satisfied every rule on the first answer.
@@ -211,9 +213,12 @@ uv run --no-project --python 3.11 --with-requirements requirements.txt direct_ll
 |---|---|
 | `results/experiments_summary.csv` | per experiment: runs, completed, stopped at step limit, code executions and failures, analysed rounds, rounds self-rated as achieved, usable schedules |
 | `results/mas_round_classification.csv` | every analysed MAS round classified by failure type, with the MAS's own verdict and a short note |
+| `results/mas2025_round_classification.csv` | the same for the 2025 version, plus how faithfully each round's program re-executed (see below) |
 | `results/direct_llm_runs.csv` | direct-LLM runs with checker scores |
 | `results/cost_by_experiment.csv` | API calls, tokens and cost per experiment, from the OpenRouter activity export of 16 Nov 2026, split by timestamp; the export ends before the last 4 direct runs |
 | `results/scoresheet_template.csv` | blank rubric for human evaluators, one row per MAS round |
+
+The 2025 runs were made before the harness kept the files the programs write, so their rosters were recovered by re-executing each round's saved program on the same input (`mas_harness/reexecute_rounds.py`). 21 of the 29 re-executions (28 rounds plus the rerun's one) reproduced the original printed output exactly, or the last 4000 characters the MAS kept; the other 8 differ because the heuristics are randomised, and their output has the same form. For dataset C, programs that printed staff presence per time slot were scored with `datasets/C_reconstructed/score_presence_output.py`, which places the floating employee where it helps most.
 
 The round classification is the third evaluator's (an AI-assisted evaluation harness). Two human evaluators score the same rounds with the template. The raw run logs are not published.
 

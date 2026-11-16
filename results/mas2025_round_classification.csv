@@ -1,0 +1,30 @@
+run,round,run_outcome,category,self_rated_achieved,usability,reexecution,note
+A_mas2025_r01,1,completed,"history repeated, no new weeks",no,unusable,identical output,"Excel = weeks 5-17 unchanged; printed only two shifts, both Staff01 (round 2: None)."
+A_mas2025_r01,2,completed,"history repeated, no new weeks",no,unusable,identical output,"Excel = weeks 5-17 unchanged; printed only two shifts, both Staff01 (round 2: None)."
+A_mas2025_r01,3,completed,"history repeated, no new weeks",no,unusable,identical output,"Excel = weeks 5-17 unchanged; printed only two shifts, both Staff01 (round 2: None)."
+A_mas2025_r02,1,completed,structurally impossible schedule,yes,unusable,identical output,8 rows appended with 2 of 11 shifts filled; week numbers restart at 5 (later rounds: empty).
+A_mas2025_r02,2,completed,structurally impossible schedule,yes,unusable,identical output,8 rows appended with 2 of 11 shifts filled; week numbers restart at 5 (later rounds: empty).
+A_mas2025_r02,3,completed,structurally impossible schedule,yes,unusable,identical output,8 rows appended with 2 of 11 shifts filled; week numbers restart at 5 (later rounds: empty).
+A_mas2025_r03,1,completed,"history repeated, no new weeks",no,unusable,identical to the last 4000 characters the MAS kept,Could not parse the shift columns (read cell objects as times); Excel = weeks 5-17 unchanged.
+A_mas2025_r03,2,completed,"history repeated, no new weeks",no,unusable,output differs (randomised); same form as the original,Could not parse the shift columns (read cell objects as times); Excel = weeks 5-17 unchanged.
+A_mas2025_r03,3,completed,"history repeated, no new weeks",no,unusable,output differs (randomised); same form as the original,Could not parse the shift columns (read cell objects as times); Excel = weeks 5-17 unchanged.
+B_mas2025_r01,1,completed,"history repeated, no new weeks",yes,unusable,identical (a warning went to stderr instead),Excel = weeks 5-17 unchanged; child data not used.
+B_mas2025_r01,2,completed,"history repeated, no new weeks",yes,unusable,identical (a warning went to stderr instead),Excel = weeks 5-17 unchanged; child data not used.
+B_mas2025_r01,3,completed,"history repeated, no new weeks",no,unusable,identical (a warning went to stderr instead),Excel = weeks 5-17 unchanged; child data not used.
+B_mas2025_r02,1,completed,"history repeated, no new weeks",yes,unusable,identical output,Excel = weeks 5-17 unchanged.
+B_mas2025_r02,2,completed,structurally impossible schedule,yes,unusable,identical output,"New rows hold one name each in a diagonal across the columns, two extra unnamed columns."
+B_mas2025_r02,3,completed,structurally impossible schedule,yes,unusable,identical output,As round 2.
+B_mas2025_r03,1,completed,structurally impossible schedule,no,unusable,identical output,Weeks 18-30 with 'avustaja' (assistant) in every cell.
+B_mas2025_r03,2,completed,wrong decision level,yes,unusable,output differs (randomised); same form as the original,Weeks 18-30 with 'Group 1/2/3' in the cells instead of names.
+B_mas2025_r03,3,completed,wrong decision level,yes,unusable,output differs (randomised); same form as the original,As round 2 (fitness 143).
+C_mas2025_r03,1,completed,schedule breaks critical rules,no,unusable,identical to the last 4000 characters the MAS kept,"Half-hourly presence: only 5 of 13 employees used; 67.5% of group time understaffed, 210 missing staff-hours; 0/13 at 38:15."
+C_mas2025_r03,2,completed,structurally impossible schedule,no,unusable,output differs (randomised); same form as the original,"Half-hourly presence, workday split into 4 pieces on average (max 6); 76% understaffed; nobody at 38:15."
+C_mas2025_r03,3,completed,structurally impossible schedule,no,unusable,output differs (randomised); same form as the original,As round 2: 4.1 pieces per workday (max 7); 79% understaffed; nobody at 38:15.
+D_mas2025_r01,1,stopped at step limit,"history repeated, no new weeks",no,unusable,identical output,Excel = weeks 5-17 unchanged; then 4 optimisation rounds failed to run until the step limit.
+D_mas2025_r02,1,completed,structurally impossible schedule,no,unusable,identical output,"Weeks 18-25: 'Staff06, Staff11' in every one of the 11 shifts, all other staff unused."
+D_mas2025_r02,2,completed,structurally impossible schedule,no,unusable,identical output,"Only the three Lark staff fill all 11 shifts, each several times a week; week column holds names."
+D_mas2025_r02,3,completed,structurally impossible schedule,yes,unusable,identical output,"Only the three Lark staff, two names in some cells; self-rated 'Total violations: 0'."
+D_mas2025_r03,1,completed,wrong decision level,no,unusable,identical output,"Rows of day, group and person (who works which day), no shifts."
+D_mas2025_r03,2,completed,no output,no,unusable,identical output,Program stopped: 'Not enough staff available for group'; no file.
+D_mas2025_r03,3,completed,"history repeated, no new weeks",no,unusable,identical output,'No solution found'; Excel = weeks 5-17 unchanged.
+C_mas2025fix_r02,1,timeout,schedule breaks critical rules,yes,unusable,identical to the last 4000 characters the MAS kept,"Half-hourly presence: 9 of 13 employees, up to 55 h/week; 45.5% of group time understaffed, 116 missing staff-hours. Next program ran 24 min and hit the run timeout."
