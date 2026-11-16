@@ -71,7 +71,7 @@ def main():
     state = tdir / "sim_user.json"
     sim = SimManager(state, request=request, files=[f.name for f in files])
     trial = {"case": case.name, "name": a.name, "models": {k: os.getenv(k) for k in ("HEADLESS_LLM_MODEL", "HEADLESS_LLM_CODE_MODEL")},
-             "sim_model": sim.model, "mas_dir": os.getenv("MAS_DIR", str(ROOT / "mas")), "chats": []}
+             "sim_model": sim.model, "mas_dir": os.getenv("MAS_DIR", str(ROOT / "mas2024")), "chats": []}
 
     prompt_file = case / "prompt.txt"
     for attempt in (1, 2):

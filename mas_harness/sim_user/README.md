@@ -17,7 +17,7 @@ whether to retry once with a rewritten request.
   for a revision (at most 3).
 
 ```bash
-MAS_DIR=$PWD/mas uv run --no-project --python 3.11 --with-requirements requirements.txt \
+MAS_DIR=$PWD/mas2024 uv run --no-project --python 3.11 --with-requirements requirements.txt \
     mas_harness/sim_trial.py datasets/C_reconstructed C_mas_sim_r01
 uv run --no-project --python 3.11 --with-requirements requirements.txt direct_llm/direct_llm.py C 3 --sim-user --tag _sim
 ```

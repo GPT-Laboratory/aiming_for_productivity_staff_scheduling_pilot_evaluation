@@ -2,7 +2,7 @@
 """Headless runner for the GPT-Lab multi-agent system (evaluation harness).
 
 The multi-agent system is not part of this repository. Point MAS_DIR at a checkout of it
-(default: ./mas). Its code (main.py, agents/, prompts/, schemas.py) is NOT modified.
+(default: ./mas2024). The harness does not modify its code (main.py, agents/, prompts/, schemas.py).
 Instead a stand-in `chainlit` module is injected before the pipeline is
 imported, so that:
 
@@ -19,7 +19,7 @@ imported, so that:
 
 Every run writes a self-contained directory under runs/.
 
-Usage (MAS_DIR = checkout of the multi-agent system, default ./mas):
+Usage (MAS_DIR = checkout of the multi-agent system, default ./mas2024):
   mas_harness/run.sh \
       --prompt-file datasets/D_synthetic/prompt.txt \
       --file datasets/D_synthetic/synthetic_daycare.xlsx \
@@ -43,7 +43,7 @@ import types
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-REPO = Path(os.environ.get("MAS_DIR", ROOT / "mas")).resolve()   # the multi-agent system checkout
+REPO = Path(os.environ.get("MAS_DIR", ROOT / "mas2024")).resolve()   # the multi-agent system checkout
 GENERATED = REPO / "generated"
 SNAPSHOT_FILES = ["generated.py", "requirements.txt", "Dockerfile", "compose.yaml"]
 

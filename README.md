@@ -100,19 +100,19 @@ Prerequisites:
 * Docker with the Compose V2 plugin (`docker compose version`), needed only for the MAS experiments;
 * an API key for OpenAI LLM models.
 
-1. Clone this repository and the MAS at the evaluated commit. The harness expects the MAS in `./mas`, or wherever `MAS_DIR` points.
+1. Clone this repository and the MAS at the evaluated commit. The harness expects the MAS in `./mas2024`, or wherever `MAS_DIR` points.
 
    ```bash
    git clone https://github.com/GPT-Laboratory/aiming_for_productivity_staff_scheduling_pilot_evaluation.git
    cd aiming_for_productivity_staff_scheduling_pilot_evaluation
-   git clone https://github.com/JoniHonkanen/ucs-llm-code-docker-optimizer.git mas
-   git -C mas checkout 7656ad92289f27e37e51a38657ed18f042dca650
+   git clone https://github.com/JoniHonkanen/ucs-llm-code-docker-optimizer.git mas2024
+   git -C mas2024 checkout 7656ad92289f27e37e51a38657ed18f042dca650
    ```
 
    For the patched variant of the MAS, apply the evaluation patch on top of that commit:
 
    ```bash
-   git -C mas apply ../mas_harness/mas_eval_patches.diff
+   git -C mas2024 apply ../mas_harness/mas_eval_patches.diff
    ```
 
    The patch fixes bit rot and gaps against the intended use, without changing prompts, models or agent logic:
