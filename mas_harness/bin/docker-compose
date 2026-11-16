@@ -1,0 +1,6 @@
+#!/bin/sh
+# The pipeline calls the hyphenated `docker-compose` binary with a compose.yaml
+# file and `--no-log-prefix`. The system-wide docker-compose here is v1.25, which
+# supports neither. Forward to the Compose V2 plugin instead (environment
+# adaptation only; the pipeline code is untouched).
+exec docker compose "$@"

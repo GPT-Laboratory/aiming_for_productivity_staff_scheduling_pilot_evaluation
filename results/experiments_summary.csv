@@ -1,0 +1,9 @@
+experiment,kind,model,runs,completed,stopped_at_step_limit,executions,failed_executions,analysed_rounds,self_rated_achieved,usable_schedules,mean_duration_s
+smoke_mas,mas,openai/gpt-4o,1,1,0,2,0,2,2,n/a,142
+A_mas,mas,openai/gpt-4o,3,3,0,16,7,9,7,0,225
+B_mas,mas,openai/gpt-4o,3,3,0,18,9,9,7,0,219
+C_mas,mas,openai/gpt-4o,5,4,1,29,17,12,6,0,195
+D_mas,mas,openai/gpt-4o,5,3,2,35,22,13,5,0,169
+D_mas_newmodel,mas,openai/gpt-6.1-terra-pro,3,0,3,30,27,3,0,0,1115
+D_direct,direct,openai/gpt-6.1-terra-pro,5,5,0,,,5,,,274
+C_direct,direct,openai/gpt-6.1-terra-pro,3,3,0,,,3,,,119

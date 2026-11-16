@@ -1,0 +1,9 @@
+run,dataset,valid_format,answers_needed,duration_s,completion_tokens,missing_staff_hours_per_week,share_group_time_understaffed,same_shift_consecutive_weeks,all_11_rules_satisfied,employees_exactly_38h15
+D_direct_r01,D,True,1,1039.4,10420,11.7,0.087,7,,
+D_direct_r02,D,True,1,89.5,8735,14.5,0.111,7,,
+D_direct_r03,D,True,1,74.0,7317,13.5,0.102,4,,
+D_direct_r04,D,True,1,73.5,7756,13.4,0.103,8,,
+D_direct_r05,D,True,1,92.4,11015,10.9,0.084,6,,
+C_direct_r01,C,True,1,115.7,11992,0.0,0.0,,True,13
+C_direct_r02,C,True,1,129.8,12656,0.0,0.0,,True,13
+C_direct_r03,C,True,1,112.1,12337,0.0,0.0,,True,13

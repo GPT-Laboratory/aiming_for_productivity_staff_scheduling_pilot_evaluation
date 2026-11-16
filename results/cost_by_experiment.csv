@@ -1,0 +1,8 @@
+experiment,runs_in_export,calls,prompt_tokens,completion_tokens,reasoning_tokens,cached_tokens,cost_usd,cost_per_run_usd
+smoke_mas,1,8,16569,2555,0,0,0.012,0.012
+C_mas,5,64,302494,39851,0,20736,0.422,0.084
+A_mas,3,40,113424,16479,0,6912,0.133,0.044
+B_mas,3,42,643600,19083,0,96000,0.552,0.184
+D_mas,5,69,252877,38453,0,35584,0.449,0.09
+D_mas_newmodel,3,44,1489112,480391,33715,655925,3.284,1.095
+D_direct,4,5,160390,43671,39703,103942,0.282,0.07

@@ -218,3 +218,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Evaluation outputs and local checkouts
+runs/
+mas/
+generated/
+*.export.csv
+openrouter_activity*.csv

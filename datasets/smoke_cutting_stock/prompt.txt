@@ -1,0 +1,1 @@
+Optimize the cutting of the materials in the attached Excel file so that all production orders are fulfilled with as little material waste as possible. Give me a cutting plan.
