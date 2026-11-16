@@ -88,6 +88,30 @@ class Recorder:
         print(f"\n[headless] >>> step {self.step_count}: {name}", flush=True)
         return self.step_count
 
+    def keep_program_outputs(self, d, since):
+        """Copy what the executed program wrote into generated/ (e.g. an Excel roster) to
+        <step>/outputs/: files modified during this step, except the MAS's own files and input
+        files left unchanged. An input file the program overwrote is kept."""
+        if not GENERATED.exists():
+            return
+        inputs = self.run_dir / "inputs"
+        kept = []
+        for src in sorted(p for p in GENERATED.rglob("*") if p.is_file()):
+            rel = src.relative_to(GENERATED)
+            if rel.parts[0] in ("__pycache__", ".dockerignore") or str(rel) in SNAPSHOT_FILES:
+                continue
+            orig = inputs / rel.name
+            if len(rel.parts) == 1 and orig.exists() and orig.read_bytes() == src.read_bytes():
+                continue
+            if src.stat().st_mtime < since or src.stat().st_size > 50_000_000:
+                continue
+            dst = d / "outputs" / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
+            kept.append(str(rel))
+        if kept:
+            self.event("program_outputs", step=d.name, files=kept)
+
     def step_end(self, index, step, duration, state, error):
         slug = step.name.lower().replace(" ", "_")
         d = self.run_dir / "steps" / f"{index:02d}_{slug}"
@@ -105,6 +129,8 @@ class Recorder:
             src = GENERATED / fname
             if src.exists():
                 shutil.copy2(src, d / fname)
+        if step.name == "Start Docker Container Agent":
+            self.keep_program_outputs(d, since=time.time() - duration - 1)
         if step.name == "Start Docker Container Agent" and "Attaching to" in "".join(step.tokens):
             from sim_user.sim_user import program_output
             self.last_program_output = program_output("".join(step.tokens))

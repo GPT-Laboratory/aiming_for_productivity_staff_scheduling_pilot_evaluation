@@ -130,7 +130,7 @@ Prerequisites:
    ```bash
    git clone https://github.com/JoniHonkanen/heuristic-multi-agent-system.git mas2025
    git -C mas2025 checkout e8c2077
-   git -C mas2025 apply ../mas_harness/mas2025_eval_patches.diff   # Compose V2 and the PuLP/numpy fix only
+   git -C mas2025 apply ../mas_harness/mas2025_eval_patches.diff   # Compose V2, PuLP/numpy, fix-counter reset
    export MAS_DIR=$PWD/mas2025
    ```
 
@@ -138,6 +138,8 @@ Prerequisites:
    * `run.sh` detects it and installs `mas_harness/requirements-mas2025.txt`, resolved as of its commit date. Its own `requirements.txt` is a pip freeze that does not resolve.
    * The harness supports its Chainlit 2 button format.
    * The harness gives its unused Claude client a placeholder key, because the client refuses to start without one.
+
+   The patch also fixes one bug in the MAS's own control flow. After 4 failed fixes, MAS 2025 regenerates the code, but it resets the fix counter only in its new-round agent. The next execution therefore routes to a node that is missing from the routing table and the run crashes with `KeyError: 'heuristic'` (or `'code_generator'`); this happened in 2 of the first 12 runs, both on dataset C. The patch resets the counter when code is regenerated, as the new-round agent already does. Runs that keep failing then stop at the MAS's own step limit of 50. Runs made with the patch are named `*_mas2025fix_*`.
 
 2. Configure the API access:
 
@@ -169,7 +171,7 @@ The direct-LLM experiment and the dataset scripts need only uv and the API key, 
 mas_harness/run.sh --prompt-file datasets/D_synthetic/prompt.txt \
     --file datasets/D_synthetic/synthetic_daycare.xlsx --optimization-rounds 2 --name D_mas_r01
 
-# a batch: <dataset dir> <name> <runs> <optimization rounds>
+# a batch: <dataset dir> <name> <runs> <optimization rounds> [timeout s, default 1500]
 mas_harness/run_batch.sh datasets/D_synthetic D_mas 5 2
 
 # newer-model arm: the same, with both MAS models overridden
@@ -182,11 +184,11 @@ Runs take 2–5 minutes each with gpt-4o and up to 25 minutes with the newer mod
 How the harness works:
 * **No user interface.** It replaces the MAS's Chainlit UI with a stand-in module and calls the MAS's own `main()` handler, so file ingestion, prompt formatting and the LangGraph workflow are the original code.
 * **Fixed human decisions.** The plan is always accepted, and `--optimization-rounds` further rounds are requested before the final report.
-* **Full recording.** Every agent step's input, output and state, the generated code, the Docker files and a run summary go to `runs/<timestamp>_<name>/`.
+* **Full recording.** Every agent step's input, output and state, the generated code, the Docker files and a run summary go to `runs/<timestamp>_<name>/`. Files the executed program writes (for example an Excel roster) are copied to the step's `outputs/` folder. Runs made before this was added lost those files; `mas_harness/reexecute_rounds.py <run>` re-executes the program behind each analysed round to recover them. Most programs are randomised, so a re-execution is not guaranteed to reproduce the original output.
 * **Compose wrapper.** `mas_harness/bin/docker-compose` forwards the MAS's `docker-compose` calls to Compose V2.
 * **Model override.** `HEADLESS_LLM_MODEL` and `HEADLESS_LLM_CODE_MODEL` replace the MAS's two models (gpt-4o-mini and gpt-4o) without changing its code; this is how the newer-model arm was run. `OPENAI_API_BASE` selects the provider.
 * **Output cap.** The 2025 MAS hard-codes `max_tokens=4096` for its code model (the original gpt-4o limit). A whole program comes back in one structured reply, so the harness raises the cap to 16384 (current gpt-4o's limit), or to `HEADLESS_LLM_CODE_MAX_TOKENS`. The 2024 MAS sets no cap and is left alone unless the variable is set. Replies cut off at the cap are logged as `llm_truncated` events.
-* **Unchanged limits.** LangGraph's default limit of 25 steps is kept; `--recursion-limit` raises it.
+* **Unchanged limits.** The MAS's own step limit is kept: LangGraph's default of 25 for MAS 2024, 50 set by MAS 2025 itself. `--recursion-limit` changes it.
 * **Side effect.** The MAS runs `docker image prune -f` after every execution.
 
 `mas_harness/make_packets.py runs/<run>...` writes a readable evaluator packet per run, showing each round's code, trimmed output and the MAS's own verdict.

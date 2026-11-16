@@ -1,3 +1,17 @@
+diff --git a/agents/code_generator_agent.py b/agents/code_generator_agent.py
+index 32685a5..8ae24a6 100644
+--- a/agents/code_generator_agent.py
++++ b/agents/code_generator_agent.py
+@@ -44,6 +44,9 @@ async def generate_code_logic(state: AgentState) -> Code:
+ @cl.step(name="Code Generator Agent")
+ async def code_generator_agent(state: AgentState) -> AgentState:
+     print("*** CODE GENERATOR AGENT ***")
++    # eval patch: new code starts a fresh fix budget (as new_loop_agent does); without this,
++    # main.decide_next_step routes to a node missing from start_docker's path_map (KeyError).
++    state["fixIterations"] = 0
+     current_step = cl.context.current_step
+ 
+     # Prepare display input for Chainlit interface
 diff --git a/agents/docker_execution_agent.py b/agents/docker_execution_agent.py
 index 8233db2..c0c3d59 100644
 --- a/agents/docker_execution_agent.py
@@ -45,3 +59,17 @@ index 8233db2..c0c3d59 100644
          subprocess.run(["docker", "image", "prune", "-f"])
          os.chdir("..")
  
+diff --git a/agents/heuristic_agent.py b/agents/heuristic_agent.py
+index c3c42a2..91bbe93 100644
+--- a/agents/heuristic_agent.py
++++ b/agents/heuristic_agent.py
+@@ -45,6 +45,9 @@ async def apply_heuristic_logic(state: AgentState) -> Code:
+ @cl.step(name="Heuristic Agent")
+ async def heuristic_agent(state: AgentState) -> AgentState:
+     print("*** HEURISTIC AGENT ***")
++    # eval patch: new code starts a fresh fix budget (as new_loop_agent does); without this,
++    # main.decide_next_step routes to a node missing from start_docker's path_map (KeyError).
++    state["fixIterations"] = 0
+     current_step = cl.context.current_step
+ 
+     inputs = state["purpose"]
