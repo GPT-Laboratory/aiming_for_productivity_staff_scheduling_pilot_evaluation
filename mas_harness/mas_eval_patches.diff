@@ -1,0 +1,154 @@
+diff --git a/agents/code_output_agent.py b/agents/code_output_agent.py
+index 5b8c15d..1eb5834 100644
+--- a/agents/code_output_agent.py
++++ b/agents/code_output_agent.py
+@@ -79,6 +79,11 @@ async def code_output_analyzer_agent(state: AgentState):
+     # Handle the user's response
+     if res and res.get("value") == "continue":
+         state["proceed"] = "continue"
++        # [eval patch] let the user say what the next round should change (optional)
++        fb = await cl.AskUserMessage(
++            content="Anything the next round should take into account? (leave empty to just continue)", timeout=1800
++        ).send()
++        state["user_feedback"] = ((fb or {}).get("output") or (fb or {}).get("content") or "").strip()
+         await cl.Message(content="Starting new optimization round!").send()
+     else:
+         state["proceed"] = "done"
+diff --git a/agents/docker_environment_agent.py b/agents/docker_environment_agent.py
+index e338a49..2a66f7f 100644
+--- a/agents/docker_environment_agent.py
++++ b/agents/docker_environment_agent.py
+@@ -28,6 +28,13 @@ async def docker_environment_files_agent(state: AgentState):
+         f"Resources: {inputs.resources}"
+     )
+ 
++    # [eval patch] after a failed run, show the error so broken Docker files can be corrected
++    if state.get("proceed") == "fix" and state.get("docker_output"):
++        prompt += (
++            "\n\nThe previous attempt failed. If the error below is caused by the Dockerfile or "
++            "compose.yaml (e.g. build steps, mounts, paths), correct them:\n" + state["docker_output"]
++        )
++
+     # Set up the output parser
+     output_parser = PydanticOutputParser(pydantic_object=DockerFiles)
+     format_instructions = output_parser.get_format_instructions()
+diff --git a/agents/docker_execution_agent.py b/agents/docker_execution_agent.py
+index 4fd462e..a559745 100644
+--- a/agents/docker_execution_agent.py
++++ b/agents/docker_execution_agent.py
+@@ -16,10 +16,22 @@ async def start_docker_container_agent(state: AgentState):
+     full_output = ""
+     error_output = ""  # To capture the entire traceback if an error occurs
+ 
++    # [eval patch] bit rot: PuLP >= 3.3 imports numpy but does not install it,
++    # so every unpinned "PuLP" requirement now fails without pandas pulling numpy in.
++    try:
++        with open("requirements.txt", encoding="utf-8") as f:
++            reqs = f.read()
++        names = [re.split(r"[<>=!~\[; ]", l.strip(), 1)[0].lower() for l in reqs.splitlines()]
++        if "pulp" in names and "numpy" not in names:
++            with open("requirements.txt", "a", encoding="utf-8") as f:
++                f.write(("" if reqs.endswith("\n") or not reqs else "\n") + "numpy\n")
++    except FileNotFoundError:
++        pass
++
+     try:
+         # Build the Docker image
+         print("Building Docker image...")
+-        build_command = ["docker-compose", "build"]
++        build_command = ["docker", "compose", "build"]  # [eval patch] Compose V1 is gone
+         build_process = subprocess.Popen(
+             build_command,
+             stdout=subprocess.PIPE,
+@@ -40,7 +52,8 @@ async def start_docker_container_agent(state: AgentState):
+         # Run the Docker container
+         print("Running Docker container...")
+         up_command = [
+-            "docker-compose",
++            "docker",
++            "compose",
+             "up",
+             "--abort-on-container-exit",
+             "--no-log-prefix",
+@@ -85,7 +98,12 @@ async def start_docker_container_agent(state: AgentState):
+     except Exception as e:
+         print(f"An error occurred: {e}")
+         # Combine exception message with captured traceback output
+-        state["docker_output"] = f"{str(e)}\n{error_output.strip()}"
++        # [eval patch] build and start-up errors happen outside the Python traceback;
++        # without the log tail the fixer only saw "Docker image build failed".
++        log_tail = "\n".join(full_output.strip().splitlines()[-60:])
++        state["docker_output"] = (
++            f"{str(e)}\n{error_output.strip()}\n\nLast lines of the build/run log:\n{log_tail}"
++        )
+         print(state["docker_output"])
+         state["proceed"] = "fix"
+         await cl.Message(
+@@ -94,7 +112,7 @@ async def start_docker_container_agent(state: AgentState):
+ 
+     finally:
+         # Clean up Docker resources
+-        subprocess.run(["docker-compose", "down"])
++        subprocess.run(["docker", "compose", "down"])
+         subprocess.run(["docker", "image", "prune", "-f"])
+         os.chdir("..")
+ 
+diff --git a/agents/new_loop_agent.py b/agents/new_loop_agent.py
+index 2a993b1..56629d4 100644
+--- a/agents/new_loop_agent.py
++++ b/agents/new_loop_agent.py
+@@ -33,6 +33,10 @@ async def new_loop_logic(state: AgentState) -> Code:
+     output_parser = PydanticOutputParser(pydantic_object=Code)
+     format_instructions = output_parser.get_format_instructions()
+ 
++    # [eval patch] user feedback from the previous round, if any
++    if state.get("user_feedback"):
++        prompt += f"\n\n**User feedback on the previous result (take this into account):**\n{state['user_feedback']}"
++
+     # Append format instructions to the prompt
+     prompt += f"\n\n{format_instructions}"
+ 
+diff --git a/agents/problem_analyzer_agent.py b/agents/problem_analyzer_agent.py
+index 53df01d..d9cbdd7 100644
+--- a/agents/problem_analyzer_agent.py
++++ b/agents/problem_analyzer_agent.py
+@@ -73,6 +73,11 @@ async def problem_analyzer_agent(state: AgentState):
+         await cl.Message(content="Alright, let's cancel this and start over!").send()
+     else:
+         state["proceed"] = "new"
++        # [eval patch] "Create new plan" re-ran the analysis on unchanged input; ask what to change
++        fb = await cl.AskUserMessage(content="What should be different in the new plan?", timeout=1800).send()
++        fb_text = (fb or {}).get("output") or (fb or {}).get("content") or ""
++        if fb_text.strip():
++            state["userInput"] = f"{state['userInput']}\n\nUser feedback on the previous plan:\n{fb_text.strip()}"
+         await cl.Message(content="Alright, let's create a new plan!").send()
+ 
+     return state
+diff --git a/main.py b/main.py
+index 15d87d3..950baba 100644
+--- a/main.py
++++ b/main.py
+@@ -65,7 +65,7 @@ workflow.add_conditional_edges(
+         "continue": "output_analyzer",  # Proceed to the next node
+     },
+ )
+-workflow.add_edge("code_fixer", "start_docker")  # Try to execute the fixed code again
++workflow.add_edge("code_fixer", "docker_files")  # [eval patch] regenerate Docker files too, then run again
+ # workflow.add_edge("start_docker", "output_analyzer")
+ workflow.add_conditional_edges(
+     source="output_analyzer",
+@@ -172,4 +172,4 @@ async def main(message: cl.Message):
+     )
+ 
+     # Invoke the agent with the state
+-    await app.ainvoke(state)
++    await app.ainvoke(state, config={"recursion_limit": 50})  # [eval patch] LangGraph default 25 was implicit
+diff --git a/schemas.py b/schemas.py
+index 60b4e8e..ce473e0 100644
+--- a/schemas.py
++++ b/schemas.py
+@@ -122,3 +122,4 @@ class AgentState(TypedDict):
+     docker_output: str  # What running code in docker container outputs
+     result: OutputOfCode  # Results of the code execution - answer, explanation, etc.
+     results: List[OutputOfCode]
++    user_feedback: str  # [eval patch] optional feedback for the next optimization round

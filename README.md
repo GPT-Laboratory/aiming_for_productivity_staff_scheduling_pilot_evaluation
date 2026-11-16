@@ -100,6 +100,22 @@ Prerequisites:
    git -C mas checkout 7656ad92289f27e37e51a38657ed18f042dca650
    ```
 
+   For the patched variant of the MAS, apply the evaluation patch on top of that commit:
+
+   ```bash
+   git -C mas apply ../mas_harness/mas_eval_patches.diff
+   ```
+
+   The patch fixes bit rot and gaps against the intended use, without changing prompts, models or agent logic:
+   * it calls `docker compose`, because Compose V1 is no longer available;
+   * it adds `numpy` when the requirements list PuLP, because PuLP 3.3 needs numpy but does not install it;
+   * it gives the code fixer the tail of the build and run log, because build and start-up errors used to reach it as a single line;
+   * it regenerates the Docker files after a fix, because the fixer could not repair a broken Dockerfile or compose file;
+   * it asks the user what to change when they request a new plan, and lets them give optional feedback for the next round;
+   * it sets the LangGraph step limit explicitly to 50 instead of the implicit default of 25.
+
+   The original results were produced without this patch.
+
 2. Configure the API access:
 
    ```bash

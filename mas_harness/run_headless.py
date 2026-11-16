@@ -207,6 +207,19 @@ def install_chainlit_shim(rec: Recorder, optimization_rounds: int):
             print(f"[headless] decision: {self.content!r} -> {choice}", flush=True)
             return {"name": choice, "value": choice}
 
+    class AskUserMessage:
+        """Free-text question (added by mas_eval_patches.diff). Fixed policy: no feedback."""
+        def __init__(self, content="", **kwargs):
+            self.content = content
+
+        async def send(self):
+            s = current.get()
+            entry = {"step": s.name if s else None, "question": self.content, "options": ["<free text>"], "choice": ""}
+            rec.decisions.append(entry)
+            rec.event("decision", **entry)
+            print(f"[headless] free-text question: {self.content!r} -> (empty)", flush=True)
+            return {"output": "", "content": ""}
+
     class File:
         def __init__(self, name, path):
             self.name, self.path = name, path
@@ -220,6 +233,7 @@ def install_chainlit_shim(rec: Recorder, optimization_rounds: int):
     mod.Message = Message
     mod.Action = Action
     mod.AskActionMessage = AskActionMessage
+    mod.AskUserMessage = AskUserMessage
     mod.File = File
     mod.on_chat_start = passthrough
     mod.on_message = passthrough
