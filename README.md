@@ -71,6 +71,15 @@ results/                           aggregated results (see below)
 
 All children and staff profiles are invented. The task prompt is the one written for the pilot.
 
+### Where each dataset comes from
+
+* **A: the pilot as it was.** The task description written for the pilot and the daycare's real 11-slot shift rotation table for weeks 5–17. Staff names are replaced with pseudonyms. This is the closest to what the MAS saw in the pilot, but it holds too little data to build or check a roster: no staff groups, hours or children.
+* **B: A with the pilot-era child data.** A synthetic child attendance table found among the pilot material, added to A. It was made during the pilot as test input, but it does not describe the daycare in the task: its group sizes differ, and it has no children under 3. B shows what the MAS does with richer but mismatched input.
+* **C: a reconstruction from the MAS thesis.** When this evaluation started, the original thesis inputs were not available. C rebuilds the daycare example described in Joni Honkanen's thesis on the MAS (section 6.2.4) as a complete, self-consistent task. The Finnish statutory staffing ratios come from the Early Childhood Education and Care Act and Decree. Children, staff and care times are generated with a fixed random seed, and the task prompt was written for C. It differs from the pilot in two ways:
+  * The roster is a free-shift roster: the tool chooses each employee's start and end time every day, instead of filling fixed rotation slots.
+  * It is solvable by construction. `make_case.py` builds a schedule that meets all 11 rules, so a perfect answer is known to exist, and any failure is the tool's.
+* **D: a synthetic daycare for the pilot task.** The pilot's task description, rotation slots and rotation history, combined with a synthetic daycare that matches the daycare's real number of children per age group: 15 under 3, 25 over 3 and 5 in a mixed group. Staff profiles (groups, roles, weekly hours, vacations) are invented to fit the rotation table. D is the most realistic test of the pilot task, but it is not fully solvable. With fixed slots, home groups and the holiday weeks, every roster found leaves some understaffing (the best found has 10.9 missing staff-hours per week), so D is scored by how small the gaps are rather than pass or fail.
+
 The two checkers model different rules:
 * **Dataset C** schedules are lists of shifts per employee and day, and are checked minute by minute against all 11 rules.
 * **Dataset D** schedules are weekly rotation tables in the company's format: one row per week, one column per shift. A person in a column works that shift on every day of the week they are available. The checker reports understaffing per group in 10-minute steps, vacation conflicts, duplicates and rotation.
