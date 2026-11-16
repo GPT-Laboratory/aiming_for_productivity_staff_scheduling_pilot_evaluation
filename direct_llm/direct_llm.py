@@ -129,19 +129,32 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("case", choices=CASE); ap.add_argument("runs", type=int)
     ap.add_argument("--model", default="openai/gpt-6.1-terra-pro"); ap.add_argument("--max-turns", type=int, default=4)
+    ap.add_argument("--max-tokens", type=int, default=30000); ap.add_argument("--tag", default="")
+    ap.add_argument("--sim-user", action="store_true",
+                    help="After each format-valid answer the simulated manager accepts it or asks for a revision (max 3).")
+    ap.add_argument("--max-reviews", type=int, default=3)
     a = ap.parse_args()
     load_dotenv(REPO / ".env")
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"], base_url=os.getenv("OPENAI_API_BASE"), timeout=900)
     task, validate, score = CASE[a.case]
+    if a.sim_user:
+        sys.path.insert(0, str(REPO / "mas_harness"))
+        from sim_user.sim_user import SimManager
+        case_dir = CASES / ("D_synthetic" if a.case == "D" else "C_reconstructed")
     for n in range(1, a.runs + 1):
-        out = REPO / "runs" / f"{dt.datetime.now():%Y%m%d-%H%M%S}_direct{a.case}_r{n:02d}"
+        out = REPO / "runs" / f"{dt.datetime.now():%Y%m%d-%H%M%S}_direct{a.case}{a.tag}_r{n:02d}"
         out.mkdir(parents=True)
         msgs = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": task()}]
         log = {"case": a.case, "model": a.model, "max_turns": a.max_turns, "turns": [], "started": dt.datetime.now().isoformat(timespec="seconds")}
         parsed, errs, t0 = None, ["no answer"], time.time()
-        for turn in range(1, a.max_turns + 1):          # hard cap prevents endless revision loops
+        sim, reviews, fmt_fails, last_valid = None, 0, 0, None
+        if a.sim_user:
+            sim = SimManager(out / "sim_user.json", request=(case_dir / "prompt.txt").read_text(encoding="utf-8"),
+                             files=[x.name for x in sorted(case_dir.glob("*.xlsx"))])
+        turn_cap = a.max_turns + (a.max_reviews if sim else 0)
+        for turn in range(1, turn_cap + 1):          # hard cap prevents endless revision loops
             try:
-                r = client.chat.completions.create(model=a.model, messages=msgs, max_tokens=30000)
+                r = client.chat.completions.create(model=a.model, messages=msgs, max_tokens=a.max_tokens)
                 text = r.choices[0].message.content or ""
                 usage = r.usage.model_dump() if r.usage else {}
             except Exception as exc:
@@ -152,11 +165,29 @@ def main():
                                  "completion_tokens": usage.get("completion_tokens"), "prompt_tokens": usage.get("prompt_tokens")})
             print(f"[direct {a.case} r{n}] turn {turn}: {len(errs)} validity errors", flush=True)
             if not errs:
+                last_valid = parsed
+                if sim is None or reviews >= a.max_reviews:
+                    break
+                v = sim.ask("the assistant's answer", text, "Is this what you need?",
+                            {"revise": "ask for changes; type what should change",
+                             "accept": "use this schedule"})
+                log["turns"][-1]["manager"] = v["decision"]
+                if v["decision"] != "revise":
+                    break
+                reviews += 1
+                msgs += [{"role": "assistant", "content": text}, {"role": "user", "content": v["message"] or "Please improve it."}]
+                continue
+            fmt_fails += 1
+            if fmt_fails >= a.max_turns:
                 break
             msgs += [{"role": "assistant", "content": text},
                      {"role": "user", "content": "A basic format check found these problems:\n- " + "\n- ".join(errs) +
                       "\nPlease correct the schedule and give the complete final csv block again."}]
-        log.update(valid=not errs, n_turns=len(log["turns"]), duration_s=round(time.time() - t0, 1))
+        if errs and last_valid is not None:   # a revision broke the format: keep the last valid schedule
+            parsed, errs = last_valid, []
+            log["used_earlier_valid_answer"] = True
+        log.update(valid=not errs, n_turns=len(log["turns"]), duration_s=round(time.time() - t0, 1),
+                   manager_reviews=reviews if sim else None)
         if parsed is not None and (not errs or a.case == "D"):
             try:
                 log["checker"] = score(parsed, out)

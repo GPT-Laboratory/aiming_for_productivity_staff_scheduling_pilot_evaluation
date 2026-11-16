@@ -72,6 +72,8 @@ class Recorder:
         self.steps = []
         self.messages = []
         self.decisions = []
+        self.last_program_output = ""
+        self.shown_upto = 0  # messages already shown to the simulated user
         (run_dir / "steps").mkdir(parents=True, exist_ok=True)
         self._events = open(run_dir / "events.jsonl", "a", encoding="utf-8")
 
@@ -103,6 +105,9 @@ class Recorder:
             src = GENERATED / fname
             if src.exists():
                 shutil.copy2(src, d / fname)
+        if step.name == "Start Docker Container Agent" and "Attaching to" in "".join(step.tokens):
+            from sim_user.sim_user import program_output
+            self.last_program_output = program_output("".join(step.tokens))
         proceed = state.get("proceed") if isinstance(state, dict) else None
         info = {
             "index": index,
@@ -120,10 +125,39 @@ class Recorder:
         )
 
 
-def install_chainlit_shim(rec: Recorder, optimization_rounds: int):
-    """Register a minimal fake `chainlit` module in sys.modules."""
+def install_chainlit_shim(rec: Recorder, optimization_rounds: int, sim=None):
+    """Register a minimal fake `chainlit` module in sys.modules.
+
+    With `sim` (a SimManager) the user's questions are answered by the simulated manager
+    instead of the fixed policy."""
     current = contextvars.ContextVar("current_step", default=None)
     counters = {"continue_given": 0}
+    pending = {"message": ""}
+
+    def new_messages():
+        from sim_user.sim_user import visible_messages
+        text = visible_messages(rec.messages[rec.shown_upto:])
+        rec.shown_upto = len(rec.messages)
+        return text
+
+    async def ask_sim(values, question):
+        from sim_user.sim_user import clip
+        if "done" in values:
+            shown = new_messages()
+            if rec.last_program_output:
+                shown += "\n\n=== Output printed by the tool's program ===\n" + clip(rec.last_program_output)
+            options = {"continue": "run another round; you may type what it should take into account",
+                       "done": "this is enough; the tool writes its final report and the chat ends"}
+            where = "after an optimisation round"
+        else:
+            shown = new_messages()
+            options = {"new": "ask for a new plan; type what should be different",
+                       "cancel": "stop this chat",
+                       "continue": "go ahead with this plan"}
+            where = "the tool's plan"
+        ans = await asyncio.to_thread(sim.ask, where, shown, question, options)
+        pending["message"] = ans.get("message", "")
+        return ans["decision"]
 
     class Step:
         def __init__(self, name):
@@ -189,7 +223,9 @@ def install_chainlit_shim(rec: Recorder, optimization_rounds: int):
 
         async def send(self):
             values = [a.value for a in self.actions]
-            if "done" in values:  # output analyzer: another optimization round?
+            if sim is not None:
+                choice = await ask_sim(values, self.content)
+            elif "done" in values:  # output analyzer: another optimization round?
                 if counters["continue_given"] < optimization_rounds:
                     counters["continue_given"] += 1
                     choice = "continue"
@@ -216,11 +252,13 @@ def install_chainlit_shim(rec: Recorder, optimization_rounds: int):
 
         async def send(self):
             s = current.get()
-            entry = {"step": s.name if s else None, "question": self.content, "options": ["<free text>"], "choice": ""}
+            text = pending["message"] if sim is not None else ""  # the simulated user typed it with its decision
+            pending["message"] = ""
+            entry = {"step": s.name if s else None, "question": self.content, "options": ["<free text>"], "choice": text}
             rec.decisions.append(entry)
             rec.event("decision", **entry)
-            print(f"[headless] free-text question: {self.content!r} -> (empty)", flush=True)
-            return {"output": "", "content": ""}
+            print(f"[headless] free-text question: {self.content!r} -> {text[:200]!r}", flush=True)
+            return {"output": text, "content": text}
 
     class File:
         def __init__(self, name, path):
@@ -287,6 +325,8 @@ def main():
     ap.add_argument("--timeout", type=int, default=3600, help="Wall-clock limit in seconds (default 3600).")
     ap.add_argument("--recursion-limit", type=int, default=None,
                     help="LangGraph recursion limit. Default: unchanged (LangGraph default, 25 node visits).")
+    ap.add_argument("--sim-user", metavar="STATE_JSON",
+                    help="Answer the user's questions with the simulated manager; its conversation is kept in this file.")
     ap.add_argument("--keep-generated", action="store_true",
                     help="Do not empty generated/ before the run.")
     args = ap.parse_args()
@@ -324,7 +364,11 @@ def main():
     sys.stderr = Tee(sys.__stderr__, console)
 
     rec = Recorder(run_dir)
-    cl = install_chainlit_shim(rec, args.optimization_rounds)
+    sim = None
+    if args.sim_user:
+        from sim_user.sim_user import SimManager
+        sim = SimManager(args.sim_user, request=prompt, files=[f.name for f in attachments])
+    cl = install_chainlit_shim(rec, args.optimization_rounds, sim)
 
     # The 2025 MAS builds a Claude client at import time although no agent uses it;
     # ChatAnthropic refuses to start without a key, so give it a placeholder.
@@ -347,7 +391,8 @@ def main():
         "models": {"llm": common.llm.model_name, "llm_code": common.llm_code.model_name},
         "api_base": os.getenv("OPENAI_API_BASE") or "https://api.openai.com/v1 (default)",
         "attachments": [f.name for f in attachments],
-        "optimization_rounds_requested": args.optimization_rounds,
+        "optimization_rounds_requested": None if args.sim_user else args.optimization_rounds,
+        "sim_user": args.sim_user,
         "recursion_limit": args.recursion_limit,
         "timeout_s": args.timeout,
         "outcome": None,
@@ -377,6 +422,8 @@ def main():
                 for r in results
             ],
             messages=rec.messages,
+            last_program_output=rec.last_program_output,
+            sim_shown_upto=rec.shown_upto,
         )
         if final_state is not None:
             (run_dir / "final_state.json").write_text(
