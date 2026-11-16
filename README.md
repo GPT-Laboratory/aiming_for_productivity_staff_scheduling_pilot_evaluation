@@ -217,6 +217,8 @@ python3 analysis/cost_by_experiment.py openrouter_activity.csv --runs runs --utc
 
 * The datasets are synthetic. The checkers measure the written rules, not whether the daycare would accept a roster. That requires the company's validation, which is pending.
 * For dataset D, the best-known reference was found heuristically and is not a proven optimum. The human-baseline figure depends on the synthetic group assignment.
+* Dataset D's workforce is partly assumed. The rotation table gives only the names in each slot, and the task text says only that "a few" employees work 30 h 35 min or 19 h 8 min. Their groups and roles, and which people work part-time, were chosen for this evaluation: one caregiver works 30 h 35 min Mon–Thu, the assistant 19 h 8 min Mon–Wed, and everyone else full-time. The person who disappears from the rotation in week 13 is left out. These choices look plausible, but the missing staff-hours figures, including the replayed human baseline, depend on them.
+* The D checker does not compare working hours with the weekly targets. Part-time contracts count only through working days: a person covers their slot on the days they work. With fixed slots of about 7 h 40 min to 7 h 50 min, part-timers' hours do not match their targets exactly; for the assistant the gap is about 4 hours a week. Small deviations like this are normal in practice and can be agreed locally, so they are not counted as rule violations.
 * The human decisions in the MAS were fixed, so the effect of interactive steering was not measured.
 * There were 3–5 runs per condition: enough to show consistent failure or success, not to estimate exact rates.
 
