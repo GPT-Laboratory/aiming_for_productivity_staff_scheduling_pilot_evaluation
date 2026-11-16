@@ -132,6 +132,30 @@ def score(table, kids=None, staff=None):
         "same_slot_two_weeks_running": sum(1 for h in slot_hist.values() for a, b in zip(h, h[1:]) if a == b),
         "opening_slot_holders": len({x for row in table.values() for x in row[:1] if x in by}),
         "closing_slot_holders": len({x for row in table.values() for x in row[-1:] if x in by})}
+    # [hours] Working hours against the weekly targets, pro-rated for days off. Informational only,
+    # not part of the score: in fixed slots a person's hours follow from working days x slot length,
+    # so most deviations are structural (the same in every roster) and can be agreed locally.
+    hrs = {"person_weeks": 0, "as_contracted_within_1h": 0, "minor_agree_locally_within_5h": [], "needs_attention": []}
+    for w, row in sorted(table.items()):
+        for i, x in enumerate(row):
+            if x not in by:
+                continue
+            st = by[x]
+            days = [d for d in DAYS if d not in off_days(st, w)]
+            if not days:
+                continue
+            worked = len(days) * (T(SLOTS[i][2]) - T(SLOTS[i][1]))
+            target = T(st["Weekly hour target"]) * len(days) / len(daylist(st["Working days"]))
+            dev = (worked - target) / 60
+            hrs["person_weeks"] += 1
+            item = f"week {w} {x}: {worked / 60:.1f} h vs target {target / 60:.1f} h ({dev:+.1f} h)"
+            if abs(dev) <= 1:
+                hrs["as_contracted_within_1h"] += 1
+            elif abs(dev) <= 5:
+                hrs["minor_agree_locally_within_5h"].append(item)
+            else:
+                hrs["needs_attention"].append(item)
+    rep["working_hours_info"] = hrs
     rep["valid_table"] = not rep["unknown_names"] and rep["duplicate_assignments"] == 0 and bool(table)
     return rep
 
