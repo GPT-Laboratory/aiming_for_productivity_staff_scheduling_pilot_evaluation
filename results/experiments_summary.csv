@@ -12,3 +12,8 @@ B_mas2025,mas,openai/gpt-4o,3,3,0,15,6,9,7,0,158
 C_mas2025,mas,openai/gpt-4o,3,1,0,21,18,3,0,0,269
 D_mas2025,mas,openai/gpt-4o,3,2,1,33,26,7,1,0,212
 C_mas2025fix,mas,openai/gpt-4o,2,0,1,22,20,1,1,0,883
+D_mas2025_terra,mas,gpt-6.1-terra (Azure),3,0,3,55,49,6,0,0,1116
+C_mas2025_terra,mas,gpt-6.1-terra (Azure),3,1,2,50,46,4,1,0,972
+A_mas2025_terra,mas,gpt-6.1-terra (Azure),3,0,3,60,60,0,0,0,1026
+B_mas2025_terra,mas,gpt-6.1-terra (Azure),3,0,3,60,60,0,0,0,592
+D_mas2024_terra,mas,gpt-6.1-terra (Azure),3,2,1,33,26,7,0,0,595
