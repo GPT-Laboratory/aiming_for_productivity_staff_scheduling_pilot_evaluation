@@ -41,7 +41,7 @@ like, every experiment is run again on the same setup, with repetitions.
 | E3 | MAS 2025 v2 | 4o | A, B, C, D × 5 | 20 | 1.7 h | ~€1 |
 | E4 | MAS 2025 v2 | Terra | A, B, C, D × 5 | 20 | 2 h | ~€6.5 |
 | E5, E6 | MAS 2024 | – | dropped: no longer part of the comparison | 0 | – | – |
-| E7 | Direct prompt | Terra | A, B, D × 5; C × 2 (+ 3 reused) | 17 | 20 min | ~€1.5 |
+| E7 | Direct prompt | Terra | A, B, C, D × 5 (C: 2 runs, then 3 more after E12 as E7c; the 3 reused C runs are extra repetitions) | 20 | 22 min | ~€1.6 |
 | E8 | Direct prompt | gpt-4o | A, B, C, D × 5 | 20 | 10 min | < €1 |
 | E9 | Direct prompt | gpt-4o-mini | A, B, C, D × 5 | 20 | 10 min | < €0.2 |
 | E10 | Direct prompt + domain skill | Terra | D × 5, C × 3, original text, all reused | 0 | – | – |
@@ -84,3 +84,10 @@ on Azure); they stay in the archive and in the README as earlier results.
 
 `experiments/rerun_2026-11/run.sh E4 E3 E7 …` runs the listed experiments in that order and logs
 to `experiments/rerun_2026-11/logs/` (git-ignored). Nothing is started without the user's go.
+
+## Changes during the run
+
+* 20:58: E3 was restarted after one minute; from then on the MAS experiments (E3) and the direct
+  ones (E7, E8, E9, E12) ran in two parallel queues. MAS runs stayed one at a time.
+* E7's C set was made all fresh: 3 more runs after E12 (`e7c_extra.sh`, logged as E7c). The 3
+  reused C runs of 17 Nov count as extra repetitions, not in the main table.

@@ -19,7 +19,7 @@ RUNS = HERE.parents[1] / "runs"
 PLAN = [
     ("E4", "MAS v2 · Terra", 20, 120, r"_rr_[ABCD]_v2_terra_"),
     ("E3", "MAS v2 · 4o", 20, 100, r"_rr_[ABCD]_v2_4o_"),
-    ("E7", "Direct · Terra", 17, 20, r"_direct[ABCD]_rr_terra(_rev)?_r\d"),
+    ("E7", "Direct · Terra", 20, 22, r"_direct[ABCD]_rr_terra(_rev)?_r\d"),
     ("E8", "Direct · gpt-4o", 20, 10, r"_direct[ABCD]_rr_gpt-4o(_rev)?_r\d"),
     ("E9", "Direct · gpt-4o-mini", 20, 10, r"_direct[ABCD]_rr_gpt-4o-mini(_rev)?_r\d"),
     ("E12", "Direct + skill · 3 models", 60, 30, r"_direct[ABCD]_rr_[a-z0-9.-]+_skill(_rev)?_r\d"),
