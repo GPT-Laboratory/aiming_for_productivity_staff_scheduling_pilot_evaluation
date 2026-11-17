@@ -53,10 +53,6 @@ def cost(model_name, inp, cached, out):
 CURRENT = {"Staff01", "Staff02", "Staff03", "Staff04", "Staff05", "Staff06", "Staff07", "Staff09", "Staff10", "Staff11", "Assistant"}
 
 
-def cost(inp, cached, out):
-    return round(((inp - cached) * PRICE["input"] + cached * PRICE["cached"] + out * PRICE["output"]) / 1e6, 4)
-
-
 # ------------------------------------------------------------------ scoring of one workbook
 def weekly_table(x):
     sheet = next((n for n in x.sheet_names if "rotation" in n.lower()), x.sheet_names[0])
