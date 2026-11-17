@@ -80,7 +80,11 @@ def main():
     print(f"{BOLD}Rerun progress{RESET}  ·  started {start:%H:%M}  ·  now {now:%H:%M}   "
           f"{BLUE}▒ plan{RESET} = where the plan expected to be now   {GREEN}█ actual{RESET} = runs finished\n")
     tot_done = tot_plan = 0
-    plan_cursor, proj_end = start, now
+    plan_cursor = start
+    # Since 20:58 on 17 Nov the MAS experiments and the direct ones run in two parallel queues
+    # ("lanes"); the projected end is the later of the two lanes. The plan bars keep the
+    # original, sequential plan.
+    lane_end = {"mas": now, "direct": now}
     plan_total = sum(p[3] for p in PLAN)
     for eid, label, n, plan_min, pat in PLAN:
         done, running, mins, steps, now_step = runs_of(pat)
@@ -90,16 +94,17 @@ def main():
         plan_frac = max(0.0, min(1.0, plan_frac))
         act_frac = done / n
         s, e = t.get((eid, "start")), t.get((eid, "done"))
+        lane = "mas" if "MAS" in label else "direct"
         if e:
             status = f"done in {hm((e - s).total_seconds() / 60)} (planned {hm(plan_min)})"
         elif s:
             elapsed = (now - s).total_seconds() / 60
             mean = elapsed / done if done else plan_min / n
             remaining = mean * (n - done)
-            proj_end = now + dt.timedelta(minutes=remaining)
+            lane_end[lane] = now + dt.timedelta(minutes=remaining)
             status = f"running {hm(elapsed)}, ~{hm(remaining)} left (planned {hm(plan_min)})"
         else:
-            proj_end += dt.timedelta(minutes=plan_min)
+            lane_end[lane] += dt.timedelta(minutes=plan_min)
             status = f"queued (planned {hm(plan_min)})"
         col = GREEN if act_frac >= plan_frac else YELLOW
         mean_run = f"{sum(mins) / len(mins):.1f} min/run" if mins else ""
@@ -117,7 +122,7 @@ def main():
     act = tot_done / tot_plan
     col = GREEN if act >= plan_frac else YELLOW
     print(f"\n{BOLD}{'Total':<31}{RESET} plan   {bar(plan_frac, '▒', BLUE)} {plan_frac:>4.0%}   planned end {plan_cursor:%H:%M}")
-    print(f"{'':<31} actual {bar(act, '█', col)} {act:>4.0%}  {tot_done}/{tot_plan}  projected end {proj_end:%H:%M}")
+    print(f"{'':<31} actual {bar(act, '█', col)} {act:>4.0%}  {tot_done}/{tot_plan}  projected end {max(lane_end.values()):%H:%M} (MAS {lane_end['mas']:%H:%M}, direct {lane_end['direct']:%H:%M})")
 
 
 if __name__ == "__main__":
