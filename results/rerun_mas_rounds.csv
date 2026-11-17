@@ -1,0 +1,120 @@
+experiment,model,dataset,task_text,rep,run,round,program_step,picked,self_rated_achieved,score,failed,understaffed_min,empty,conflicts,repeats,staff08,form,file
+E4,terra,A,revised,1,20261117-185523_rr_A_v2_terra_rev_r01,1,04,False,False,,,,0,,0,False,weekly,updated_shift_rotation.xlsx
+E4,terra,A,revised,1,20261117-185523_rr_A_v2_terra_rev_r01,2,10,True,False,,,,0,,0,False,weekly,updated_shift_rotation.xlsx
+E4,terra,A,revised,1,20261117-185523_rr_A_v2_terra_rev_r01,3,14,False,False,,,,0,,0,False,weekly,updated_shift_rotation.xlsx
+E4,terra,A,revised,2,20261117-190002_rr_A_v2_terra_rev_r02,1,04,True,False,,,,,,,,,
+E4,terra,A,revised,2,20261117-190002_rr_A_v2_terra_rev_r02,2,08,False,False,,,,,,,,,
+E4,terra,A,revised,2,20261117-190002_rr_A_v2_terra_rev_r02,3,12,False,False,,,,,,,,,
+E4,terra,A,revised,3,20261117-190308_rr_A_v2_terra_rev_r03,1,04,True,False,,,,,,,,,
+E4,terra,A,revised,3,20261117-190308_rr_A_v2_terra_rev_r03,2,08,False,False,,,,,,,,,
+E4,terra,A,revised,3,20261117-190308_rr_A_v2_terra_rev_r03,3,12,False,False,,,,,,,,,
+E4,terra,A,revised,4,20261117-190807_rr_A_v2_terra_rev_r04,1,04,False,False,,,,,,,,,
+E4,terra,A,revised,4,20261117-190807_rr_A_v2_terra_rev_r04,2,08,False,False,,,,,,,,,
+E4,terra,A,revised,4,20261117-190807_rr_A_v2_terra_rev_r04,3,12,True,False,,,,,,,,,
+E4,terra,A,revised,5,20261117-191130_rr_A_v2_terra_rev_r05,1,04,False,False,,,,,,,,,
+E4,terra,A,revised,5,20261117-191130_rr_A_v2_terra_rev_r05,2,08,True,False,,,,,,,,,
+E4,terra,A,revised,5,20261117-191130_rr_A_v2_terra_rev_r05,3,12,False,False,,,,,,,,,
+E4,terra,B,revised,1,20261117-191420_rr_B_v2_terra_rev_r01,1,08,False,False,,,,,,,,,
+E4,terra,B,revised,1,20261117-191420_rr_B_v2_terra_rev_r01,2,14,False,False,,,,0,,5,True,weekly,updated_shift_rotation.xlsx
+E4,terra,B,revised,1,20261117-191420_rr_B_v2_terra_rev_r01,3,18,True,False,,,,0,,5,True,weekly,updated_shift_rotation.xlsx
+E4,terra,B,revised,2,20261117-191952_rr_B_v2_terra_rev_r02,1,06,False,False,,,,,,,,,
+E4,terra,B,revised,2,20261117-191952_rr_B_v2_terra_rev_r02,2,12,False,False,,,,,,,,,
+E4,terra,B,revised,2,20261117-191952_rr_B_v2_terra_rev_r02,3,16,True,False,,,,,,,,,
+E4,terra,B,revised,3,20261117-192428_rr_B_v2_terra_rev_r03,1,06,True,False,,,,,,,,,
+E4,terra,B,revised,3,20261117-192428_rr_B_v2_terra_rev_r03,2,10,False,False,,,,,,,,,
+E4,terra,B,revised,3,20261117-192428_rr_B_v2_terra_rev_r03,3,14,False,False,,,,,,,,,
+E4,terra,B,revised,4,20261117-192846_rr_B_v2_terra_rev_r04,1,06,False,False,,,,0,,5,True,weekly,updated_shift_rotation.xlsx
+E4,terra,B,revised,4,20261117-192846_rr_B_v2_terra_rev_r04,2,12,False,False,,,,0,,0,True,weekly,updated_shift_rotation.xlsx
+E4,terra,B,revised,4,20261117-192846_rr_B_v2_terra_rev_r04,3,18,True,False,,,,0,,0,True,weekly,updated_shift_rotation.xlsx
+E4,terra,B,revised,5,20261117-193754_rr_B_v2_terra_rev_r05,1,06,False,False,,,,,,,,,
+E4,terra,B,revised,5,20261117-193754_rr_B_v2_terra_rev_r05,2,12,False,False,,,,,,,,,
+E4,terra,B,revised,5,20261117-193754_rr_B_v2_terra_rev_r05,3,16,True,False,,,,,,,,,
+E4,terra,C,C prompt,1,20261117-194238_rr_C_v2_terra_r01,1,04,True,False,6,R10,0,,,,,workbook,daycare_roster.xlsx
+E4,terra,C,C prompt,1,20261117-194238_rr_C_v2_terra_r01,2,08,False,False,7,,0,,,,,workbook,improved_daycare_roster.xlsx
+E4,terra,C,C prompt,1,20261117-194238_rr_C_v2_terra_r01,3,12,False,False,7,,0,,,,,workbook,updated_daycare_roster.xlsx
+E4,terra,C,C prompt,2,20261117-194652_rr_C_v2_terra_r02,1,04,False,False,7,,0,,,,,workbook,daycare_schedule.xlsx
+E4,terra,C,C prompt,2,20261117-194652_rr_C_v2_terra_r02,2,08,True,False,7,,0,,,,,workbook,updated_daycare_schedule.xlsx
+E4,terra,C,C prompt,2,20261117-194652_rr_C_v2_terra_r02,3,15,False,True,7,,0,,,,,workbook,updated_daycare_schedule_2.xlsx
+E4,terra,C,C prompt,3,20261117-195311_rr_C_v2_terra_r03,1,04,False,False,6,R10,0,,,,,workbook,daycare_schedule.xlsx
+E4,terra,C,C prompt,3,20261117-195311_rr_C_v2_terra_r03,2,08,False,False,6,R10,0,,,,,workbook,daycare_schedule_improved.xlsx
+E4,terra,C,C prompt,3,20261117-195311_rr_C_v2_terra_r03,3,12,True,False,6,R10,0,,,,,workbook,daycare_schedule_repaired.xlsx
+E4,terra,C,C prompt,4,20261117-195746_rr_C_v2_terra_r04,1,04,False,False,6,R10,0,,,,,workbook,daycare_weekly_roster.xlsx
+E4,terra,C,C prompt,4,20261117-195746_rr_C_v2_terra_r04,2,08,True,False,6,R10,0,,,,,workbook,daycare_improved_roster.xlsx
+E4,terra,C,C prompt,4,20261117-195746_rr_C_v2_terra_r04,3,12,False,False,6,R10,0,,,,,workbook,daycare_strictly_improved_roster.xlsx
+E4,terra,C,C prompt,5,20261117-200135_rr_C_v2_terra_r05,1,04,False,True,7,,0,,,,,workbook,daycare_roster.xlsx
+E4,terra,C,C prompt,5,20261117-200135_rr_C_v2_terra_r05,2,08,True,True,7,,0,,,,,workbook,updated_daycare_roster.xlsx
+E4,terra,C,C prompt,5,20261117-200135_rr_C_v2_terra_r05,3,12,False,True,7,,0,,,,,workbook,improved_daycare_roster.xlsx
+E4,terra,D,revised,1,20261117-200950_rr_D_v2_terra_rev_r01,1,04,False,False,16.7,,,0,0,4,,weekly,updated_synthetic_daycare.xlsx
+E4,terra,D,revised,1,20261117-200950_rr_D_v2_terra_rev_r01,2,10,False,False,25.3,,,0,0,33,,weekly,updated_synthetic_daycare.xlsx
+E4,terra,D,revised,1,20261117-200950_rr_D_v2_terra_rev_r01,3,14,True,False,14.6,,,0,0,10,,weekly,updated_synthetic_daycare.xlsx
+E4,terra,D,revised,2,20261117-201942_rr_D_v2_terra_rev_r02,1,06,False,True,10.8,,,0,0,13,,weekly,updated_synthetic_daycare.xlsx
+E4,terra,D,revised,2,20261117-201942_rr_D_v2_terra_rev_r02,2,14,False,False,10.8,,,0,0,14,,weekly,updated_synthetic_daycare.xlsx
+E4,terra,D,revised,2,20261117-201942_rr_D_v2_terra_rev_r02,3,18,True,False,10.8,,,0,0,14,,weekly,updated_synthetic_daycare.xlsx
+E4,terra,D,revised,3,20261117-202659_rr_D_v2_terra_rev_r03,1,06,False,False,11.0,,,0,0,3,,weekly,updated_daycare.xlsx
+E4,terra,D,revised,3,20261117-202659_rr_D_v2_terra_rev_r03,2,10,True,False,10.8,,,0,0,3,,weekly,updated_daycare.xlsx
+E4,terra,D,revised,3,20261117-202659_rr_D_v2_terra_rev_r03,3,14,False,False,10.8,,,0,0,3,,weekly,updated_daycare.xlsx
+E4,terra,D,revised,4,20261117-203415_rr_D_v2_terra_rev_r04,1,04,True,True,10.8,,,0,0,3,,weekly,updated_daycare.xlsx
+E4,terra,D,revised,4,20261117-203415_rr_D_v2_terra_rev_r04,2,10,False,False,10.8,,,0,0,3,,weekly,updated_daycare.xlsx
+E4,terra,D,revised,4,20261117-203415_rr_D_v2_terra_rev_r04,3,14,False,False,10.8,,,0,0,3,,weekly,updated_daycare.xlsx
+E4,terra,D,revised,5,20261117-204621_rr_D_v2_terra_rev_r05,1,04,False,False,19.0,,,2,0,7,,weekly,updated_daycare.xlsx
+E4,terra,D,revised,5,20261117-204621_rr_D_v2_terra_rev_r05,2,10,True,False,18.8,,,2,0,3,,weekly,updated_daycare.xlsx
+E4,terra,D,revised,5,20261117-204621_rr_D_v2_terra_rev_r05,3,14,False,False,18.8,,,2,0,3,,weekly,updated_daycare.xlsx
+E3,4o,A,revised,1,20261117-205847_rr_A_v2_4o_rev_r01,1,04,False,False,,,,,,,,,
+E3,4o,A,revised,1,20261117-205847_rr_A_v2_4o_rev_r01,2,12,True,True,,,,,,,,,
+E3,4o,A,revised,1,20261117-205847_rr_A_v2_4o_rev_r01,3,19,False,True,,,,,,,,,
+E3,4o,A,revised,2,20261117-210126_rr_A_v2_4o_rev_r02,1,04,False,False,,,,,,,,,
+E3,4o,A,revised,2,20261117-210126_rr_A_v2_4o_rev_r02,2,08,False,False,,,,,,,,,
+E3,4o,A,revised,2,20261117-210126_rr_A_v2_4o_rev_r02,3,14,True,True,,,,0,,4,True,weekly,updated_shift_rotation.xlsx
+E3,4o,A,revised,3,20261117-210351_rr_A_v2_4o_rev_r03,1,04,False,False,,,,,,,,,
+E3,4o,A,revised,3,20261117-210351_rr_A_v2_4o_rev_r03,2,10,False,True,,,,0,,4,True,weekly,updated_shift_rotation.xlsx
+E3,4o,A,revised,3,20261117-210351_rr_A_v2_4o_rev_r03,3,14,True,True,,,,0,,4,True,weekly,updated_shift_rotation.xlsx
+E3,4o,A,revised,4,20261117-210517_rr_A_v2_4o_rev_r04,1,04,False,True,,,,0,,33,False,weekly,updated_shift_rotation.xlsx
+E3,4o,A,revised,4,20261117-210517_rr_A_v2_4o_rev_r04,2,08,True,True,,,,0,,1,True,weekly,updated_shift_rotation.xlsx
+E3,4o,A,revised,4,20261117-210517_rr_A_v2_4o_rev_r04,3,12,False,False,,,,0,,1,True,weekly,updated_shift_rotation.xlsx
+E3,4o,A,revised,5,20261117-210638_rr_A_v2_4o_rev_r05,1,04,False,False,,,,,,,,,
+E3,4o,A,revised,5,20261117-210638_rr_A_v2_4o_rev_r05,2,08,True,True,,,,,,,,,
+E3,4o,A,revised,5,20261117-210638_rr_A_v2_4o_rev_r05,3,14,False,True,,,,,,,,,
+E3,4o,B,revised,1,20261117-210801_rr_B_v2_4o_rev_r01,1,04,True,False,,,,,,,,,
+E3,4o,B,revised,1,20261117-210801_rr_B_v2_4o_rev_r01,2,08,False,False,,,,,,,,,
+E3,4o,B,revised,1,20261117-210801_rr_B_v2_4o_rev_r01,3,12,False,False,,,,,,,,,
+E3,4o,B,revised,2,20261117-210955_rr_B_v2_4o_rev_r02,1,04,True,False,,,,,,,,,
+E3,4o,B,revised,2,20261117-210955_rr_B_v2_4o_rev_r02,2,10,False,False,,,,,,,,,
+E3,4o,B,revised,2,20261117-210955_rr_B_v2_4o_rev_r02,3,14,False,False,,,,,,,,,
+E3,4o,B,revised,3,20261117-211212_rr_B_v2_4o_rev_r03,1,04,True,True,,,,,,,,,
+E3,4o,B,revised,3,20261117-211212_rr_B_v2_4o_rev_r03,2,12,False,False,,,,,,,,,
+E3,4o,B,revised,3,20261117-211212_rr_B_v2_4o_rev_r03,3,16,False,False,,,,,,,,,
+E3,4o,B,revised,4,20261117-211509_rr_B_v2_4o_rev_r04,1,04,False,True,,,,,,,,,
+E3,4o,B,revised,4,20261117-211509_rr_B_v2_4o_rev_r04,2,08,False,True,,,,,,,,,
+E3,4o,B,revised,4,20261117-211509_rr_B_v2_4o_rev_r04,3,12,True,True,,,,,,,,,
+E3,4o,B,revised,5,20261117-211606_rr_B_v2_4o_rev_r05,1,04,True,False,,,,,,,,,
+E3,4o,B,revised,5,20261117-211606_rr_B_v2_4o_rev_r05,2,10,False,False,,,,,,,,,
+E3,4o,B,revised,5,20261117-211606_rr_B_v2_4o_rev_r05,3,14,False,False,,,,,,,,,
+E3,4o,C,C prompt,1,20261117-211821_rr_C_v2_4o_r01,1,06,True,True,,,,,,,,,
+E3,4o,C,C prompt,1,20261117-211821_rr_C_v2_4o_r01,2,10,False,False,,,,,,,,,
+E3,4o,C,C prompt,1,20261117-211821_rr_C_v2_4o_r01,3,14,False,False,,,,,,,,,
+E3,4o,C,C prompt,2,20261117-212019_rr_C_v2_4o_r02,1,04,True,False,,,,,,,,,
+E3,4o,C,C prompt,2,20261117-212019_rr_C_v2_4o_r02,2,08,False,False,,,,,,,,,
+E3,4o,C,C prompt,2,20261117-212019_rr_C_v2_4o_r02,3,12,False,False,,,,,,,,,
+E3,4o,C,C prompt,3,20261117-212217_rr_C_v2_4o_r03,1,11,True,False,,,,,,,,,
+E3,4o,C,C prompt,3,20261117-212217_rr_C_v2_4o_r03,2,15,False,False,,,,,,,,,
+E3,4o,C,C prompt,3,20261117-212217_rr_C_v2_4o_r03,3,19,False,False,,,,,,,,,
+E3,4o,C,C prompt,4,20261117-212343_rr_C_v2_4o_r04,1,07,False,False,,,,,,,,,
+E3,4o,C,C prompt,4,20261117-212343_rr_C_v2_4o_r04,2,27,False,False,,,,,,,,,
+E3,4o,C,C prompt,4,20261117-212343_rr_C_v2_4o_r04,3,31,True,True,,,,,,,,,
+E3,4o,C,C prompt,5,20261117-212928_rr_C_v2_4o_r05,1,04,False,True,,,,,,,,,
+E3,4o,C,C prompt,5,20261117-212928_rr_C_v2_4o_r05,2,08,False,False,,,,,,,,,
+E3,4o,C,C prompt,5,20261117-212928_rr_C_v2_4o_r05,3,14,True,True,,,,,,,,,
+E3,4o,D,revised,1,20261117-213221_rr_D_v2_4o_rev_r01,1,04,True,False,,,,,,,,,
+E3,4o,D,revised,1,20261117-213221_rr_D_v2_4o_rev_r01,2,12,False,False,,,,,,,,,
+E3,4o,D,revised,1,20261117-213221_rr_D_v2_4o_rev_r01,3,16,False,False,,,,,,,,,
+E3,4o,D,revised,2,20261117-213559_rr_D_v2_4o_rev_r02,1,04,False,False,,,,,,,,,
+E3,4o,D,revised,2,20261117-213559_rr_D_v2_4o_rev_r02,2,12,False,False,,,,,,,,,
+E3,4o,D,revised,2,20261117-213559_rr_D_v2_4o_rev_r02,3,16,True,True,,,,,,,,,
+E3,4o,D,revised,3,20261117-213704_rr_D_v2_4o_rev_r03,1,04,True,False,,,,,,,,,
+E3,4o,D,revised,3,20261117-213704_rr_D_v2_4o_rev_r03,2,12,False,False,,,,,,,,,
+E3,4o,D,revised,3,20261117-213704_rr_D_v2_4o_rev_r03,3,16,False,False,,,,,,,,,
+E3,4o,D,revised,4,20261117-213910_rr_D_v2_4o_rev_r04,1,04,False,False,,,,,,,,,
+E3,4o,D,revised,4,20261117-213910_rr_D_v2_4o_rev_r04,2,48,False,True,,,,,,,,,
+E3,4o,D,revised,5,20261117-214342_rr_D_v2_4o_rev_r05,1,04,False,False,,,,,,,,,
+E3,4o,D,revised,5,20261117-214342_rr_D_v2_4o_rev_r05,2,10,True,True,,,,,,,,,
+E3,4o,D,revised,5,20261117-214342_rr_D_v2_4o_rev_r05,3,14,False,True,,,,,,,,,

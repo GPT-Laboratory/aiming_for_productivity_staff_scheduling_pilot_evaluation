@@ -1,0 +1,41 @@
+experiment,model,dataset,task_text,rep,run,outcome,steps,executions,failed_executions,rounds,minutes,final_report_pick,final_score,final_form,scorable_rounds,empty,staff08,repeats,best_round_score,llm_calls,input_tokens,cached_input_tokens,output_tokens,reasoning_tokens,cost_eur
+E4,terra,A,revised,1,20261117-185523_rr_A_v2_terra_rev_r01,completed,16,4,1,3,4.6,2,,weekly,3,0,False,0,,12,63012,0,32457,9400,0.243
+E4,terra,A,revised,2,20261117-190002_rr_A_v2_terra_rev_r02,completed,14,3,0,3,3.1,1,,,0,,,,,11,53179,4975,22140,6582,0.1717
+E4,terra,A,revised,3,20261117-190308_rr_A_v2_terra_rev_r03,completed,14,3,0,3,5.0,1,,,0,,,,,11,59314,4975,27038,7078,0.2047
+E4,terra,A,revised,4,20261117-190807_rr_A_v2_terra_rev_r04,completed,14,3,0,3,3.4,3,,,0,,,,,11,57752,4975,25286,6537,0.1936
+E4,terra,A,revised,5,20261117-191130_rr_A_v2_terra_rev_r05,completed,14,3,0,3,2.8,2,,,0,,,,,11,44372,4975,15297,5573,0.1253
+E4,terra,B,revised,1,20261117-191420_rr_B_v2_terra_rev_r01,completed,20,6,3,3,5.5,3,,weekly,2,0,True,5,,14,258596,0,42454,7136,0.5081
+E4,terra,B,revised,2,20261117-191952_rr_B_v2_terra_rev_r02,completed,18,5,2,3,4.6,3,,,0,,,,,13,243738,49420,31736,7320,0.3839
+E4,terra,B,revised,3,20261117-192428_rr_B_v2_terra_rev_r03,completed,16,4,1,3,4.3,1,,,0,,,,,12,246019,49420,32915,6074,0.3927
+E4,terra,B,revised,4,20261117-192846_rr_B_v2_terra_rev_r04,completed,20,6,3,3,9.1,3,,weekly,3,0,True,0,,14,273437,49420,54097,6798,0.5365
+E4,terra,B,revised,5,20261117-193754_rr_B_v2_terra_rev_r05,completed,18,5,2,3,4.7,3,,,0,,,,,13,251466,49420,36758,5658,0.4193
+E4,terra,C,C prompt,1,20261117-194238_rr_C_v2_terra_r01,completed,14,3,0,3,4.2,1,6,workbook,3,,,,7,11,69246,0,31423,8905,0.2442
+E4,terra,C,C prompt,2,20261117-194652_rr_C_v2_terra_r02,completed,17,4,1,3,6.3,2,7,workbook,3,,,,7,14,102030,5954,50809,10915,0.378
+E4,terra,C,C prompt,3,20261117-195311_rr_C_v2_terra_r03,completed,14,3,0,3,4.6,3,6,workbook,3,,,,6,11,74250,5954,34569,7967,0.2604
+E4,terra,C,C prompt,4,20261117-195746_rr_C_v2_terra_r04,completed,14,3,0,3,3.8,2,6,workbook,3,,,,6,11,69139,5954,30901,8004,0.2352
+E4,terra,C,C prompt,5,20261117-200135_rr_C_v2_terra_r05,completed,14,3,0,3,8.2,2,7,workbook,3,,,,7,11,71637,5954,32156,7519,0.2446
+E4,terra,D,revised,1,20261117-200950_rr_D_v2_terra_rev_r01,completed,16,4,1,3,9.9,3,14.6,weekly,3,0,,10,14.6,12,96320,0,41527,6629,0.3279
+E4,terra,D,revised,2,20261117-201942_rr_D_v2_terra_rev_r02,completed,20,6,3,3,7.3,3,10.8,weekly,3,0,,14,10.8,14,115167,9360,56144,7523,0.4174
+E4,terra,D,revised,3,20261117-202659_rr_D_v2_terra_rev_r03,completed,16,4,1,3,7.3,2,10.8,weekly,3,0,,3,10.8,12,98159,9360,40890,5862,0.3169
+E4,terra,D,revised,4,20261117-203415_rr_D_v2_terra_rev_r04,completed,16,4,1,3,12.1,1,10.8,weekly,3,0,,3,10.8,12,100765,9360,43999,6910,0.3364
+E4,terra,D,revised,5,20261117-204621_rr_D_v2_terra_rev_r05,completed,16,4,1,3,10.5,2,18.8,weekly,3,2,,3,18.8,12,96123,9360,40360,5692,0.3118
+E3,4o,A,revised,1,20261117-205847_rr_A_v2_4o_rev_r01,completed,21,6,3,3,2.6,2,,,0,,,,,15,53574,9600,9786,0,
+E3,4o,A,revised,2,20261117-210126_rr_A_v2_4o_rev_r02,completed,16,4,1,3,2.4,3,,weekly,1,0,True,4,,12,42107,4864,5509,0,
+E3,4o,A,revised,3,20261117-210351_rr_A_v2_4o_rev_r03,completed,16,4,1,3,1.4,3,,weekly,2,0,True,4,,12,41312,9600,5832,0,
+E3,4o,A,revised,4,20261117-210517_rr_A_v2_4o_rev_r04,completed,14,3,0,3,1.3,2,,weekly,3,0,True,1,,11,37225,9600,4561,0,
+E3,4o,A,revised,5,20261117-210638_rr_A_v2_4o_rev_r05,completed,16,4,1,3,1.4,2,,,0,,,,,12,40533,9600,5328,0,
+E3,4o,B,revised,1,20261117-210801_rr_B_v2_4o_rev_r01,completed,14,3,0,3,1.9,1,,,0,,,,,11,215190,3840,3795,0,
+E3,4o,B,revised,2,20261117-210955_rr_B_v2_4o_rev_r02,completed,16,4,1,3,2.3,1,,,0,,,,,12,220399,54016,5996,0,
+E3,4o,B,revised,3,20261117-211212_rr_B_v2_4o_rev_r03,completed,18,5,2,3,2.9,1,,,0,,,,,13,220390,53504,5029,0,
+E3,4o,B,revised,4,20261117-211509_rr_B_v2_4o_rev_r04,completed,14,3,0,3,0.9,3,,,0,,,,,11,213741,55296,3369,0,
+E3,4o,B,revised,5,20261117-211606_rr_B_v2_4o_rev_r05,completed,16,4,1,3,2.2,1,,,0,,,,,12,219561,54016,5688,0,
+E3,4o,C,C prompt,1,20261117-211821_rr_C_v2_4o_r01,completed,16,4,1,3,2.0,1,,,0,,,,,12,46727,4736,5243,0,
+E3,4o,C,C prompt,2,20261117-212019_rr_C_v2_4o_r02,completed,14,3,0,3,1.9,1,,,0,,,,,11,42873,6528,4371,0,
+E3,4o,C,C prompt,3,20261117-212217_rr_C_v2_4o_r03,completed,21,6,3,3,1.4,1,,,0,,,,,15,55793,10624,6554,0,
+E3,4o,C,C prompt,4,20261117-212343_rr_C_v2_4o_r04,completed,33,11,8,3,5.7,3,,,0,,,,,22,90127,22528,16910,0,
+E3,4o,C,C prompt,5,20261117-212928_rr_C_v2_4o_r05,completed,16,4,1,3,2.9,3,,,0,,,,,12,48576,10496,5912,0,
+E3,4o,D,revised,1,20261117-213221_rr_D_v2_4o_rev_r01,completed,18,5,2,3,3.6,1,,,0,,,,,13,65086,4608,7521,0,
+E3,4o,D,revised,2,20261117-213559_rr_D_v2_4o_rev_r02,completed,18,5,2,3,1.1,3,,,0,,,,,13,62238,13952,6594,0,
+E3,4o,D,revised,3,20261117-213704_rr_D_v2_4o_rev_r03,completed,18,5,2,3,2.1,1,,,0,,,,,13,65150,14208,8856,0,
+E3,4o,D,revised,4,20261117-213910_rr_D_v2_4o_rev_r04,step limit,50,18,16,2,4.5,,,,0,,,,,33,185791,53376,36014,0,
+E3,4o,D,revised,5,20261117-214342_rr_D_v2_4o_rev_r05,completed,16,4,1,3,3.0,2,,,0,,,,,11,58434,14080,5700,0,
