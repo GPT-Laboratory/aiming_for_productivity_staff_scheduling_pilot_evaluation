@@ -59,10 +59,14 @@ def last_csv_block(text):
     return blocks[-1].strip() if blocks else None
 
 
+# Task text file in the dataset folder (--prompt): prompt.txt, the pilot text, or prompt_revised.txt.
+PROMPT_NAME = "prompt.txt"
+
+
 # ----------------------------------------------------------------- case D
 def d_task():
     xlsx = CASES / "D_synthetic" / "synthetic_daycare.xlsx"
-    prompt = (CASES / "D_synthetic" / "prompt.txt").read_text(encoding="utf-8")
+    prompt = (CASES / "D_synthetic" / PROMPT_NAME).read_text(encoding="utf-8")
     fmt = ("\n\nProduce the schedule for weeks 18, 19, 20 and 21.\n"
            "Answer format: after your reasoning, give the final schedule as ONE fenced csv block with the header\n"
            "Vko," + ",".join(ln.SLOT_NAMES) + "\nand one row per week. Each cell holds one staff name exactly as in the "
@@ -104,7 +108,7 @@ def d_score(table, out):
 # ----------------------------------------------------------------- case C
 def c_task():
     xlsx = CASES / "C_reconstructed" / "daycare_structure_example.xlsx"
-    prompt = (CASES / "C_reconstructed" / "prompt.txt").read_text(encoding="utf-8")
+    prompt = (CASES / "C_reconstructed" / PROMPT_NAME).read_text(encoding="utf-8")
     fmt = ("\n\nAnswer format: after your reasoning, give the final schedule as ONE fenced csv block with the header\n"
            "employee,day,start,end,group\nand one row per employee per working day (day = Mon..Fri, times HH:MM, "
            "group = the group the employee works in during that shift).")
@@ -151,11 +155,14 @@ def main():
     ap.add_argument("--sim-user", action="store_true",
                     help="After each format-valid answer the simulated manager accepts it or asks for a revision (max 3).")
     ap.add_argument("--max-reviews", type=int, default=3)
+    ap.add_argument("--prompt", default="prompt.txt", help="task text file in the dataset folder, e.g. prompt_revised.txt")
     ap.add_argument("--skill", help="SKILL.md appended to the system prompt, "
                     "e.g. direct_llm/skills/finnish-daycare-scheduling/SKILL.md")
     load_dotenv(REPO / ".env")
     ap.set_defaults(model=os.getenv("DIRECT_LLM_MODEL", "openai/gpt-6.1-terra-pro"))
     a = ap.parse_args()
+    global PROMPT_NAME
+    PROMPT_NAME = a.prompt
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"], base_url=os.getenv("OPENAI_API_BASE"), timeout=900)
     task, validate, score = CASE[a.case]
     if a.sim_user:
@@ -167,12 +174,12 @@ def main():
         out.mkdir(parents=True)
         system = SYSTEM + " " + LIMIT.format(n=a.max_tokens) + (load_skill(a.skill) if a.skill else "")
         msgs = [{"role": "system", "content": system}, {"role": "user", "content": task()}]
-        log = {"case": a.case, "model": a.model, "max_turns": a.max_turns, "max_tokens": a.max_tokens, "skill": a.skill,
+        log = {"case": a.case, "model": a.model, "max_turns": a.max_turns, "max_tokens": a.max_tokens, "skill": a.skill, "prompt_file": a.prompt,
                "api_base": os.getenv("OPENAI_API_BASE") or "https://api.openai.com/v1 (default)", "turns": [], "started": dt.datetime.now().isoformat(timespec="seconds")}
         parsed, errs, t0 = None, ["no answer"], time.time()
         sim, reviews, fmt_fails, last_valid = None, 0, 0, None
         if a.sim_user:
-            sim = SimManager(out / "sim_user.json", request=(case_dir / "prompt.txt").read_text(encoding="utf-8"),
+            sim = SimManager(out / "sim_user.json", request=(case_dir / PROMPT_NAME).read_text(encoding="utf-8"),
                              files=[x.name for x in sorted(case_dir.glob("*.xlsx"))])
         turn_cap = a.max_turns + (a.max_reviews if sim else 0)
         for turn in range(1, turn_cap + 1):          # hard cap prevents endless revision loops

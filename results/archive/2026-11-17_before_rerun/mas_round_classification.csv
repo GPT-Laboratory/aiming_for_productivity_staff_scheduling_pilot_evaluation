@@ -1,0 +1,49 @@
+run,round,run_outcome,category,self_rated_achieved,usability,note
+C_mas_r01,1,completed,"infeasible model, no schedule",no,unusable,Weekly hours 38:15 parsed as 14 h; ratios rounded down; no groups.
+C_mas_r01,2,completed,"infeasible model, no schedule",no,unusable,Weekly hours 38:15 parsed as 14 h; ratios rounded down; no groups.
+C_mas_r01,3,completed,"infeasible model, no schedule",no,unusable,Weekly hours 38:15 parsed as 14 h; ratios rounded down; no groups.
+C_mas_r02,1,completed,structurally impossible schedule,yes,unusable,Round 1: one day's presence as scattered single minutes.
+C_mas_r02,2,completed,"infeasible model, no schedule",no,unusable,Round 1: one day's presence as scattered single minutes.
+C_mas_r02,3,completed,"infeasible model, no schedule",no,unusable,Round 1: one day's presence as scattered single minutes.
+C_mas_r03,-,exception,run stopped at step limit before any analysed round,,unusable,
+C_mas_r04,1,completed,wrong decision level (no names or no shift times),yes,unusable,"Four 'day parts', one day only; ratio constraint meaningless."
+C_mas_r04,2,completed,"infeasible model, no schedule",no,unusable,"Four 'day parts', one day only; ratio constraint meaningless."
+C_mas_r04,3,completed,wrong decision level (no names or no shift times),yes,unusable,"Four 'day parts', one day only; ratio constraint meaningless."
+C_mas_r05,1,completed,structurally impossible schedule,yes,unusable,"Rounds 2-3: exactly 38:15 each, 6.5 % understaffed, 6.9 work fragments per day (checker)."
+C_mas_r05,2,completed,structurally impossible schedule,yes,unusable,"Rounds 2-3: exactly 38:15 each, 6.5 % understaffed, 6.9 work fragments per day (checker)."
+C_mas_r05,3,completed,structurally impossible schedule,yes,unusable,"Rounds 2-3: exactly 38:15 each, 6.5 % understaffed, 6.9 work fragments per day (checker)."
+A_mas_r01,1,completed,no schedule printed,no,unusable,Rounds 2-3: nearly every employee in every shift.
+A_mas_r01,2,completed,structurally impossible schedule,yes,unusable,Rounds 2-3: nearly every employee in every shift.
+A_mas_r01,3,completed,structurally impossible schedule,yes,unusable,Rounds 2-3: nearly every employee in every shift.
+A_mas_r02,1,completed,"history repeated, no new weeks",yes,unusable,"Weeks 5-17 printed again, shuffled."
+A_mas_r02,2,completed,"history repeated, no new weeks",yes,unusable,"Weeks 5-17 printed again, shuffled."
+A_mas_r02,3,completed,"history repeated, no new weeks",yes,unusable,"Weeks 5-17 printed again, shuffled."
+A_mas_r03,1,completed,"history repeated, no new weeks",yes,unusable,Weeks 5-17 repeated; round 3 infeasible.
+A_mas_r03,2,completed,"history repeated, no new weeks",yes,unusable,Weeks 5-17 repeated; round 3 infeasible.
+A_mas_r03,3,completed,"infeasible model, no schedule",no,unusable,Weeks 5-17 repeated; round 3 infeasible.
+B_mas_r01,1,completed,wrong decision level (no names or no shift times),yes,unusable,"Staff per group per date, no shifts; invented staff ids."
+B_mas_r01,2,completed,"infeasible model, no schedule",yes,unusable,"Staff per group per date, no shifts; invented staff ids."
+B_mas_r01,3,completed,"infeasible model, no schedule",no,unusable,"Staff per group per date, no shifts; invented staff ids."
+B_mas_r02,1,completed,wrong decision level (no names or no shift times),yes,unusable,Only who works in which week.
+B_mas_r02,2,completed,wrong decision level (no names or no shift times),yes,unusable,Only who works in which week.
+B_mas_r02,3,completed,wrong decision level (no names or no shift times),yes,unusable,Only who works in which week.
+B_mas_r03,1,completed,"infeasible model, no schedule",no,unusable,Only which shifts are staffed.
+B_mas_r03,2,completed,wrong decision level (no names or no shift times),yes,unusable,Only which shifts are staffed.
+B_mas_r03,3,completed,wrong decision level (no names or no shift times),yes,unusable,Only which shifts are staffed.
+D_mas_r01,1,completed,no schedule printed,yes,unusable,Round 1: 'optimal' 0 with empty schedule; then infeasible.
+D_mas_r01,2,completed,"infeasible model, no schedule",no,unusable,Round 1: 'optimal' 0 with empty schedule; then infeasible.
+D_mas_r01,3,completed,"infeasible model, no schedule",no,unusable,Round 1: 'optimal' 0 with empty schedule; then infeasible.
+D_mas_r02,1,exception,"history repeated, no new weeks",yes,unusable,Only round: old weeks 5-17 per person; run stopped at step limit.
+D_mas_r03,1,exception,no schedule printed,no,unusable,Empty or infeasible model; run stopped at step limit before final report.
+D_mas_r03,2,exception,"infeasible model, no schedule",no,unusable,Empty or infeasible model; run stopped at step limit before final report.
+D_mas_r03,3,exception,"infeasible model, no schedule",no,unusable,Empty or infeasible model; run stopped at step limit before final report.
+D_mas_r04,1,completed,"infeasible model, no schedule",no,unusable,Infeasible in every round.
+D_mas_r04,2,completed,"infeasible model, no schedule",no,unusable,Infeasible in every round.
+D_mas_r04,3,completed,"infeasible model, no schedule",no,unusable,Infeasible in every round.
+D_mas_r05,1,completed,structurally impossible schedule,yes,unusable,"Weeks 18-21, but on average 4.5 shifts per person per week."
+D_mas_r05,2,completed,structurally impossible schedule,yes,unusable,"Weeks 18-21, but on average 4.5 shifts per person per week."
+D_mas_r05,3,completed,structurally impossible schedule,yes,unusable,"Weeks 18-21, but on average 4.5 shifts per person per week."
+D_mas_newmodel_r01,1,exception,no schedule: program reports obstacles and asks for policy decisions,no,unusable,
+D_mas_newmodel_r02,-,exception,run stopped at step limit before any analysed round,,unusable,
+D_mas_newmodel_r03,1,exception,no schedule: program reports obstacles and asks for policy decisions,no,unusable,
+D_mas_newmodel_r03,2,exception,no schedule: program reports obstacles and asks for policy decisions,no,unusable,
