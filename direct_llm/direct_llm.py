@@ -144,7 +144,68 @@ def c_score(block, out):
     return cs.check(p, CASES / "C_reconstructed" / "daycare_structure_example.xlsx")
 
 
-CASE = {"D": (d_task, d_validate, d_score), "C": (c_task, c_validate, c_score)}
+# ----------------------------------------------------------------- cases A and B
+# The pilot's own inputs: the rotation table for weeks 5-17 (A), plus the children's attendance (B).
+# No staff profiles, so no rule checker: the answer is checked for format, and the score records
+# simple facts about the table (names used, empty cells, repeats).
+AB_DIR = {"A": "A_pilot_rotation", "B": "B_pilot_rotation_with_children"}
+
+
+def ab_names(case):
+    rot = pd.read_excel(CASES / AB_DIR[case] / "shift_rotation.xlsx", sheet_name="Shift rotation").astype(str)
+    names = {c.strip() for c in rot.iloc[:, 1:].values.ravel()}
+    return {n for n in names if re.fullmatch(r"Staff\d\d|Assistant", n)}
+
+
+def ab_task(case):
+    folder = CASES / AB_DIR[case]
+    prompt = (folder / PROMPT_NAME).read_text(encoding="utf-8")
+    fmt = ("\n\nProduce the schedule for weeks 18, 19, 20 and 21.\n"
+           "Answer format: after your reasoning, give the final schedule as ONE fenced csv block with the header\n"
+           "Vko," + ",".join(ln.SLOT_NAMES) + "\nand one row per week. Each cell holds one staff name exactly as in the "
+           "rotation table, 'loma', or is empty.")
+    return prompt + fmt + "\n\nAttached data:\n" + "\n\n".join(sheets_as_text(x) for x in sorted(folder.glob("*.xlsx")))
+
+
+def ab_validate(case, text):
+    block = last_csv_block(text)
+    if not block:
+        return None, ["No fenced csv block found in the answer."]
+    staff, errs, table = ab_names(case), [], {}
+    for r in csv.reader(io.StringIO(block)):
+        if not r or not r[0].strip().isdigit():
+            continue
+        cells = [c.strip() for c in r[1:]]
+        if len(cells) != 11:
+            errs.append(f"Week {r[0]}: expected 11 shift columns, found {len(cells)}.")
+        cells = (cells + [""] * 11)[:11]
+        names = [c for c in cells if c and c.lower() != "loma"]
+        errs += [f"Week {r[0]}: unknown name '{n}'." for n in names if n not in staff]
+        errs += [f"Week {r[0]}: '{n}' appears in more than one shift." for n in sorted(set(names)) if names.count(n) > 1]
+        table[int(r[0])] = cells
+    missing = [w for w in ln.NEW_WEEKS if w not in table]
+    if missing:
+        errs.append(f"Missing weeks: {missing}.")
+    return {w: c for w, c in table.items() if w in ln.NEW_WEEKS}, errs
+
+
+def ab_score(table, out):
+    ln.write_table(table, out / "final_table.csv")
+    cells = [c for row in table.values() for c in row]
+    hist = {}
+    for w in sorted(table):
+        for i, x in enumerate(table[w]):
+            if x and x.lower() != "loma":
+                hist.setdefault(x, []).append(i)
+    return {"weeks": sorted(table), "empty_cells": sum(1 for c in cells if not c),
+            "loma_cells": sum(1 for c in cells if c.lower() == "loma"),
+            "names_used": sorted({c for c in cells if c and c.lower() != "loma"}),
+            "same_slot_two_weeks_running": sum(1 for h in hist.values() for a, b in zip(h, h[1:]) if a == b)}
+
+
+CASE = {"D": (d_task, d_validate, d_score), "C": (c_task, c_validate, c_score),
+        "A": (lambda: ab_task("A"), lambda t: ab_validate("A", t), ab_score),
+        "B": (lambda: ab_task("B"), lambda t: ab_validate("B", t), ab_score)}
 
 
 def main():
@@ -168,7 +229,7 @@ def main():
     if a.sim_user:
         sys.path.insert(0, str(REPO / "mas_harness"))
         from sim_user.sim_user import SimManager
-        case_dir = CASES / ("D_synthetic" if a.case == "D" else "C_reconstructed")
+        case_dir = CASES / {"D": "D_synthetic", "C": "C_reconstructed", **AB_DIR}[a.case]
     for n in range(1, a.runs + 1):
         out = REPO / "runs" / f"{dt.datetime.now():%Y%m%d-%H%M%S}_direct{a.case}{a.tag}_r{n:02d}"
         out.mkdir(parents=True)

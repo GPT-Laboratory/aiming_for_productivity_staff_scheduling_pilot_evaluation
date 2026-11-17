@@ -26,32 +26,39 @@ like, every experiment is run again on the same setup, with repetitions.
 * Harness at the commit that starts the rerun: token usage logged for every call, output cap
   16384, 2 optimisation rounds, fixed decisions (no simulated user unless stated), 50-step limit,
   timeout 1800 s per MAS run. MAS runs one at a time; direct runs one at a time.
-* Task texts: `prompt.txt` is the pilot's original text (A, B, D) or the C prompt;
-  `prompt_revised.txt` (A, B, D) separates primary requirements from secondary goals.
+* Task texts: A, B and D use `prompt_revised.txt`, which separates primary requirements from
+  secondary goals; C uses its own prompt. The pilot's original text (`prompt.txt` in A, B, D) is
+  not used: its author is unknown and it contradicts itself (the ratios are listed as "Hard
+  Constraints" but the goals ask to "minimize violations of staffing ratios"). Its effect is
+  documented by the smoke runs of 17 Nov and the reused direct runs below.
 * Run names start with `rr_` so that they are easy to tell from the archived runs.
 
 ## Run list
 
-| ID | System | Model | Datasets × task text | Runs to make | Est. time | Est. cost |
+| ID | System | Model | Datasets | Runs to make | Est. time | Est. cost |
 |---|---|---|---|---|---|---|
-| E1, E2 | MAS 2025 as delivered | – | dropped: its flaws are documented (fix-loop analysis, archived results); the final report compares v2 with direct prompting | 0 | – | – |
-| E3 | MAS 2025 v2 | 4o | A, B, D × revised; C; D × original | 15 | 1 h | < €1 |
-| E4 | MAS 2025 v2 | Terra | A, B, D × revised; C; D × original | 15 | 1.5 h | ~€5 |
-| E5, E6 | MAS 2024 | – | dropped: MAS 2024 is no longer part of the comparison | 0 | – | – |
-| E7 | Direct prompt | Terra | D × revised (5); D × original (5) and C (3) reused | 5 | 5 min | ~€0.4 |
-| E8 | Direct prompt | gpt-4o | D × original (5), D × revised (5), C (3) | 13 | 5 min | < €0.5 |
-| E9 | Direct prompt | gpt-4o-mini | as E8 | 13 | 5 min | < €0.1 |
-| E10 | Direct prompt + domain skill | Terra | D × original (5), C (3), all reused | 0 | – | – |
-| E11 | Direct prompt + simulated manager | Terra | D × original (3), C (3), all reused | 0 | – | – |
+| E1, E2 | MAS 2025 as delivered | – | dropped: its flaws are documented (fix-loop analysis, archived results) | 0 | – | – |
+| E3 | MAS 2025 v2 | 4o | A, B, C, D × 3 | 12 | 1 h | < €1 |
+| E4 | MAS 2025 v2 | Terra | A, B, C, D × 3 | 12 | 1.2 h | ~€4 |
+| E5, E6 | MAS 2024 | – | dropped: no longer part of the comparison | 0 | – | – |
+| E7 | Direct prompt | Terra | A, B, D × 5; C × 2 (+ 3 reused) | 17 | 20 min | ~€1.5 |
+| E8 | Direct prompt | gpt-4o | A, B, C, D × 5 | 20 | 10 min | < €1 |
+| E9 | Direct prompt | gpt-4o-mini | A, B, C, D × 5 | 20 | 10 min | < €0.2 |
+| E10 | Direct prompt + domain skill | Terra | D × 5, C × 3, original text, all reused | 0 | – | – |
+| E11 | Direct prompt + simulated manager | Terra | D × 3, C × 3, original text, all reused | 0 | – | – |
+
+A and B have no rule checker (no staff profiles). Direct answers for them use the same weekly
+format as D (weeks 18–21) and are checked for format; the score records names used, empty
+cells and repeats. The B prompt includes the children's attendance sheet (about 40k tokens).
 
 Reused runs: the 22 direct runs with `gpt-6.1-terra` made on 17 Nov 2026 between 10:58 and 11:25
-were made on exactly this setup (Azure, 16384-token cap stated in the prompt,
-`max_completion_tokens`, original task text). They were moved back from the archive to `runs/`
-under their original names: `*_directD_terra_r0*`, `*_directC_terra_r0*` (E7),
-`*_direct?_terra_skill_r0*` (E10), `*_direct?_terra_sim_r0*` (E11). The direct runs of
-16 Nov (OpenRouter, `gpt-6.1-terra-pro` and gpt-4o) stay in the archive.
+were made on this setup (Azure, 16384-token cap stated in the prompt, `max_completion_tokens`).
+They were moved back from the archive to `runs/` under their original names: `*_directC_terra_r0*`
+(3 of E7's C runs), `*_directD_terra_r0*` (D with the original text, kept as the comparison with
+the pilot text), `*_direct?_terra_skill_r0*` (E10), `*_direct?_terra_sim_r0*` (E11). The direct runs
+of 16 Nov (OpenRouter, `gpt-6.1-terra-pro` and gpt-4o) stay in the archive.
 
-Total to make: 61 runs, about 3 hours, about €7. Estimates for the MAS runs come from single
+Total to make: 81 runs, about 3 hours, about €7. Estimates for the MAS runs come from single
 runs and may be off by a factor of two.
 
 Order: E4, E3, E7, E8, E9.
