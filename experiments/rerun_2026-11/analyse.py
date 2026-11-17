@@ -23,15 +23,16 @@ RUNS, RES = REPO / "runs", REPO / "results"
 sys.path.insert(0, str(REPO / "datasets" / "C_reconstructed")); import check_schedule as cs
 sys.path.insert(0, str(REPO / "datasets" / "D_synthetic")); import synthetic_daycare as sd, score_daily_detail as sdd
 CX = REPO / "datasets" / "C_reconstructed" / "daycare_structure_example.xlsx"
-# Prices per million tokens, Azure "EU Data Zone Standard", short context, as given by the user on
-# 17 Nov 2026. gpt-6.1-terra in EUR (an earlier quote was 1.08 / 0.06 / 5.39); gpt-4o and
-# gpt-4o-mini in USD, from third-party price aggregators (Microsoft's page shows no text figures).
-# gpt-4o-mini has no cached-input price listed: cached input is charged at the input price.
-# Costs are kept in each model's currency; no exchange rate is applied.
+# Prices in EUR per million tokens, Azure "EU Data Zone Standard", short context, as given by the
+# user on 17 Nov 2026. gpt-6.1-terra: Azure list (an earlier quote was 1.08 / 0.06 / 5.39).
+# gpt-4o and gpt-4o-mini: USD prices from third-party price aggregators (Microsoft's page shows no
+# text figures), converted at 0.8977 EUR/USD, the ratio of Azure's own EUR and USD retail prices
+# for another model (EUR 1.7954 against USD 2.00). gpt-4o-mini has no cached-input price listed:
+# cached input is charged at the input price.
 PRICES = {
     "gpt-6.1-terra": ("EUR", 0.99, 0.054, 4.94),
-    "gpt-4o": ("USD", 2.75, 1.38, 11.00),
-    "gpt-4o-mini": ("USD", 0.165, 0.165, 0.66),
+    "gpt-4o": ("EUR", 2.47, 1.24, 9.87),
+    "gpt-4o-mini": ("EUR", 0.148, 0.148, 0.59),
 }
 
 

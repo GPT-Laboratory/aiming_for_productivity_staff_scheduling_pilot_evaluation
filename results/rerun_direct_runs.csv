@@ -38,46 +38,46 @@ E7,terra,D,False,False,revised,4,20261117-210237_directD_rr_terra_rev_r04,True,1
 E7,terra,D,False,False,revised,5,20261117-210322_directD_rr_terra_rev_r05,True,1,49,11.2,,,0,0,7,,7579,7576,6350,5729,full,0.0318,
 E7,terra,C,False,False,C prompt,1,20261117-210412_directC_rr_terra_r01,True,1,31,6,R2-R6,90,,,,,4042,0,4520,3356,full,0.0263,
 E7,terra,C,False,False,C prompt,2,20261117-210444_directC_rr_terra_r02,True,1,46,5,R2-R6 R10,57,,,,,4042,4039,5786,4608,full,0.0288,
-E8,gpt-4o,A,False,False,revised,1,20261117-210531_directA_rr_gpt-4o_rev_r01,True,1,10,,,,0,,0,False,3164,0,544,0,full,,0.0147
-E8,gpt-4o,A,False,False,revised,2,20261117-210542_directA_rr_gpt-4o_rev_r02,True,1,12,,,,0,,0,False,3164,3072,567,0,full,,0.0107
-E8,gpt-4o,A,False,False,revised,3,20261117-210554_directA_rr_gpt-4o_rev_r03,True,1,6,,,,0,,0,False,3164,3072,329,0,full,,0.0081
-E8,gpt-4o,A,False,False,revised,4,20261117-210600_directA_rr_gpt-4o_rev_r04,True,1,5,,,,0,,2,True,3164,3072,356,0,full,,0.0084
-E8,gpt-4o,A,False,False,revised,5,20261117-210605_directA_rr_gpt-4o_rev_r05,True,1,6,,,,0,,0,False,3164,3072,503,0,full,,0.01
-E8,gpt-4o,B,False,False,revised,1,20261117-210612_directB_rr_gpt-4o_rev_r01,True,1,11,,,,0,,0,True,47609,1024,686,0,full,,0.1371
-E8,gpt-4o,B,False,False,revised,2,20261117-210623_directB_rr_gpt-4o_rev_r02,True,1,18,,,,0,,2,False,47609,47488,735,0,full,,0.074
-E8,gpt-4o,B,False,False,revised,3,20261117-210641_directB_rr_gpt-4o_rev_r03,True,1,21,,,,0,,0,True,47609,47488,717,0,full,,0.0738
-E8,gpt-4o,B,False,False,revised,4,20261117-210702_directB_rr_gpt-4o_rev_r04,True,1,8,,,,0,,0,False,47609,47488,502,0,full,,0.0714
-E8,gpt-4o,B,False,False,revised,5,20261117-210711_directB_rr_gpt-4o_rev_r05,True,1,12,,,,0,,0,False,47609,47488,589,0,full,,0.0723
-E8,gpt-4o,D,False,False,revised,1,20261117-210724_directD_rr_gpt-4o_rev_r01,False,4,17,,,,,,,,34105,26112,2053,0,full,,0.0806
-E8,gpt-4o,D,False,False,revised,2,20261117-210742_directD_rr_gpt-4o_rev_r02,True,2,16,18.1,,,0,0,0,,15881,15744,1127,0,full,,0.0345
-E8,gpt-4o,D,False,False,revised,3,20261117-210758_directD_rr_gpt-4o_rev_r03,True,3,11,22.0,,,0,0,3,,24355,24064,1245,0,full,,0.0477
-E8,gpt-4o,D,False,False,revised,4,20261117-210809_directD_rr_gpt-4o_rev_r04,True,2,9,25.3,,,0,0,13,,15800,15616,1009,0,full,,0.0332
-E8,gpt-4o,D,False,False,revised,5,20261117-210819_directD_rr_gpt-4o_rev_r05,True,2,31,18.5,,,0,0,3,,15903,15744,1153,0,full,,0.0348
-E8,gpt-4o,C,False,False,C prompt,1,20261117-210851_directC_rr_gpt-4o_r01,True,2,35,4,R2-R6 R7 R10,285,,,,,9810,5632,2824,0,full,,0.0503
-E8,gpt-4o,C,False,False,C prompt,2,20261117-210926_directC_rr_gpt-4o_r02,True,2,42,5,R7 R10,0,,,,,9866,9600,2927,0,full,,0.0462
-E8,gpt-4o,C,False,False,C prompt,3,20261117-211008_directC_rr_gpt-4o_r03,True,2,37,5,R7 R10,0,,,,,9728,9472,2789,0,full,,0.0445
-E8,gpt-4o,C,False,False,C prompt,4,20261117-211046_directC_rr_gpt-4o_r04,True,2,30,4,R2-R6 R7 R10,144,,,,,9757,9472,2795,0,full,,0.0446
-E8,gpt-4o,C,False,False,C prompt,5,20261117-211116_directC_rr_gpt-4o_r05,True,2,30,4,R2-R6 R7 R10,75,,,,,9759,9472,2832,0,full,,0.045
-E9,gpt-4o-mini,A,False,False,revised,1,20261117-211147_directA_rr_gpt-4o-mini_rev_r01,True,1,8,,,,0,,2,True,3164,0,690,0,full,,0.001
-E9,gpt-4o-mini,A,False,False,revised,2,20261117-211155_directA_rr_gpt-4o-mini_rev_r02,True,1,6,,,,0,,1,True,3164,0,595,0,full,,0.0009
-E9,gpt-4o-mini,A,False,False,revised,3,20261117-211200_directA_rr_gpt-4o-mini_rev_r03,True,1,6,,,,0,,0,True,3164,3072,609,0,full,,0.0009
-E9,gpt-4o-mini,A,False,False,revised,4,20261117-211206_directA_rr_gpt-4o-mini_rev_r04,True,1,6,,,,0,,4,True,3164,3072,640,0,full,,0.0009
-E9,gpt-4o-mini,A,False,False,revised,5,20261117-211212_directA_rr_gpt-4o-mini_rev_r05,True,1,6,,,,0,,0,True,3164,3072,576,0,full,,0.0009
-E9,gpt-4o-mini,B,False,False,revised,1,20261117-211220_directB_rr_gpt-4o-mini_rev_r01,True,2,13,,,,0,,3,True,96013,1024,1065,0,full,,0.0165
-E9,gpt-4o-mini,B,False,False,revised,2,20261117-211233_directB_rr_gpt-4o-mini_rev_r02,True,1,6,,,,0,,1,True,47609,47488,669,0,full,,0.0083
-E9,gpt-4o-mini,B,False,False,revised,3,20261117-211239_directB_rr_gpt-4o-mini_rev_r03,True,1,6,,,,0,,1,True,47609,47488,588,0,full,,0.0082
-E9,gpt-4o-mini,B,False,False,revised,4,20261117-211245_directB_rr_gpt-4o-mini_rev_r04,True,2,9,,,,0,,0,True,95987,95616,1084,0,full,,0.0166
-E9,gpt-4o-mini,B,False,False,revised,5,20261117-211255_directB_rr_gpt-4o-mini_rev_r05,True,2,10,,,,0,,2,True,95895,95616,993,0,full,,0.0165
-E9,gpt-4o-mini,D,False,False,revised,1,20261117-211306_directD_rr_gpt-4o-mini_rev_r01,True,3,15,22.0,,,0,0,9,,24748,16896,1628,0,full,,0.0052
-E9,gpt-4o-mini,D,False,False,revised,2,20261117-211321_directD_rr_gpt-4o-mini_rev_r02,True,2,11,65.0,,,4,0,3,,15955,8576,1138,0,full,,0.0034
-E9,gpt-4o-mini,D,False,False,revised,3,20261117-211333_directD_rr_gpt-4o-mini_rev_r03,True,4,21,49.1,,,0,0,17,,35043,34560,2261,0,full,,0.0073
-E9,gpt-4o-mini,D,False,False,revised,4,20261117-211354_directD_rr_gpt-4o-mini_rev_r04,True,1,6,72.4,,,4,0,4,,7580,7552,679,0,full,,0.0017
-E9,gpt-4o-mini,D,False,False,revised,5,20261117-211400_directD_rr_gpt-4o-mini_rev_r05,True,2,10,43.1,,,0,0,4,,15882,15744,1102,0,full,,0.0033
-E9,gpt-4o-mini,C,False,False,C prompt,1,20261117-211412_directC_rr_gpt-4o-mini_r01,True,1,10,3,R2-R6 R7 R8 R10,4350,,,,,4043,0,1094,0,full,,0.0014
-E9,gpt-4o-mini,C,False,False,C prompt,2,20261117-211422_directC_rr_gpt-4o-mini_r02,True,2,33,3,R2-R6 R7 R10 R11,480,,,,,9582,9344,2576,0,full,,0.0033
-E9,gpt-4o-mini,C,False,False,C prompt,3,20261117-211455_directC_rr_gpt-4o-mini_r03,True,2,24,4,R2-R6 R7 R10,135,,,,,9646,3968,2676,0,full,,0.0034
-E9,gpt-4o-mini,C,False,False,C prompt,4,20261117-211519_directC_rr_gpt-4o-mini_r04,True,2,24,4,R2-R6 R7 R10,60,,,,,9657,9472,2660,0,full,,0.0033
-E9,gpt-4o-mini,C,False,False,C prompt,5,20261117-211544_directC_rr_gpt-4o-mini_r05,True,2,22,3,R2-R6 R7 R9 R11,855,,,,,9571,9344,2588,0,full,,0.0033
+E8,gpt-4o,A,False,False,revised,1,20261117-210531_directA_rr_gpt-4o_rev_r01,True,1,10,,,,0,,0,False,3164,0,544,0,full,0.0132,
+E8,gpt-4o,A,False,False,revised,2,20261117-210542_directA_rr_gpt-4o_rev_r02,True,1,12,,,,0,,0,False,3164,3072,567,0,full,0.0096,
+E8,gpt-4o,A,False,False,revised,3,20261117-210554_directA_rr_gpt-4o_rev_r03,True,1,6,,,,0,,0,False,3164,3072,329,0,full,0.0073,
+E8,gpt-4o,A,False,False,revised,4,20261117-210600_directA_rr_gpt-4o_rev_r04,True,1,5,,,,0,,2,True,3164,3072,356,0,full,0.0076,
+E8,gpt-4o,A,False,False,revised,5,20261117-210605_directA_rr_gpt-4o_rev_r05,True,1,6,,,,0,,0,False,3164,3072,503,0,full,0.009,
+E8,gpt-4o,B,False,False,revised,1,20261117-210612_directB_rr_gpt-4o_rev_r01,True,1,11,,,,0,,0,True,47609,1024,686,0,full,0.1231,
+E8,gpt-4o,B,False,False,revised,2,20261117-210623_directB_rr_gpt-4o_rev_r02,True,1,18,,,,0,,2,False,47609,47488,735,0,full,0.0664,
+E8,gpt-4o,B,False,False,revised,3,20261117-210641_directB_rr_gpt-4o_rev_r03,True,1,21,,,,0,,0,True,47609,47488,717,0,full,0.0663,
+E8,gpt-4o,B,False,False,revised,4,20261117-210702_directB_rr_gpt-4o_rev_r04,True,1,8,,,,0,,0,False,47609,47488,502,0,full,0.0641,
+E8,gpt-4o,B,False,False,revised,5,20261117-210711_directB_rr_gpt-4o_rev_r05,True,1,12,,,,0,,0,False,47609,47488,589,0,full,0.065,
+E8,gpt-4o,D,False,False,revised,1,20261117-210724_directD_rr_gpt-4o_rev_r01,False,4,17,,,,,,,,34105,26112,2053,0,full,0.0724,
+E8,gpt-4o,D,False,False,revised,2,20261117-210742_directD_rr_gpt-4o_rev_r02,True,2,16,18.1,,,0,0,0,,15881,15744,1127,0,full,0.031,
+E8,gpt-4o,D,False,False,revised,3,20261117-210758_directD_rr_gpt-4o_rev_r03,True,3,11,22.0,,,0,0,3,,24355,24064,1245,0,full,0.0428,
+E8,gpt-4o,D,False,False,revised,4,20261117-210809_directD_rr_gpt-4o_rev_r04,True,2,9,25.3,,,0,0,13,,15800,15616,1009,0,full,0.0298,
+E8,gpt-4o,D,False,False,revised,5,20261117-210819_directD_rr_gpt-4o_rev_r05,True,2,31,18.5,,,0,0,3,,15903,15744,1153,0,full,0.0313,
+E8,gpt-4o,C,False,False,C prompt,1,20261117-210851_directC_rr_gpt-4o_r01,True,2,35,4,R2-R6 R7 R10,285,,,,,9810,5632,2824,0,full,0.0452,
+E8,gpt-4o,C,False,False,C prompt,2,20261117-210926_directC_rr_gpt-4o_r02,True,2,42,5,R7 R10,0,,,,,9866,9600,2927,0,full,0.0415,
+E8,gpt-4o,C,False,False,C prompt,3,20261117-211008_directC_rr_gpt-4o_r03,True,2,37,5,R7 R10,0,,,,,9728,9472,2789,0,full,0.0399,
+E8,gpt-4o,C,False,False,C prompt,4,20261117-211046_directC_rr_gpt-4o_r04,True,2,30,4,R2-R6 R7 R10,144,,,,,9757,9472,2795,0,full,0.04,
+E8,gpt-4o,C,False,False,C prompt,5,20261117-211116_directC_rr_gpt-4o_r05,True,2,30,4,R2-R6 R7 R10,75,,,,,9759,9472,2832,0,full,0.0404,
+E9,gpt-4o-mini,A,False,False,revised,1,20261117-211147_directA_rr_gpt-4o-mini_rev_r01,True,1,8,,,,0,,2,True,3164,0,690,0,full,0.0009,
+E9,gpt-4o-mini,A,False,False,revised,2,20261117-211155_directA_rr_gpt-4o-mini_rev_r02,True,1,6,,,,0,,1,True,3164,0,595,0,full,0.0008,
+E9,gpt-4o-mini,A,False,False,revised,3,20261117-211200_directA_rr_gpt-4o-mini_rev_r03,True,1,6,,,,0,,0,True,3164,3072,609,0,full,0.0008,
+E9,gpt-4o-mini,A,False,False,revised,4,20261117-211206_directA_rr_gpt-4o-mini_rev_r04,True,1,6,,,,0,,4,True,3164,3072,640,0,full,0.0008,
+E9,gpt-4o-mini,A,False,False,revised,5,20261117-211212_directA_rr_gpt-4o-mini_rev_r05,True,1,6,,,,0,,0,True,3164,3072,576,0,full,0.0008,
+E9,gpt-4o-mini,B,False,False,revised,1,20261117-211220_directB_rr_gpt-4o-mini_rev_r01,True,2,13,,,,0,,3,True,96013,1024,1065,0,full,0.0148,
+E9,gpt-4o-mini,B,False,False,revised,2,20261117-211233_directB_rr_gpt-4o-mini_rev_r02,True,1,6,,,,0,,1,True,47609,47488,669,0,full,0.0074,
+E9,gpt-4o-mini,B,False,False,revised,3,20261117-211239_directB_rr_gpt-4o-mini_rev_r03,True,1,6,,,,0,,1,True,47609,47488,588,0,full,0.0074,
+E9,gpt-4o-mini,B,False,False,revised,4,20261117-211245_directB_rr_gpt-4o-mini_rev_r04,True,2,9,,,,0,,0,True,95987,95616,1084,0,full,0.0148,
+E9,gpt-4o-mini,B,False,False,revised,5,20261117-211255_directB_rr_gpt-4o-mini_rev_r05,True,2,10,,,,0,,2,True,95895,95616,993,0,full,0.0148,
+E9,gpt-4o-mini,D,False,False,revised,1,20261117-211306_directD_rr_gpt-4o-mini_rev_r01,True,3,15,22.0,,,0,0,9,,24748,16896,1628,0,full,0.0046,
+E9,gpt-4o-mini,D,False,False,revised,2,20261117-211321_directD_rr_gpt-4o-mini_rev_r02,True,2,11,65.0,,,4,0,3,,15955,8576,1138,0,full,0.003,
+E9,gpt-4o-mini,D,False,False,revised,3,20261117-211333_directD_rr_gpt-4o-mini_rev_r03,True,4,21,49.1,,,0,0,17,,35043,34560,2261,0,full,0.0065,
+E9,gpt-4o-mini,D,False,False,revised,4,20261117-211354_directD_rr_gpt-4o-mini_rev_r04,True,1,6,72.4,,,4,0,4,,7580,7552,679,0,full,0.0015,
+E9,gpt-4o-mini,D,False,False,revised,5,20261117-211400_directD_rr_gpt-4o-mini_rev_r05,True,2,10,43.1,,,0,0,4,,15882,15744,1102,0,full,0.003,
+E9,gpt-4o-mini,C,False,False,C prompt,1,20261117-211412_directC_rr_gpt-4o-mini_r01,True,1,10,3,R2-R6 R7 R8 R10,4350,,,,,4043,0,1094,0,full,0.0012,
+E9,gpt-4o-mini,C,False,False,C prompt,2,20261117-211422_directC_rr_gpt-4o-mini_r02,True,2,33,3,R2-R6 R7 R10 R11,480,,,,,9582,9344,2576,0,full,0.0029,
+E9,gpt-4o-mini,C,False,False,C prompt,3,20261117-211455_directC_rr_gpt-4o-mini_r03,True,2,24,4,R2-R6 R7 R10,135,,,,,9646,3968,2676,0,full,0.003,
+E9,gpt-4o-mini,C,False,False,C prompt,4,20261117-211519_directC_rr_gpt-4o-mini_r04,True,2,24,4,R2-R6 R7 R10,60,,,,,9657,9472,2660,0,full,0.003,
+E9,gpt-4o-mini,C,False,False,C prompt,5,20261117-211544_directC_rr_gpt-4o-mini_r05,True,2,22,3,R2-R6 R7 R9 R11,855,,,,,9571,9344,2588,0,full,0.0029,
 E12,terra,A,True,False,revised,1,20261117-211608_directA_rr_terra_skill_rev_r01,True,1,12,,,,0,,0,True,4444,0,1363,994,full,0.0111,
 E12,terra,A,True,False,revised,2,20261117-211621_directA_rr_terra_skill_rev_r02,True,1,14,,,,0,,0,False,4444,4441,1382,1024,full,0.0071,
 E12,terra,A,True,False,revised,3,20261117-211634_directA_rr_terra_skill_rev_r03,True,1,36,,,,0,,0,True,4444,4441,1136,796,full,0.0059,
@@ -98,46 +98,46 @@ E12,terra,C,True,False,C prompt,2,20261117-212418_directC_rr_terra_skill_r02,Tru
 E12,terra,C,True,False,C prompt,3,20261117-212453_directC_rr_terra_skill_r03,True,1,44,7,,0,,,,,5323,5320,5517,4269,full,0.0275,
 E12,terra,C,True,False,C prompt,4,20261117-212537_directC_rr_terra_skill_r04,True,1,40,7,,0,,,,,5323,5320,5197,3960,full,0.026,
 E12,terra,C,True,False,C prompt,5,20261117-212618_directC_rr_terra_skill_r05,True,1,47,7,,0,,,,,5323,5320,5910,4638,full,0.0295,
-E12,gpt-4o,A,True,False,revised,1,20261117-212707_directA_rr_gpt-4o_skill_rev_r01,True,1,9,,,,0,,0,True,4445,0,412,0,full,,0.0168
-E12,gpt-4o,A,True,False,revised,2,20261117-212716_directA_rr_gpt-4o_skill_rev_r02,True,1,9,,,,0,,0,False,4445,4352,485,0,full,,0.0116
-E12,gpt-4o,A,True,False,revised,3,20261117-212725_directA_rr_gpt-4o_skill_rev_r03,True,1,12,,,,0,,0,True,4445,4352,513,0,full,,0.0119
-E12,gpt-4o,A,True,False,revised,4,20261117-212737_directA_rr_gpt-4o_skill_rev_r04,True,1,10,,,,0,,0,False,4445,4352,517,0,full,,0.0119
-E12,gpt-4o,A,True,False,revised,5,20261117-212747_directA_rr_gpt-4o_skill_rev_r05,True,1,8,,,,0,,1,False,4445,4352,446,0,full,,0.0112
-E12,gpt-4o,B,True,False,revised,1,20261117-212756_directB_rr_gpt-4o_skill_rev_r01,True,1,11,,,,0,,0,True,48890,2304,412,0,full,,0.1358
-E12,gpt-4o,B,True,False,revised,2,20261117-212807_directB_rr_gpt-4o_skill_rev_r02,True,1,18,,,,0,,0,True,48890,48768,525,0,full,,0.0734
-E12,gpt-4o,B,True,False,revised,3,20261117-212826_directB_rr_gpt-4o_skill_rev_r03,True,1,17,,,,0,,0,True,48890,48768,628,0,full,,0.0745
-E12,gpt-4o,B,True,False,revised,4,20261117-212843_directB_rr_gpt-4o_skill_rev_r04,True,2,16,,,,0,,4,False,98324,98048,814,0,full,,0.145
-E12,gpt-4o,B,True,False,revised,5,20261117-212859_directB_rr_gpt-4o_skill_rev_r05,True,1,9,,,,0,,0,True,48890,48768,378,0,full,,0.0718
-E12,gpt-4o,D,True,False,revised,1,20261117-212910_directD_rr_gpt-4o_skill_rev_r01,True,2,18,17.8,,,0,0,2,,18397,11776,968,0,full,,0.0451
-E12,gpt-4o,D,True,False,revised,2,20261117-212928_directD_rr_gpt-4o_skill_rev_r02,True,2,15,20.8,,,0,0,6,,18409,18304,1007,0,full,,0.0366
-E12,gpt-4o,D,True,False,revised,3,20261117-212943_directD_rr_gpt-4o_skill_rev_r03,True,1,13,37.1,,,0,0,0,,8861,8832,643,0,full,,0.0193
-E12,gpt-4o,D,True,False,revised,4,20261117-212956_directD_rr_gpt-4o_skill_rev_r04,True,2,23,27.3,,,1,0,5,,18556,18432,1143,0,full,,0.0384
-E12,gpt-4o,D,True,False,revised,5,20261117-213019_directD_rr_gpt-4o_skill_rev_r05,True,2,19,26.6,,,2,0,14,,18314,18176,876,0,full,,0.0351
-E12,gpt-4o,C,True,False,C prompt,1,20261117-213040_directC_rr_gpt-4o_skill_r01,True,2,28,3,R2-R6 R7 R10 R11,255,,,,,12112,7936,2526,0,full,,0.0502
-E12,gpt-4o,C,True,False,C prompt,2,20261117-213108_directC_rr_gpt-4o_skill_r02,True,2,28,3,R2-R6 R7 R10 R11,270,,,,,12084,11904,2572,0,full,,0.0452
-E12,gpt-4o,C,True,False,C prompt,3,20261117-213136_directC_rr_gpt-4o_skill_r03,True,1,18,5,R7 R10,0,,,,,5324,5248,1412,0,full,,0.023
-E12,gpt-4o,C,True,False,C prompt,4,20261117-213154_directC_rr_gpt-4o_skill_r04,True,1,23,4,R2-R6 R7 R10,150,,,,,5324,5248,1485,0,full,,0.0238
-E12,gpt-4o,C,True,False,C prompt,5,20261117-213217_directC_rr_gpt-4o_skill_r05,True,1,18,5,R7 R10,0,,,,,5324,5248,1462,0,full,,0.0235
-E12,gpt-4o-mini,A,True,False,revised,1,20261117-213236_directA_rr_gpt-4o-mini_skill_rev_r01,True,1,7,,,,0,,0,True,4445,0,788,0,full,,0.0013
-E12,gpt-4o-mini,A,True,False,revised,2,20261117-213244_directA_rr_gpt-4o-mini_skill_rev_r02,True,1,5,,,,0,,0,True,4445,0,631,0,full,,0.0011
-E12,gpt-4o-mini,A,True,False,revised,3,20261117-213249_directA_rr_gpt-4o-mini_skill_rev_r03,True,1,5,,,,0,,0,True,4445,4352,682,0,full,,0.0012
-E12,gpt-4o-mini,A,True,False,revised,4,20261117-213254_directA_rr_gpt-4o-mini_skill_rev_r04,True,1,6,,,,0,,0,True,4445,4352,614,0,full,,0.0011
-E12,gpt-4o-mini,A,True,False,revised,5,20261117-213300_directA_rr_gpt-4o-mini_skill_rev_r05,True,1,5,,,,0,,1,True,4445,4352,676,0,full,,0.0012
-E12,gpt-4o-mini,B,True,False,revised,1,20261117-213306_directB_rr_gpt-4o-mini_skill_rev_r01,True,1,8,,,,0,,4,True,48890,0,693,0,full,,0.0085
-E12,gpt-4o-mini,B,True,False,revised,2,20261117-213314_directB_rr_gpt-4o-mini_skill_rev_r02,True,1,8,,,,0,,0,True,48890,2304,709,0,full,,0.0085
-E12,gpt-4o-mini,B,True,False,revised,3,20261117-213322_directB_rr_gpt-4o-mini_skill_rev_r03,True,2,8,,,,4,,1,True,98535,98304,993,0,full,,0.0169
-E12,gpt-4o-mini,B,True,False,revised,4,20261117-213330_directB_rr_gpt-4o-mini_skill_rev_r04,True,2,8,,,,0,,2,True,98474,98176,982,0,full,,0.0169
-E12,gpt-4o-mini,B,True,False,revised,5,20261117-213339_directB_rr_gpt-4o-mini_skill_rev_r05,True,1,6,,,,0,,1,True,48890,48768,732,0,full,,0.0085
-E12,gpt-4o-mini,D,True,False,revised,1,20261117-213346_directD_rr_gpt-4o-mini_skill_rev_r01,True,2,10,27.0,,,4,0,23,,18496,11776,1076,0,full,,0.0038
-E12,gpt-4o-mini,D,True,False,revised,2,20261117-213356_directD_rr_gpt-4o-mini_skill_rev_r02,True,1,7,30.2,,,0,0,7,,8861,0,801,0,full,,0.002
-E12,gpt-4o-mini,D,True,False,revised,3,20261117-213403_directD_rr_gpt-4o-mini_skill_rev_r03,False,4,15,,,,,,,,38969,29696,1733,0,full,,0.0076
-E12,gpt-4o-mini,D,True,False,revised,4,20261117-213419_directD_rr_gpt-4o-mini_skill_rev_r04,True,2,11,38.3,,,0,0,3,,18641,17664,1226,0,full,,0.0039
-E12,gpt-4o-mini,D,True,False,revised,5,20261117-213429_directD_rr_gpt-4o-mini_skill_rev_r05,True,1,6,50.5,,,0,0,10,,8861,8832,677,0,full,,0.0019
-E12,gpt-4o-mini,C,True,False,C prompt,1,20261117-213436_directC_rr_gpt-4o-mini_skill_r01,True,2,23,4,R2-R6 R7 R10,180,,,,,12257,1280,2717,0,full,,0.0038
-E12,gpt-4o-mini,C,True,False,C prompt,2,20261117-213459_directC_rr_gpt-4o-mini_skill_r02,True,3,32,4,R2-R6 R7 R10,150,,,,,20974,17280,3863,0,full,,0.006
-E12,gpt-4o-mini,C,True,False,C prompt,3,20261117-213532_directC_rr_gpt-4o-mini_skill_r03,True,2,24,3,R2-R6 R7 R10 R11,780,,,,,12515,12288,2871,0,full,,0.004
-E12,gpt-4o-mini,C,True,False,C prompt,4,20261117-213555_directC_rr_gpt-4o-mini_skill_r04,True,2,13,3,R2-R6 R7 R8 R10,6720,,,,,11740,11520,1607,0,full,,0.003
-E12,gpt-4o-mini,C,True,False,C prompt,5,20261117-213608_directC_rr_gpt-4o-mini_skill_r05,True,1,10,3,R2-R6 R7 R10 R11,1530,,,,,5324,5248,1266,0,full,,0.0017
+E12,gpt-4o,A,True,False,revised,1,20261117-212707_directA_rr_gpt-4o_skill_rev_r01,True,1,9,,,,0,,0,True,4445,0,412,0,full,0.015,
+E12,gpt-4o,A,True,False,revised,2,20261117-212716_directA_rr_gpt-4o_skill_rev_r02,True,1,9,,,,0,,0,False,4445,4352,485,0,full,0.0104,
+E12,gpt-4o,A,True,False,revised,3,20261117-212725_directA_rr_gpt-4o_skill_rev_r03,True,1,12,,,,0,,0,True,4445,4352,513,0,full,0.0107,
+E12,gpt-4o,A,True,False,revised,4,20261117-212737_directA_rr_gpt-4o_skill_rev_r04,True,1,10,,,,0,,0,False,4445,4352,517,0,full,0.0107,
+E12,gpt-4o,A,True,False,revised,5,20261117-212747_directA_rr_gpt-4o_skill_rev_r05,True,1,8,,,,0,,1,False,4445,4352,446,0,full,0.01,
+E12,gpt-4o,B,True,False,revised,1,20261117-212756_directB_rr_gpt-4o_skill_rev_r01,True,1,11,,,,0,,0,True,48890,2304,412,0,full,0.122,
+E12,gpt-4o,B,True,False,revised,2,20261117-212807_directB_rr_gpt-4o_skill_rev_r02,True,1,18,,,,0,,0,True,48890,48768,525,0,full,0.066,
+E12,gpt-4o,B,True,False,revised,3,20261117-212826_directB_rr_gpt-4o_skill_rev_r03,True,1,17,,,,0,,0,True,48890,48768,628,0,full,0.067,
+E12,gpt-4o,B,True,False,revised,4,20261117-212843_directB_rr_gpt-4o_skill_rev_r04,True,2,16,,,,0,,4,False,98324,98048,814,0,full,0.1303,
+E12,gpt-4o,B,True,False,revised,5,20261117-212859_directB_rr_gpt-4o_skill_rev_r05,True,1,9,,,,0,,0,True,48890,48768,378,0,full,0.0645,
+E12,gpt-4o,D,True,False,revised,1,20261117-212910_directD_rr_gpt-4o_skill_rev_r01,True,2,18,17.8,,,0,0,2,,18397,11776,968,0,full,0.0405,
+E12,gpt-4o,D,True,False,revised,2,20261117-212928_directD_rr_gpt-4o_skill_rev_r02,True,2,15,20.8,,,0,0,6,,18409,18304,1007,0,full,0.0329,
+E12,gpt-4o,D,True,False,revised,3,20261117-212943_directD_rr_gpt-4o_skill_rev_r03,True,1,13,37.1,,,0,0,0,,8861,8832,643,0,full,0.0174,
+E12,gpt-4o,D,True,False,revised,4,20261117-212956_directD_rr_gpt-4o_skill_rev_r04,True,2,23,27.3,,,1,0,5,,18556,18432,1143,0,full,0.0344,
+E12,gpt-4o,D,True,False,revised,5,20261117-213019_directD_rr_gpt-4o_skill_rev_r05,True,2,19,26.6,,,2,0,14,,18314,18176,876,0,full,0.0315,
+E12,gpt-4o,C,True,False,C prompt,1,20261117-213040_directC_rr_gpt-4o_skill_r01,True,2,28,3,R2-R6 R7 R10 R11,255,,,,,12112,7936,2526,0,full,0.0451,
+E12,gpt-4o,C,True,False,C prompt,2,20261117-213108_directC_rr_gpt-4o_skill_r02,True,2,28,3,R2-R6 R7 R10 R11,270,,,,,12084,11904,2572,0,full,0.0406,
+E12,gpt-4o,C,True,False,C prompt,3,20261117-213136_directC_rr_gpt-4o_skill_r03,True,1,18,5,R7 R10,0,,,,,5324,5248,1412,0,full,0.0206,
+E12,gpt-4o,C,True,False,C prompt,4,20261117-213154_directC_rr_gpt-4o_skill_r04,True,1,23,4,R2-R6 R7 R10,150,,,,,5324,5248,1485,0,full,0.0214,
+E12,gpt-4o,C,True,False,C prompt,5,20261117-213217_directC_rr_gpt-4o_skill_r05,True,1,18,5,R7 R10,0,,,,,5324,5248,1462,0,full,0.0211,
+E12,gpt-4o-mini,A,True,False,revised,1,20261117-213236_directA_rr_gpt-4o-mini_skill_rev_r01,True,1,7,,,,0,,0,True,4445,0,788,0,full,0.0011,
+E12,gpt-4o-mini,A,True,False,revised,2,20261117-213244_directA_rr_gpt-4o-mini_skill_rev_r02,True,1,5,,,,0,,0,True,4445,0,631,0,full,0.001,
+E12,gpt-4o-mini,A,True,False,revised,3,20261117-213249_directA_rr_gpt-4o-mini_skill_rev_r03,True,1,5,,,,0,,0,True,4445,4352,682,0,full,0.0011,
+E12,gpt-4o-mini,A,True,False,revised,4,20261117-213254_directA_rr_gpt-4o-mini_skill_rev_r04,True,1,6,,,,0,,0,True,4445,4352,614,0,full,0.001,
+E12,gpt-4o-mini,A,True,False,revised,5,20261117-213300_directA_rr_gpt-4o-mini_skill_rev_r05,True,1,5,,,,0,,1,True,4445,4352,676,0,full,0.0011,
+E12,gpt-4o-mini,B,True,False,revised,1,20261117-213306_directB_rr_gpt-4o-mini_skill_rev_r01,True,1,8,,,,0,,4,True,48890,0,693,0,full,0.0076,
+E12,gpt-4o-mini,B,True,False,revised,2,20261117-213314_directB_rr_gpt-4o-mini_skill_rev_r02,True,1,8,,,,0,,0,True,48890,2304,709,0,full,0.0077,
+E12,gpt-4o-mini,B,True,False,revised,3,20261117-213322_directB_rr_gpt-4o-mini_skill_rev_r03,True,2,8,,,,4,,1,True,98535,98304,993,0,full,0.0152,
+E12,gpt-4o-mini,B,True,False,revised,4,20261117-213330_directB_rr_gpt-4o-mini_skill_rev_r04,True,2,8,,,,0,,2,True,98474,98176,982,0,full,0.0152,
+E12,gpt-4o-mini,B,True,False,revised,5,20261117-213339_directB_rr_gpt-4o-mini_skill_rev_r05,True,1,6,,,,0,,1,True,48890,48768,732,0,full,0.0077,
+E12,gpt-4o-mini,D,True,False,revised,1,20261117-213346_directD_rr_gpt-4o-mini_skill_rev_r01,True,2,10,27.0,,,4,0,23,,18496,11776,1076,0,full,0.0034,
+E12,gpt-4o-mini,D,True,False,revised,2,20261117-213356_directD_rr_gpt-4o-mini_skill_rev_r02,True,1,7,30.2,,,0,0,7,,8861,0,801,0,full,0.0018,
+E12,gpt-4o-mini,D,True,False,revised,3,20261117-213403_directD_rr_gpt-4o-mini_skill_rev_r03,False,4,15,,,,,,,,38969,29696,1733,0,full,0.0068,
+E12,gpt-4o-mini,D,True,False,revised,4,20261117-213419_directD_rr_gpt-4o-mini_skill_rev_r04,True,2,11,38.3,,,0,0,3,,18641,17664,1226,0,full,0.0035,
+E12,gpt-4o-mini,D,True,False,revised,5,20261117-213429_directD_rr_gpt-4o-mini_skill_rev_r05,True,1,6,50.5,,,0,0,10,,8861,8832,677,0,full,0.0017,
+E12,gpt-4o-mini,C,True,False,C prompt,1,20261117-213436_directC_rr_gpt-4o-mini_skill_r01,True,2,23,4,R2-R6 R7 R10,180,,,,,12257,1280,2717,0,full,0.0034,
+E12,gpt-4o-mini,C,True,False,C prompt,2,20261117-213459_directC_rr_gpt-4o-mini_skill_r02,True,3,32,4,R2-R6 R7 R10,150,,,,,20974,17280,3863,0,full,0.0054,
+E12,gpt-4o-mini,C,True,False,C prompt,3,20261117-213532_directC_rr_gpt-4o-mini_skill_r03,True,2,24,3,R2-R6 R7 R10 R11,780,,,,,12515,12288,2871,0,full,0.0035,
+E12,gpt-4o-mini,C,True,False,C prompt,4,20261117-213555_directC_rr_gpt-4o-mini_skill_r04,True,2,13,3,R2-R6 R7 R8 R10,6720,,,,,11740,11520,1607,0,full,0.0027,
+E12,gpt-4o-mini,C,True,False,C prompt,5,20261117-213608_directC_rr_gpt-4o-mini_skill_r05,True,1,10,3,R2-R6 R7 R10 R11,1530,,,,,5324,5248,1266,0,full,0.0015,
 E7,terra,C,False,False,C prompt,1,20261117-213642_directC_rr_terra_r01,True,1,33,6,R2-R6,201,,,,,4042,0,4543,3384,full,0.0264,
 E7,terra,C,False,False,C prompt,2,20261117-213714_directC_rr_terra_r02,True,1,32,7,,0,,,,,4042,4039,4446,3282,full,0.0222,
 E7,terra,C,False,False,C prompt,3,20261117-213746_directC_rr_terra_r03,True,1,32,6,R10,0,,,,,4042,4039,4623,3464,full,0.0231,
