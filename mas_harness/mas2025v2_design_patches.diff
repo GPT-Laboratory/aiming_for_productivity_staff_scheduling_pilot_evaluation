@@ -1,0 +1,144 @@
+diff -ru -x generated -x __pycache__ -x .git mas2025/agents/code_fixer_agent.py mas2025v2/agents/code_fixer_agent.py
+--- mas2025/agents/code_fixer_agent.py	2026-11-16 18:29:21.948780797 +0200
++++ mas2025v2/agents/code_fixer_agent.py	2026-11-17 14:49:02.115239336 +0200
+@@ -1,10 +1,11 @@
+ from .common import cl, PydanticOutputParser, llm_code, llm_code_claude
+ from schemas import AgentState, Code, CodeFix
+-from prompts.prompts import CODE_FIXER_PROMPT
++from prompts.prompts import CODE_FIXER_PROMPT, EXECUTION_CONTRACT, FULL_LOGS_INSTRUCTIONS
++from pathlib import Path
+ 
+ 
+ # Code is split into two functions to allow for easier testing
+-async def fix_code_logic(code: Code, docker_output: str) -> Code:
++async def fix_code_logic(code: Code, docker_output: str, full_log: str = None) -> Code:
+     """
+     Core logic to fix code using the LLM.
+ 
+@@ -22,6 +23,19 @@
+         docker_output=docker_output,
+     )
+ 
++    # [design patch v2] how the program is built and run; the full logs only on request
++    prompt += "\n\n" + EXECUTION_CONTRACT
++    if full_log is None:
++        prompt += "\n\n" + FULL_LOGS_INSTRUCTIONS
++    else:
++        docker_files = ""
++        for name in ("Dockerfile", "compose.yaml"):
++            f = Path("generated") / name
++            docker_files += f"\n--- {name} ---\n" + (f.read_text(encoding="utf-8", errors="replace") if f.exists() else "(missing)")
++        prompt += ("\n\n### Full logs (you asked for them)\nLast part of the complete build and run log:\n"
++                   f"```\n{full_log}\n```\nThe Docker files used:\n```{docker_files}\n```\n"
++                   "Fix the code now; set need_full_logs to false.")
++
+     output_parser = PydanticOutputParser(pydantic_object=CodeFix)
+     format_instructions = output_parser.get_format_instructions()
+     prompt += f"\n\n{format_instructions}"
+@@ -63,6 +77,12 @@
+         # Call the core logic function
+         print("CALLING the fix_code_logic")
+         response = await fix_code_logic(code, docker_output)
++        # [design patch v2] the fixer asked for the full logs: same step, second call with them
++        if getattr(response, "need_full_logs", False):
++            print("Code fixer asked for the full logs:", response.full_logs_reason)
++            state["full_logs_requests"] = (state.get("full_logs_requests") or []) + [response.full_logs_reason]
++            await cl.Message(content=f"Code fixer asked for the full Docker logs: {response.full_logs_reason}").send()
++            response = await fix_code_logic(code, docker_output, full_log=state.get("docker_full_log") or "(no log recorded)")
+     except Exception as e:
+         await cl.Message(content=str(e)).send()
+         return state
+diff -ru -x generated -x __pycache__ -x .git mas2025/agents/docker_environment_agent.py mas2025v2/agents/docker_environment_agent.py
+--- mas2025/agents/docker_environment_agent.py	2026-11-16 18:29:21.948780797 +0200
++++ mas2025v2/agents/docker_environment_agent.py	2026-11-17 14:48:43.143293372 +0200
+@@ -1,5 +1,6 @@
+ from prompts.prompts import (
+     DOCKER_FILES_PROMPT,
++    EXECUTION_CONTRACT,
+ )
+ from schemas import AgentState, DockerFiles
+ from .common import cl, PydanticOutputParser, llm
+@@ -32,6 +33,9 @@
+     output_parser = PydanticOutputParser(pydantic_object=DockerFiles)
+     format_instructions = output_parser.get_format_instructions()
+ 
++    # [design patch v2] tell the agent how the MAS builds and runs the program
++    prompt += "\n\n" + EXECUTION_CONTRACT
++
+     # Append format instructions to the prompt
+     prompt += f"\n\n{format_instructions}"
+ 
+diff -ru -x generated -x __pycache__ -x .git mas2025/agents/docker_execution_agent.py mas2025v2/agents/docker_execution_agent.py
+--- mas2025/agents/docker_execution_agent.py	2026-11-16 18:30:29.332659763 +0200
++++ mas2025v2/agents/docker_execution_agent.py	2026-11-17 14:48:43.143293372 +0200
+@@ -119,6 +119,8 @@
+         ).send()
+ 
+     finally:
++        # [design patch v2] keep the tail of the unfiltered build + run log for the code fixer
++        state["docker_full_log"] = "\n".join(full_output.strip().splitlines()[-150:])[-8000:]
+         # Siivotaan Docker-resurssit
+         subprocess.run(["docker", "compose", "down"])
+         subprocess.run(["docker", "image", "prune", "-f"])
+diff -ru -x generated -x __pycache__ -x .git mas2025/prompts/prompts.py mas2025v2/prompts/prompts.py
+--- mas2025/prompts/prompts.py	2026-11-16 18:29:21.956780782 +0200
++++ mas2025v2/prompts/prompts.py	2026-11-17 14:48:43.143293372 +0200
+@@ -1009,3 +1009,32 @@
+ )
+ 
+ 
++
++
++# [design patch v2] How the MAS builds and runs the generated program. Appended to the Docker
++# files agent's prompt and to the code fixer's prompt.
++EXECUTION_CONTRACT = """
++### How this program will be built and run (fixed; plan the Docker files for exactly this)
++- The project folder (the Docker build context) contains generated.py, requirements.txt, the
++  Dockerfile, compose.yaml and the user's input files, all side by side at the top level.
++  There are no subfolders such as ./data.
++- The system runs, from that folder and with no environment variables set:
++  `docker compose build`, then `docker compose up --abort-on-container-exit`.
++  Nobody can type input, pass extra command-line arguments or set variables later.
++- Therefore: do not use ${VARIABLE} interpolation in compose.yaml. Make the input files
++  available inside the container by their plain file names in the program's working directory
++  (copy the whole build context into the image, or mount the project folder as the working
++  directory). The command must start the complete computation with every argument it needs.
++- Files the program writes into a mounted project folder are kept; only the last 4000
++  characters of what the program prints are passed on for analysis, so the program should print
++  its key results.
++"""
++
++FULL_LOGS_INSTRUCTIONS = """
++### If the error text above is not enough
++You see only the lines the system extracted from the Docker logs. If they do not show the cause,
++or you suspect the Docker setup (Dockerfile, compose.yaml, file locations) rather than the code,
++set "need_full_logs" to true and give the reason in "full_logs_reason". You will then get the
++last part of the complete build and run log together with the Dockerfile and compose.yaml, and
++you are asked for the fix again. You cannot change the Dockerfile or compose.yaml yourself.
++"""
+diff -ru -x generated -x __pycache__ -x .git mas2025/schemas.py mas2025v2/schemas.py
+--- mas2025/schemas.py	2026-11-16 18:29:21.956780782 +0200
++++ mas2025v2/schemas.py	2026-11-17 14:48:43.143293372 +0200
+@@ -92,6 +92,13 @@
+     original_error: str = Field(
+         description="Summary of docker logs (provided error) what needed to be fixed and why."
+     )
++    need_full_logs: bool = Field(  # [design patch v2]
++        default=False,
++        description="True if the extracted error is not enough or the Docker setup is suspected; the full log tail and the Docker files are then provided and the fix is asked again.",
++    )
++    full_logs_reason: str = Field(  # [design patch v2]
++        default="", description="Why the full logs are needed (when need_full_logs is true)."
++    )
+ 
+ 
+ class DockerFiles(BaseModel):
+@@ -147,6 +154,8 @@
+     code: Code  # Python code and requirements
+     dockerFiles: DockerFiles  # DockerFile and compose.yaml
+     docker_output: str  # What running code in docker container outputs
++    docker_full_log: str  # [design patch v2] tail of the unfiltered build + run log
++    full_logs_requests: List[str]  # [design patch v2] reasons the fixer gave when it asked for the full logs
+     result: OutputOfCode  # Results of the code execution - answer, explanation, etc.
+     results: List[OutputOfCode]
+     solution_method: SolutionMethod

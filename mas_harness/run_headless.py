@@ -84,6 +84,7 @@ class Recorder:
 
     def step_start(self, name):
         self.step_count += 1
+        self.step_name = name
         self.event("step_start", index=self.step_count, name=name)
         print(f"\n[headless] >>> step {self.step_count}: {name}", flush=True)
         return self.step_count
@@ -388,7 +389,6 @@ def main():
         except PermissionError:
             # Docker Compose creates missing bind-mount folders (and the program then writes
             # into them) as root; remove those leftovers through a container.
-            import subprocess
             subprocess.run(["docker", "run", "--rm", "-v", f"{GENERATED}:/g", "python:3.9-slim",
                             "sh", "-c", "rm -rf /g/* /g/.[!.]*"], check=True, capture_output=True)
             shutil.rmtree(GENERATED)
@@ -465,8 +465,39 @@ def main():
                         rec.event("llm_truncated", model=model)
                         print(f"[headless] WARNING: {model} reply cut off at the output cap", flush=True)
 
+    # Token usage of every LLM call: an "llm_usage" event per call (with the step it belongs
+    # to) and per-model totals in summary.json. Streamed calls report usage only when asked
+    # (stream_usage); this changes nothing in the replies.
+    usage = {}
+
+    class UsageLog(BaseCallbackHandler):
+        def on_llm_end(self, response, **kwargs):
+            for gens in response.generations:
+                for g in gens:
+                    msg = getattr(g, "message", None)
+                    um = dict(getattr(msg, "usage_metadata", None) or {})
+                    meta = getattr(msg, "response_metadata", None) or {}
+                    if not um:
+                        tu = (response.llm_output or {}).get("token_usage") or meta.get("token_usage") or {}
+                        if not tu:
+                            continue
+                        um = {"input_tokens": tu.get("prompt_tokens", 0), "output_tokens": tu.get("completion_tokens", 0),
+                              "input_token_details": {"cache_read": (tu.get("prompt_tokens_details") or {}).get("cached_tokens", 0)},
+                              "output_token_details": {"reasoning": (tu.get("completion_tokens_details") or {}).get("reasoning_tokens", 0)}}
+                    model = meta.get("model_name") or (response.llm_output or {}).get("model_name") or "?"
+                    rec_ = {"input": um.get("input_tokens", 0) or 0, "output": um.get("output_tokens", 0) or 0,
+                            "cached_input": (um.get("input_token_details") or {}).get("cache_read", 0) or 0,
+                            "reasoning": (um.get("output_token_details") or {}).get("reasoning", 0) or 0}
+                    rec.event("llm_usage", step=rec.step_count, step_name=getattr(rec, "step_name", None), model=model, **rec_)
+                    tot = usage.setdefault(model, {"calls": 0, "input": 0, "cached_input": 0, "output": 0, "reasoning": 0})
+                    tot["calls"] += 1
+                    for k, v in rec_.items():
+                        tot[k] += v
+
     for m in (common.llm, common.llm_code):
-        m.callbacks = [*(m.callbacks or []), TruncationLog()]
+        m.callbacks = [*(m.callbacks or []), TruncationLog(), UsageLog()]
+        if "stream_usage" in type(m).model_fields:
+            m.stream_usage = True
 
     summary = {
         "name": args.name,
@@ -504,6 +535,7 @@ def main():
                 if s["name"] == "Start Docker Container Agent" and s["proceed_after"] == "fix"
             ),
             n_results=len(results),
+            token_usage=usage,
             decisions=rec.decisions,
             results=[
                 {k: v for k, v in to_jsonable(r).items() if k != "code"} if hasattr(r, "model_dump") else str(r)
