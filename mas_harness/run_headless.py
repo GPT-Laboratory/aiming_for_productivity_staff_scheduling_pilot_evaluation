@@ -383,7 +383,15 @@ def main():
         shutil.copy2(f, run_dir / "inputs" / f.name)
 
     if GENERATED.exists() and not args.keep_generated:
-        shutil.rmtree(GENERATED)
+        try:
+            shutil.rmtree(GENERATED)
+        except PermissionError:
+            # Docker Compose creates missing bind-mount folders (and the program then writes
+            # into them) as root; remove those leftovers through a container.
+            import subprocess
+            subprocess.run(["docker", "run", "--rm", "-v", f"{GENERATED}:/g", "python:3.9-slim",
+                            "sh", "-c", "rm -rf /g/* /g/.[!.]*"], check=True, capture_output=True)
+            shutil.rmtree(GENERATED)
 
     console = open(run_dir / "console.log", "w", encoding="utf-8")
     sys.stdout = Tee(sys.__stdout__, console)
@@ -417,6 +425,21 @@ def main():
     if os.getenv("HEADLESS_LLM_DEFAULT_TEMPERATURE") == "1":
         for m in (common.llm, common.llm_code):
             m.temperature = None
+
+    # Structured replies. MAS 2024's LangChain (langchain-openai 0.2) asks for them through
+    # function calling, which gpt-6.1-terra on Azure's chat-completions endpoint refuses
+    # while reasoning is on (HTTP 400). HEADLESS_STRUCTURED_OUTPUT_METHOD=json_schema makes
+    # with_structured_output use a JSON-schema response format instead (the default of the
+    # newer LangChain that MAS 2025 uses). Same schemas, same prompts.
+    so_method = os.getenv("HEADLESS_STRUCTURED_OUTPUT_METHOD")
+    if so_method:
+        cls = type(common.llm_code)
+        orig_wso = cls.with_structured_output
+
+        def with_structured_output(self, schema=None, *, method=so_method, **kw):
+            return orig_wso(self, schema, method=method, **kw)
+
+        cls.with_structured_output = with_structured_output
 
     # Output cap of the code model. MAS 2025 hard-codes max_tokens=4096 (the original
     # gpt-4o output limit); current gpt-4o allows 16384, and a whole program is returned
@@ -453,6 +476,7 @@ def main():
         "models": {"llm": common.llm.model_name, "llm_code": common.llm_code.model_name},
         "llm_code_max_tokens": {"mas": mas_cap, "used": getattr(common.llm_code, "max_tokens", None)},
         "temperature": {"mas": mas_temperature, "used": {"llm": common.llm.temperature, "llm_code": common.llm_code.temperature}},
+        "structured_output_method": so_method or "MAS default",
         "api_base": os.getenv("OPENAI_API_BASE") or "https://api.openai.com/v1 (default)",
         "attachments": [f.name for f in attachments],
         "optimization_rounds_requested": None if args.sim_user else args.optimization_rounds,
