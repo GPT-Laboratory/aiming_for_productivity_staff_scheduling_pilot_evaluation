@@ -9,8 +9,8 @@
 Scores: C = rule groups met of 7 (7 = all 11 rules) and minutes of understaffed group time;
 D = missing staff-hours per week (weekly rotation; per-day roster if the weekly sheet is empty);
 A, B = no rule checker: empty cells, whether Staff08 (no longer on the staff) is scheduled, and
-the same person in the same slot two weeks running. Costs use Azure's gpt-6.1-terra prices of
-17 Nov 2026; gpt-4o and gpt-4o-mini get token counts only.
+the same person in the same slot two weeks running. Costs use Azure's gpt-6.1-terra prices (EU Data
+Zone Standard, see PRICE); gpt-4o and gpt-4o-mini get token counts only.
 
 Usage: experiments/rerun_2026-11/analyse.py   (from anywhere; reads runs/, writes results/)
 """
@@ -23,7 +23,10 @@ RUNS, RES = REPO / "runs", REPO / "results"
 sys.path.insert(0, str(REPO / "datasets" / "C_reconstructed")); import check_schedule as cs
 sys.path.insert(0, str(REPO / "datasets" / "D_synthetic")); import synthetic_daycare as sd, score_daily_detail as sdd
 CX = REPO / "datasets" / "C_reconstructed" / "daycare_structure_example.xlsx"
-PRICE = {"input": 1.08, "cached": 0.06, "output": 5.39}  # EUR per million tokens, gpt-6.1-terra
+# EUR per million tokens, Azure "EU Data Zone Standard", short context (list given by the user,
+# 17 Nov 2026). An earlier quote for the same model was 1.08 / 0.06 / 5.39. gpt-4o and gpt-4o-mini
+# prices are not known yet: their runs get token counts only.
+PRICE = {"input": 0.99, "cached": 0.054, "output": 4.94}
 CURRENT = {"Staff01", "Staff02", "Staff03", "Staff04", "Staff05", "Staff06", "Staff07", "Staff09", "Staff10", "Staff11", "Assistant"}
 
 
