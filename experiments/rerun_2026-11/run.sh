@@ -28,6 +28,14 @@ direct() {  # direct <model> <tag> <runs for C>: A, B, D with the revised text, 
   true
 }
 
+directskill() {  # directskill <model> <tag>: as direct, with the domain skill, 5 runs each
+  model=$1; tag=$2; SK=direct_llm/skills/finnish-daycare-scheduling/SKILL.md
+  R="uv run --no-project --python 3.11 --with-requirements requirements.txt direct_llm/direct_llm.py"
+  echo "--- direct+skill $tag $(date +%H:%M)"
+  for c in A B D; do $R $c 5 --model "$model" --tag "_rr_${tag}_skill_rev" --prompt prompt_revised.txt --skill $SK; done
+  $R C 5 --model "$model" --tag "_rr_${tag}_skill" --skill $SK
+}
+
 v2set() {  # v2set <models>: A, B, D with the revised text; C with its own
   mas mas2025v2 "$1" A_pilot_rotation prompt_revised.txt "rr_A_v2_$1_rev"
   mas mas2025v2 "$1" B_pilot_rotation_with_children prompt_revised.txt "rr_B_v2_$1_rev"
@@ -53,6 +61,7 @@ for e in "$@"; do
     E8) direct gpt-4o gpt-4o 5 ;;
     E9) direct gpt-4o-mini gpt-4o-mini 5 ;;
     E10|E11) echo "$e: reused runs of 17 Nov, see PLAN.md" ;;
+    E12) directskill gpt-6.1-terra terra; directskill gpt-4o gpt-4o; directskill gpt-4o-mini gpt-4o-mini ;;
     *) echo "unknown experiment $e" ;;
   esac > "$LOGS/$e.log" 2>&1
   echo "=== $e done $(date '+%F %H:%M')" | tee -a "$LOGS/queue.log"

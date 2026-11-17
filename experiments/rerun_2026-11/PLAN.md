@@ -45,6 +45,7 @@ like, every experiment is run again on the same setup, with repetitions.
 | E8 | Direct prompt | gpt-4o | A, B, C, D × 5 | 20 | 10 min | < €1 |
 | E9 | Direct prompt | gpt-4o-mini | A, B, C, D × 5 | 20 | 10 min | < €0.2 |
 | E10 | Direct prompt + domain skill | Terra | D × 5, C × 3, original text, all reused | 0 | – | – |
+| E12 | Direct prompt + domain skill | Terra, gpt-4o, gpt-4o-mini | A, B, C, D × 5 each, revised text | 60 | 30 min | ~€2 |
 | E11 | Direct prompt + simulated manager | Terra | D × 3, C × 3, original text, all reused | 0 | – | – |
 
 A and B have no rule checker (no staff profiles). Direct answers for them use the same weekly
@@ -58,10 +59,10 @@ They were moved back from the archive to `runs/` under their original names: `*_
 the pilot text), `*_direct?_terra_skill_r0*` (E10), `*_direct?_terra_sim_r0*` (E11). The direct runs
 of 16 Nov (OpenRouter, `gpt-6.1-terra-pro` and gpt-4o) stay in the archive.
 
-Total to make: 97 runs, about 4.5 hours, about €10. Estimates for the MAS runs come from single
+Total to make: 157 runs, about 5 hours, about €12. Estimates for the MAS runs come from single
 runs and may be off by a factor of two.
 
-Order: E4, E3, E7, E8, E9.
+Order: E4, E3, E7, E8, E9, E12.
 
 Not repeated: the earlier OpenRouter runs with `gpt-6.1-terra-pro` (that model is not deployed
 on Azure); they stay in the archive and in the README as earlier results.
@@ -73,6 +74,9 @@ on Azure); they stay in the archive and in the README as earlier results.
 * D: `synthetic_daycare.py check` for weekly rotations, `score_daily_detail.py` for rosters given
   per day. The best known rotation has 10.9 missing staff-hours a week.
 * A, B: round classification as before (no checker; no ground truth for the ratios).
+* Tokens: MAS runs `summary.json` (`token_usage`), direct runs `result.json` (per turn, with cached
+  and reasoning tokens). The simulated manager's tokens are logged separately (`sim_user.json`)
+  and are not counted towards the system's tokens.
 * MAS runs: `fix_loop_analysis.py` on every run; rounds classified as in
   `results/mas*_round_classification.csv`; tokens and cost from `summary.json`.
 
