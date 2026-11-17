@@ -91,3 +91,19 @@ to `experiments/rerun_2026-11/logs/` (git-ignored). Nothing is started without t
   ones (E7, E8, E9, E12) ran in two parallel queues. MAS runs stayed one at a time.
 * E7's C set was made all fresh: 3 more runs after E12 (`e7c_extra.sh`, logged as E7c). The 3
   reused C runs of 17 Nov count as extra repetitions, not in the main table.
+
+## To do: expert evaluation (agreed 17 Nov 2026, not started)
+
+Revisit the human evaluation form (`results/scoresheet_template.csv`, currently one row per MAS
+round). Only the best and most reliable outputs go to the expert: two final rosters on dataset D,
+the realistic case.
+
+* One from the best MAS setup (MAS v2 · Terra, E4) and one from the best direct setup (direct ·
+  Terra, E7 or E12a).
+* Selection rule, fixed before looking at the rosters and stated in the report: lowest missing
+  staff-hours per week; ties broken by the fairness measures (early/late balance, rotation about
+  every three weeks), then by the shorter run. (On D, three E4 runs reach 10.8; the best direct
+  run is E7 · D r05 at 11.2.)
+* Blind: both shown in the same weekly format as "Roster X" and "Roster Y" in random order,
+  possibly with the daycare's own rotation (weeks 14–17 replayed) as an anonymised third.
+* Rework the form to one row per roster (usability, safety, fairness, what would need changing).

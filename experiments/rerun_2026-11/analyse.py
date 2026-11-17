@@ -86,8 +86,29 @@ def score_c_workbook(f):
     return None
 
 
+def weekday_sheets(x):
+    """Rotation given per weekday: one sheet per day (Mon..Fri), each in the weekly layout.
+    -> {(week, day): [(slot index, name)]} or None"""
+    names = {n.strip()[:3].title(): n for n in x.sheet_names}
+    if not all(d in names for d in sdd.sd.DAYS):
+        return None
+    daily = {}
+    for d in sdd.sd.DAYS:
+        r = x.parse(names[d], header=None).fillna("").astype(str)
+        for row in r.values.tolist():
+            w = row[0].split(".")[0].strip()
+            if w.isdigit() and 18 <= int(w) <= 21:
+                daily[(int(w), d)] = [(i, c.strip()) for i, c in enumerate(row[1:12]) if c.strip() and c.strip().lower() not in ("nan", "-")]
+    return daily or None
+
+
 def score_d_workbook(f):
     x = pd.ExcelFile(f)
+    wd = weekday_sheets(x)
+    if wd:
+        dd = sdd.score_daily(wd)
+        return {"score": dd["ratio"]["missing_staff_hours_per_week"], "empty": dd["empty_slots"],
+                "conflicts": dd["assigned_on_day_off"], "repeats": None, "form": "weekday sheets"}
     t = weekly_table(x)
     if t:
         r = sd.score(t)

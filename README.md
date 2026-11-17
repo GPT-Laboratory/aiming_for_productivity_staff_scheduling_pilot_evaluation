@@ -25,6 +25,71 @@ No personal data is included. See [Data and anonymisation](#data-and-anonymisati
 
 ## Main findings
 
+### Final comparison (rerun, 17 Nov 2026)
+
+All experiments were run again on one setup: Azure (EU Data Zone), 5 runs per cell, the revised
+task text for A, B and D (see [Datasets](#datasets)), C with its own prompt, token use logged for
+every call. Plan, run list and scripts: `experiments/rerun_2026-11/`. "4o" is the MAS's own model
+pair (gpt-4o-mini for the agents, gpt-4o for the code); "Terra" is `gpt-6.1-terra` for both.
+MAS v2 is the 2025 MAS with the design changes described in [Setup](#setup).
+
+| Setup | C: rosters meeting all 11 rules | D: missing staff-hours / week, mean (range) | A and B: four-week table with current staff only | Min / run | € / run |
+|---|---|---|---|---|---|
+| **MAS v2 · Terra** (E4) | 2 / 5 as picked by the MAS, 3 / 5 in the best round; the rest miss only R10; 0 min understaffed in all 15 rounds | **11.5** (10.3–14.6); 3 of 5 at 10.8, one per-weekday roster at 10.3 | A 0 / 5 (one run planned only week 18, four wrote no table), B 0 / 5 (two runs planned three weeks with Staff08, three wrote no table) | 6.1 | 0.29 |
+| MAS v2 · 4o (E3) | 0 / 5, no roster | no roster (5 / 5) | A 0 / 5 (3 tables, all with Staff08), B 0 / 5 | 2.4 | 0.23 |
+| Direct · Terra (E7) | 1 / 5; misses are mostly the staffing ratio | 14.1 (11.2–17.6) | 10 / 10 | 0.6 | 0.02 |
+| **Direct · Terra + skill** (E12a) | **4 / 5** | 18.0 (13.0–34.6); one run left the assistant out | A 3 / 5 (Staff08 in 2), B 5 / 5 | 0.7 | 0.02 |
+| Direct · gpt-4o (E8) | 0 / 5 | 21.0 (18.1–25.3); 1 invalid | 7 / 10 (Staff08 in 3) | 0.4 | 0.04 |
+| Direct · gpt-4o + skill (E12b) | 0 / 5 | 25.9 (17.8–37.1) | 4 / 10 (Staff08 in 6) | 0.3 | 0.04 |
+| Direct · gpt-4o-mini (E9) | 0 / 5 | 50.3 (22.0–72.4) | 0 / 10 (Staff08 in all) | 0.2 | 0.005 |
+| Direct · gpt-4o-mini + skill (E12c) | 0 / 5 | 36.5 (27.0–50.5); 1 invalid | 0 / 10 (Staff08 in all) | 0.2 | 0.005 |
+
+Baselines for D: the best known rotation misses 10.9 staff-hours a week, the daycare's own
+rotation replayed 17.4, random rotations about 20.7. A and B have no rule checker (no staff
+profiles); Staff08 appears in the old rotation but is not on the staff any more.
+
+* **With a current model and the design fixes, the MAS does what it was built for.** MAS v2 with
+  Terra completed every run in 14–20 steps (2–10 min; no run near the 50-step limit) and produced
+  the best rosters of all setups on D: three of five runs reached 10.8 missing staff-hours a week,
+  slightly better than the best known rotation, and a fourth 10.3 with a roster that varies by
+  weekday (one sheet per day), which is more flexible than the requested weekly rotation. On C every round of every run kept the staffing
+  ratio and the 38 h 15 min weeks; what remained was the opening rotation (R10).
+* **The older model does not benefit.** The same MAS with gpt-4o and gpt-4o-mini ran just as
+  smoothly (no Docker failures) but produced no roster on C or D: placeholder workbooks, copies of
+  the history, or "no feasible solution found". It is not much cheaper per run (€0.23 against
+  €0.29): gpt-4o's input price is about 2.5 times Terra's.
+* **Prompted directly, the strong model is close, and the skill decides C.** Terra alone met all
+  rules on C in 1 of 5 runs, breaking mostly the staffing ratio; with the domain skill in 4 of 5.
+  On D direct prompting stays behind the MAS (14.1 against 11.5, and 18.0 with the skill, where one
+  run again left the assistant out to protect the 19:08 hour target). The direct runs cost about
+  a tenth of a MAS run.
+* **Underspecified input separates the approaches.** A and B give only the old rotation (B also
+  children's attendance), no staff profiles and no number of weeks. Prompted directly, Terra
+  always produced four weeks with the current staff. Inside the MAS it never did: its programs
+  planned one or three weeks, or wrote no table and asked for the missing data (staff profiles,
+  closures); the weaker models scheduled Staff08, who has left.
+* **The MAS's final choice is not always its best round.** In one C run the final report agent
+  picked round 1 over two rounds that met all rules, citing a 48:15 week for one employee in
+  round 2; that employee's shifts add up to 38:15, as the program printed. Every round is
+  therefore scored, not only the pick (`results/rerun_mas_rounds.csv`).
+* **Cost and tokens.** The whole rerun (160 runs) used about €13; a MAS v2 run with Terra about
+  100k input and 45k output tokens on D. Prices: Azure EU Data Zone Standard, Terra €0.99 /
+  €0.054 / €4.94 per million input / cached input / output tokens; gpt-4o and gpt-4o-mini
+  converted from USD third-party list prices at 0.8977 EUR/USD.
+
+Our interpretation: the MAS's workflow can deliver good rosters, but only with a strong model and
+after fixing how the program is built and run, how errors reach the fixer, and how hard and soft
+rules are stated. With the model of its own time it did not deliver. A strong model prompted
+directly gets close at a fraction of the cost and time; the MAS's generated code is more reliable
+on the staffing arithmetic of the realistic case (D). These conclusions rest on synthetic data
+and rule checkers, not on validation by the daycare.
+
+### Earlier experiments (16–17 Nov 2026, archived)
+
+These runs led to the design changes and the rerun. They used different providers (OpenRouter,
+then Azure), model variants (`gpt-6.1-terra-pro`, then `gpt-6.1-terra`), the pilot's original task
+text and the MAS as delivered. Their results are in `results/archive/2026-11-17_before_rerun/`.
+
 | Experiment | Runs | Analysed rounds | Rounds the system rated "goal achieved" | Usable schedules |
 |---|---|---|---|---|
 | MAS, gpt-4o / gpt-4o-mini, datasets A–D | 16 | 43 | 25 | 0 |
@@ -55,7 +120,7 @@ No personal data is included. See [Data and anonymisation](#data-and-anonymisati
 * **The non-pro `gpt-6.1-terra` (Azure) prompted directly was close behind.** D: 5/5 valid, 12.0–14.4 missing staff-hours a week (mean 13.2); C: 2 of 3 satisfied every rule, and the third missed only R10. About 30 s per answer. With the skill it again left the assistant unscheduled on D (mean 34.0). With the simulated manager, D got worse for the same reason: the manager kept asking it to respect the weekly hour targets, and it dropped the assistant (mean 35.0, no roster accepted); on C the manager accepted 1 of 3, and in one trial kept asking to fix an Eskarit gap that the checker does not find.
 * **Cost was not the limiting factor.** A MAS run with gpt-4o cost $0.04–0.18, a MAS run with the newer model about $1.10, and a direct-prompt run about $0.05. At Azure's prices for `gpt-6.1-terra` on 17 Nov 2026 (€1.08 per million input tokens, €0.06 cached input, €5.39 output), the 22 direct runs used 0.44 M input and 0.20 M output tokens, about €0.07 a run. The harness did not yet record tokens for the MAS runs on Azure.
 
-Our interpretation is that the fixed generate–run–describe workflow was the main bottleneck, more than model capability. Nothing in the loop checks the result against the rules, and information is lost between agents. These conclusions rest on synthetic data and a rule checker, not on validation by the daycare.
+At that point our interpretation was that the fixed generate–run–describe workflow was the main bottleneck, more than model capability: nothing in the loop checked the result against the rules, and information was lost between agents. The rerun above shows that fixing those gaps lets a strong model succeed inside the MAS.
 
 ## Repository layout
 
@@ -214,6 +279,8 @@ How the harness works:
 * **Step limits.** MAS 2025 sets 50 itself. MAS 2024 relies on LangGraph's implicit default of 25; the MAS 2024 runs before the evaluation patch used that, and the patch sets 50. `--recursion-limit` changes it.
 * **Side effect.** The MAS runs `docker image prune -f` after every execution.
 
+`mas_harness/llm_extract.py <run>...` gives an LLM (by default `gpt-6.1-terra`) what one round's program printed and every file it wrote (workbooks as CSV text per sheet) and asks for the roster in one fixed JSON schema: a weekly rotation (A, B, D) or a list of daily shifts (C), plus what the program reported about itself. The model is told to copy only, not to compute, add up or guess, and to leave anything not shown empty. The JSON is converted to the checkers' input and scored, so every run gets a machine-checkable result in the same way, whatever form its program chose. `--all-rounds` processes every analysed round, not only the one the final report picked.
+
 `mas_harness/make_packets.py runs/<run>...` writes a readable evaluator packet per run, showing each round's code, trimmed output and the MAS's own verdict.
 
 ## Running the direct-LLM experiment
@@ -226,25 +293,36 @@ uv run --no-project --python 3.11 --with-requirements requirements.txt direct_ll
 * **Setup.** The model receives the task description and the data serialised the same way the MAS serialises Excel files. It is told it has no tools and must not write a program. Each reply is capped at 16384 output tokens, reasoning included (the same cap as the MAS code model in the harness), and the system prompt says so, so that the model budgets its reasoning. Earlier direct runs used a cap of 30000 and did not mention it. It is also given a fixed answer format; for D this includes the convention for reading the table.
 * **Revision loop.** After each answer, a structural check looks only at format: the table parses, names are known, nobody is in two shifts at once, all weeks are present. Any problems are sent back, with at most 4 answers. The rule checkers run only afterwards, and their results are never shown to the model.
 * **Domain skill (optional).** `--skill direct_llm/skills/finnish-daycare-scheduling/SKILL.md` appends a skill to the system prompt. It is a copy of the simulated manager's `SKILL.md`, rewritten for the system that builds the roster: what the manager cares about, the Finnish staffing and working-time rules, a short method, and how to handle staffing gaps (keep the ratio as the requirement, minimise the gaps and report them). It says nothing about the datasets or the checkers. The gap paragraph settles the ratio ambiguity of the pilot task text, so runs with the skill are not a test of the task text as written.
-* **Configuration.** The model defaults to `openai/gpt-6.1-terra-pro`; change it with `--model`. The provider comes from `OPENAI_API_BASE` in `.env`.
+* **Datasets and task text.** Cases A, B, C and D. A and B use the same weekly answer format as D (weeks 18–21) and are checked for format only (no staff profiles, so no rule checker). `--prompt prompt_revised.txt` uses the revised task text instead of the pilot's original (`prompt.txt`).
+* **Configuration.** The model defaults to `DIRECT_LLM_MODEL` from the provider profile; change it with `--model`. The provider comes from `OPENAI_API_BASE`. Token use is logged per answer, with cached and reasoning tokens.
 
 ## Results
 
 | File | Contents |
 |---|---|
+| `results/rerun_summary.csv` | **rerun of 17 Nov 2026**: per experiment and dataset, the main score (mean, range), rosters meeting all rules, steps, minutes, tokens and euros per run |
+| `results/rerun_mas_runs.csv` | rerun, one row per MAS run: outcome, steps, executions, the round the final report picked, its score and the best round's score, tokens and cost |
+| `results/rerun_mas_rounds.csv` | rerun, one row per analysed MAS round: score, failed rules, the workbook it came from, whether the final report picked it |
+| `results/rerun_direct_runs.csv` | rerun, one row per direct run (and the reused direct runs of 17 Nov): score, answers needed, tokens and cost |
+| `results/rerun_llm_extract.csv` | rerun, every MAS round's roster as extracted by an LLM into a fixed JSON schema and scored (see below) |
+| `results/archive/2026-11-17_before_rerun/` | the results files as they were before the rerun |
 | `results/experiments_summary.csv` | per experiment: runs, completed, stopped at step limit, code executions and failures, analysed rounds, rounds self-rated as achieved, usable schedules |
 | `results/mas_round_classification.csv` | every analysed MAS round classified by failure type, with the MAS's own verdict and a short note |
 | `results/mas2025_round_classification.csv` | the same for the 2025 version, plus how faithfully each round's program re-executed (see below) |
 | `results/mas_terra_round_classification.csv` | every analysed round of the MAS runs with `gpt-6.1-terra` on Azure (MAS 2025 as delivered, MAS 2024 with the evaluation patch) |
 | `results/direct_llm_runs.csv` | direct-LLM runs with checker scores. Run names give the variant: `direct` (first runs, 30000-token cap), `noskill` and `skill` (current prompt, without and with `--skill`), `gpt-4o_*` (gpt-4o on the same prompt), `sim` (reviewed by the simulated manager) |
 | `results/cost_by_experiment.csv` | API calls, tokens and cost per experiment, from the OpenRouter activity export of 16 Nov 2026, split by timestamp; the export ends before the last 4 direct runs |
-| `results/scoresheet_template.csv` | blank rubric for human evaluators, one row per MAS round |
+| `results/scoresheet_template.csv` | blank rubric for human evaluators, one row per MAS round (to be reworked for the final expert evaluation of two rosters; see `experiments/rerun_2026-11/PLAN.md`) |
 
 The 2025 runs were made before the harness kept the files the programs write, so their rosters were recovered by re-executing each round's saved program on the same input (`mas_harness/reexecute_rounds.py`). 21 of the 29 re-executions (28 rounds plus the rerun's one) reproduced the original printed output exactly, or the last 4000 characters the MAS kept; the other 8 differ because the heuristics are randomised, and their output has the same form. For dataset C, programs that printed staff presence per time slot were scored with `datasets/C_reconstructed/score_presence_output.py`, which places the floating employee where it helps most.
 
+**Cross-check by LLM extraction.** For every analysed round of the 40 rerun MAS runs (119 rounds), `mas_harness/llm_extract.py` had `gpt-6.1-terra` copy the roster from what the program printed and wrote into a fixed JSON schema, which was then scored with the same checkers (`results/rerun_llm_extract.csv`; about €1.65, 6 s per round). It agrees with the workbook-based scores in all 119 rounds: the same score in 30 C/D rounds, no roster in 29, and the same presence or absence of a named table in all 60 A/B rounds. The first pass found three faults that were then fixed: the workbook scorer read only the Monday sheet of a roster given per weekday (E4 · D r05, now 10.3 instead of 18.8); the extraction schema had no way to hold such a roster; and the model, not told where the reproduced history ends, refused to extract a table that continued it. Where the programs left the roster empty and gave only "unverified suggestions", the model copied the empty table and said so, as instructed.
+
 The round classification is the third evaluator's (an AI-assisted evaluation harness). Two human evaluators score the same rounds with the template. The raw run logs are not published.
 
-To reproduce the tables from your own runs:
+The rerun's tables come from `experiments/rerun_2026-11/analyse.py`, which scores every MAS round's workbook and every direct answer with the checkers; prices are set at its top. `datasets/D_synthetic/recount_independent.py <table.csv> --compare` recounts D's missing staff-hours with independent code (written from the workbook and the task text, sharing no code with the checker) and was used to spot-check the scores; it agrees with the checker on the reference, the replayed human rotation and rerun rosters. `experiments/rerun_2026-11/progress.py` shows the progress of a running rerun against the plan.
+
+To reproduce the earlier tables from your own runs:
 
 ```bash
 python3 analysis/aggregate_runs.py runs results/experiments_summary.csv
@@ -271,7 +349,10 @@ python3 analysis/cost_by_experiment.py openrouter_activity.csv --runs runs --utc
 
   Deviations like these are normal in practice and can be agreed locally, so they are not counted as rule violations. The best-known and replayed human rosters both have 11–12 minor deviations in 44 person-weeks and none needing attention.
 * The human decisions in the MAS were fixed, so the effect of interactive steering was not measured.
-* There were 3–5 runs per condition: enough to show consistent failure or success, not to estimate exact rates.
+* There were 3–5 runs per condition (5 in the rerun): enough to show consistent failure or success, not to estimate exact rates.
+* Rule R10 ("opening and closing shifts are distributed as evenly as possible") is checked as: each employee's number of openings, and of closings, differs by at most one from every other employee's. Most remaining C failures are R10 under this reading.
+* Datasets A and B have no rule checker; for them we report only whether a table of the requested weeks with current staff was produced. The revised task text (`prompt_revised.txt`) is our revision, not the pilot's.
+* MAS rosters come in many forms. The rerun scores the workbooks the programs wrote, located by sheet and column names; `mas_harness/llm_extract.py` extracts them independently with an LLM as a cross-check (see Results).
 
 ## License
 
