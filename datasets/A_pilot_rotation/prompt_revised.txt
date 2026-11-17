@@ -1,0 +1,49 @@
+Task Description: Staff Scheduling for Daycare
+ You are tasked with creating weekly staff schedules for a daycare center. The goal is to continue the existing schedule provided in the attached Excel file. The new schedules must follow the same format and extend the current plan for the following weeks.
+Each weekly schedule must assign named employees to specific daily shifts (e.g., 6:30–14:30, 7:00–15:00) from Monday to Friday, matching the format of the existing Excel file. The output should use the same table structure, where each row represents a week and each column a specific shift slot, and each cell contains the name of the assigned staff member.
+Child data
+ The daycare includes approximately 45 children, distributed across three groups (e.g., Robin, Finch, Lark) as follows:
+ – 15 children under 3 years
+ – 25 children over 3 years
+ – 5 children in mixed-age groups
+ – 4 children with special needs: 2 counted as 2×, and 2 as 3× in staffing calculations
+For each child, the following attributes are considered:
+ – Age group (under 3 / over 3 / mixed)
+ – Daily care time (arrival and departure)
+ – Assigned group (can be reassigned in staff scheduling, but penalized)
+ – Special needs multiplier (1×, 2×, or 3×)
+Children's attendance times vary throughout the day. The number of staff needed must be recalculated for each shift slot based on the number and type of children present during that specific time.
+Staff profiles
+ Each employee has a defined profile that includes:
+ – Name
+ – Assigned group (e.g., Robin, Finch, Lark)
+ – Role (e.g., teacher, caregiver)
+ – Shift availability (e.g., marked vacations or holidays)
+ – Weekly hour target (38 hours and 15 minutes, with slight flexibility for FTE, but there are few with 30h 35min and 19 h 8 min targets).
+This information is used to determine shift eligibility and to enforce hour limits.
+
+Primary constraints (requirements; they come first)
+ Staffing ratios per group, whenever children are present:
+ – 1 adult per 4 children under 3 years
+ – 1 adult per 7 children over 3 years
+ – 1 adult per 1.75 children in mixed-age groups
+ – Special needs children are counted as 2× or 3× in staffing ratios
+ Staff and shifts:
+ – Staff can only be scheduled to work within their assigned group
+ – No employee works more than one shift per day; no overlapping or duplicate shifts
+ – No one is scheduled during vacations, time off or holidays
+ – Each shift is a fixed time block (e.g., 6:30–14:30 = 8 hours)
+ – Weekly hours stay close to each employee's target; a small overrun caused by the fixed shift lengths is acceptable
+If the staff available cannot meet the staffing ratios at all times, still produce the schedule: keep the shortfall as small as possible and list where and when adults are missing (day, time, group, number of adults), so that cover can be arranged. Do not leave shifts empty to stay under an hour target when that would leave children understaffed.
+
+Secondary goals (optimise these once the primary constraints are met as well as possible)
+ – Children are supervised by familiar adults from their own group; group continuity is preferred over rotating staff
+ – Tasks rotate approximately every 3 weeks
+ – Workload, early and late shifts are balanced evenly and fairly among staff
+ – Avoid unnecessary complexity (prefer simpler, valid solutions)
+
+Schedule format and requirements
+ – The output schedule must follow the format of the input Excel file
+ – Each row represents a week, and each column represents a specific shift
+ – Cells must contain either a staff member's name, “loma” (for vacation), or be empty if unassigned
+ – The schedule must be clear and easy to read by human users

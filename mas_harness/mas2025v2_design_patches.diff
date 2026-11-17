@@ -1,26 +1,29 @@
 diff -ru -x generated -x __pycache__ -x .git mas2025/agents/code_fixer_agent.py mas2025v2/agents/code_fixer_agent.py
 --- mas2025/agents/code_fixer_agent.py	2026-11-16 18:29:21.948780797 +0200
-+++ mas2025v2/agents/code_fixer_agent.py	2026-11-17 14:49:02.115239336 +0200
++++ mas2025v2/agents/code_fixer_agent.py	2026-11-17 16:51:29.067032502 +0200
 @@ -1,10 +1,11 @@
  from .common import cl, PydanticOutputParser, llm_code, llm_code_claude
  from schemas import AgentState, Code, CodeFix
 -from prompts.prompts import CODE_FIXER_PROMPT
-+from prompts.prompts import CODE_FIXER_PROMPT, EXECUTION_CONTRACT, FULL_LOGS_INSTRUCTIONS
++from prompts.prompts import CODE_FIXER_PROMPT, EXECUTION_CONTRACT, FULL_LOGS_INSTRUCTIONS, FIXER_ROUTE_INSTRUCTIONS
 +from pathlib import Path
  
  
  # Code is split into two functions to allow for easier testing
 -async def fix_code_logic(code: Code, docker_output: str) -> Code:
-+async def fix_code_logic(code: Code, docker_output: str, full_log: str = None) -> Code:
++async def fix_code_logic(code: Code, docker_output: str, full_log: str = None, history=None) -> Code:
      """
      Core logic to fix code using the LLM.
  
-@@ -22,6 +23,19 @@
+@@ -22,6 +23,22 @@
          docker_output=docker_output,
      )
  
-+    # [design patch v2] how the program is built and run; the full logs only on request
-+    prompt += "\n\n" + EXECUTION_CONTRACT
++    # [design patch v2] how the program is built and run; where the fault is; the full logs only on request
++    prompt += "\n\n" + EXECUTION_CONTRACT + "\n\n" + FIXER_ROUTE_INSTRUCTIONS
++    if history:
++        prompt += ("\n\n### Earlier fix attempts on this program (they did not solve it; do not repeat them)\n"
++                   + "\n".join(f"{i}. {h}" for i, h in enumerate(history, 1)))
 +    if full_log is None:
 +        prompt += "\n\n" + FULL_LOGS_INSTRUCTIONS
 +    else:
@@ -35,22 +38,93 @@ diff -ru -x generated -x __pycache__ -x .git mas2025/agents/code_fixer_agent.py 
      output_parser = PydanticOutputParser(pydantic_object=CodeFix)
      format_instructions = output_parser.get_format_instructions()
      prompt += f"\n\n{format_instructions}"
-@@ -63,6 +77,12 @@
+@@ -62,11 +79,40 @@
+     try:
          # Call the core logic function
          print("CALLING the fix_code_logic")
-         response = await fix_code_logic(code, docker_output)
+-        response = await fix_code_logic(code, docker_output)
++        response = await fix_code_logic(code, docker_output, history=state.get("fix_history"))
 +        # [design patch v2] the fixer asked for the full logs: same step, second call with them
 +        if getattr(response, "need_full_logs", False):
 +            print("Code fixer asked for the full logs:", response.full_logs_reason)
 +            state["full_logs_requests"] = (state.get("full_logs_requests") or []) + [response.full_logs_reason]
 +            await cl.Message(content=f"Code fixer asked for the full Docker logs: {response.full_logs_reason}").send()
-+            response = await fix_code_logic(code, docker_output, full_log=state.get("docker_full_log") or "(no log recorded)")
++            response = await fix_code_logic(code, docker_output, full_log=state.get("docker_full_log") or "(no log recorded)",
++                                            history=state.get("fix_history"))
      except Exception as e:
          await cl.Message(content=str(e)).send()
          return state
+ 
++    # [design patch v2] route: "docker" -> Docker files agent, "give_up" -> output analyzer
++    route = (getattr(response, "route", "code") or "code").strip().lower()
++    if route not in ("code", "docker", "give_up"):
++        route = "code"
++    state["fix_routes"] = (state.get("fix_routes") or []) + [{"route": route, "note": response.route_note}]
++    state["fix_history"] = (state.get("fix_history") or []) + [
++        f"error: {response.original_error} | action: {response.fix_description if route == 'code' else route + ': ' + response.route_note}"]
++    print(f"Code fixer route: {route}: {response.route_note}")
++    if route != "code":
++        state["fixIterations"] = state.get("fixIterations", 0) + 1
++        if route == "docker":
++            # only while fix attempts remain; otherwise a new program gets new Docker files anyway
++            state["docker_fix_note"] = response.route_note if state["fixIterations"] < 4 else ""
++            await cl.Message(content=f"Code fixer: the Docker files need a correction: {response.route_note}").send()
++        else:
++            state["gave_up"] = response.route_note
++            state["docker_output"] = (f"The program failed and the fix attempts were given up: {response.route_note}"
++                                      f"\n\nLast program output:\n{state.get('docker_output', '')}")
++            await cl.Message(content=f"Code fixer gave up on this program: {response.route_note}").send()
++        current_step.output = f"route={route}: {response.route_note}"
++        return state
++
+     # Convert CodeFix back to Code
+     updated_code = Code(
+         python_code=response.fixed_python_code,
+diff -ru -x generated -x __pycache__ -x .git mas2025/agents/code_generator_agent.py mas2025v2/agents/code_generator_agent.py
+--- mas2025/agents/code_generator_agent.py	2026-11-16 20:07:33.722393674 +0200
++++ mas2025v2/agents/code_generator_agent.py	2026-11-17 16:51:29.067032502 +0200
+@@ -1,4 +1,4 @@
+-from prompts.prompts import CODE_PROMPT_NO_DATA, CODE_PROMPT
++from prompts.prompts import CODE_PROMPT_NO_DATA, CODE_PROMPT, EXECUTION_CONTRACT
+ from schemas import AgentState, Code
+ from .common import cl, llm_code, llm_code_claude
+ 
+@@ -32,6 +32,8 @@
+         )
+ 
+     # Interact with the LLM
++    prompt += "\n\n" + EXECUTION_CONTRACT  # [design patch v2] how the program will be built and run
++
+     structured_llm = llm_code.with_structured_output(Code)
+     response = structured_llm.invoke(prompt)
+ 
+@@ -47,6 +49,7 @@
+     # eval patch: new code starts a fresh fix budget (as new_loop_agent does); without this,
+     # main.decide_next_step routes to a node missing from start_docker's path_map (KeyError).
+     state["fixIterations"] = 0
++    state["fix_history"] = []  # [design patch v2] a new program starts a new fix history
+     current_step = cl.context.current_step
+ 
+     # Prepare display input for Chainlit interface
+diff -ru -x generated -x __pycache__ -x .git mas2025/agents/code_output_agent.py mas2025v2/agents/code_output_agent.py
+--- mas2025/agents/code_output_agent.py	2026-11-16 18:29:21.948780797 +0200
++++ mas2025v2/agents/code_output_agent.py	2026-11-17 16:51:29.067032502 +0200
+@@ -66,6 +66,12 @@
+     # Display the analysis result to the user
+     await cl.Message(content=f"Analysis Result:\n{response.answer_description}\n\n{response.explanation}").send()
+ 
++    # [design patch v2] the fixer gave up on the program: the round ends here as a failed round;
++    # reset the fix counter so that main.decide_next_step routes by the user's answer
++    if state.get("gave_up"):
++        state["gave_up"] = ""
++        state["fixIterations"] = 0
++
+     # Ask the user if they want to start a new optimization round
+     res = await cl.AskActionMessage(
+         content="Let's begin a new optimization round?",
 diff -ru -x generated -x __pycache__ -x .git mas2025/agents/docker_environment_agent.py mas2025v2/agents/docker_environment_agent.py
 --- mas2025/agents/docker_environment_agent.py	2026-11-16 18:29:21.948780797 +0200
-+++ mas2025v2/agents/docker_environment_agent.py	2026-11-17 14:48:43.143293372 +0200
++++ mas2025v2/agents/docker_environment_agent.py	2026-11-17 15:47:52.804000621 +0200
 @@ -1,5 +1,6 @@
  from prompts.prompts import (
      DOCKER_FILES_PROMPT,
@@ -58,12 +132,23 @@ diff -ru -x generated -x __pycache__ -x .git mas2025/agents/docker_environment_a
  )
  from schemas import AgentState, DockerFiles
  from .common import cl, PydanticOutputParser, llm
-@@ -32,6 +33,9 @@
+@@ -32,6 +33,20 @@
      output_parser = PydanticOutputParser(pydantic_object=DockerFiles)
      format_instructions = output_parser.get_format_instructions()
  
 +    # [design patch v2] tell the agent how the MAS builds and runs the program
 +    prompt += "\n\n" + EXECUTION_CONTRACT
++    note = state.get("docker_fix_note")
++    if note:  # the code fixer found the fault in the Docker files: correct the previous ones
++        from pathlib import Path
++        prev = ""
++        for name in ("Dockerfile", "compose.yaml"):
++            f = Path("generated") / name
++            prev += f"\n--- {name} ---\n" + (f.read_text(encoding="utf-8", errors="replace") if f.exists() else "(missing)")
++        prompt += ("\n\n### Correct the previous Docker files\nThe program failed to run with these files:"
++                   f"\n```{prev}\n```\nError output:\n```\n{state.get('docker_full_log') or state.get('docker_output', '')}\n```"
++                   f"\nThe code fixer's diagnosis: {note}\nReturn corrected files; keep what was right.")
++        state["docker_fix_note"] = ""
 +
      # Append format instructions to the prompt
      prompt += f"\n\n{format_instructions}"
@@ -80,10 +165,298 @@ diff -ru -x generated -x __pycache__ -x .git mas2025/agents/docker_execution_age
          # Siivotaan Docker-resurssit
          subprocess.run(["docker", "compose", "down"])
          subprocess.run(["docker", "image", "prune", "-f"])
+diff -ru -x generated -x __pycache__ -x .git mas2025/agents/heuristic_agent.py mas2025v2/agents/heuristic_agent.py
+--- mas2025/agents/heuristic_agent.py	2026-11-16 20:07:33.722393674 +0200
++++ mas2025v2/agents/heuristic_agent.py	2026-11-17 16:51:29.067032502 +0200
+@@ -1,4 +1,4 @@
+-from prompts.prompts import HEURISTIC_PROMPT
++from prompts.prompts import HEURISTIC_PROMPT, EXECUTION_CONTRACT
+ from schemas import AgentState, Code, ProblemClass
+ from .common import cl, llm_code, llm_code_claude
+ from prompts.instuctions import *
+@@ -36,6 +36,8 @@
+     )
+ 
+     # Interact with the LLM
++    prompt += "\n\n" + EXECUTION_CONTRACT  # [design patch v2] how the program will be built and run
++
+     structured_llm = llm_code.with_structured_output(Code)
+     response = structured_llm.invoke(prompt)
+ 
+@@ -48,6 +50,7 @@
+     # eval patch: new code starts a fresh fix budget (as new_loop_agent does); without this,
+     # main.decide_next_step routes to a node missing from start_docker's path_map (KeyError).
+     state["fixIterations"] = 0
++    state["fix_history"] = []  # [design patch v2] a new program starts a new fix history
+     current_step = cl.context.current_step
+ 
+     inputs = state["purpose"]
+diff -ru -x generated -x __pycache__ -x .git mas2025/agents/new_loop_agent.py mas2025v2/agents/new_loop_agent.py
+--- mas2025/agents/new_loop_agent.py	2026-11-16 18:29:21.948780797 +0200
++++ mas2025v2/agents/new_loop_agent.py	2026-11-17 16:51:29.067032502 +0200
+@@ -4,6 +4,7 @@
+     NEW_LOOP_CODE_PROMPT,
+     NEW_LOOP_CODE_PROMPT_NO_DATA,
+     NEW_LOOP_HEURISTIC_PROMPT,
++    EXECUTION_CONTRACT,
+ )
+ from prompts.instuctions import *
+ 
+@@ -14,6 +15,7 @@
+     last_output = state["result"]
+     # Nollaa korjauslaskuri
+     state["fixIterations"] = 0
++    state["fix_history"] = []  # [design patch v2] a new program starts a new fix history
+     state["optimizedOnce"] = True
+ 
+     problem_type = inputs.problem_class
+@@ -70,6 +72,9 @@
+                 resource_requirements=inputs.resource_requirements,
+             )
+ 
++    # [design patch v2] how the program will be built and run
++    prompt += "\n\n" + EXECUTION_CONTRACT
++
+     output_parser = PydanticOutputParser(pydantic_object=Code)
+     format_instructions = output_parser.get_format_instructions()
+ 
+diff -ru -x generated -x __pycache__ -x .git mas2025/main.py mas2025v2/main.py
+--- mas2025/main.py	2026-11-16 18:29:21.956780782 +0200
++++ mas2025v2/main.py	2026-11-17 16:51:29.071032498 +0200
+@@ -48,10 +48,15 @@
+     return state["proceed"]
+ 
+ def decide_next_step_after_fix(state: AgentState) -> str:
++    # [design patch v2] the fixer's route: gave up on this program, or the Docker files must change
++    if state.get("gave_up"):
++        return "output_analyzer"
+     if state.get("fixIterations", 0) >= 4:
+         if not state.get("optimizedOnce", False):
+             return decide_problem_analysis(state)
+         return "new_loop"
++    if state.get("docker_fix_note"):
++        return "docker_files"
+     return "continue"  
+ 
+ 
+@@ -112,6 +117,8 @@
+         "heuristic": "heuristic",
+         "new_loop": "new_loop", #if fails many times, start new optimization round
+         "continue": "start_docker",  # jatketaan koodin ajoa Dockerissa
++        "docker_files": "docker_files",  # [design patch v2] fixer: the Docker files need a correction
++        "output_analyzer": "output_analyzer",  # [design patch v2] fixer gave up: the round ends as a failed round
+     },
+ )
+ # workflow.add_edge("start_docker", "output_analyzer")
+diff -ru -x generated -x __pycache__ -x .git mas2025/prompts/instuctions.py mas2025v2/prompts/instuctions.py
+--- mas2025/prompts/instuctions.py	2026-11-16 18:29:21.956780782 +0200
++++ mas2025v2/prompts/instuctions.py	2026-11-17 17:50:55.988008102 +0200
+@@ -434,61 +434,76 @@
+ """,
+ }
+ 
++# [design patch v2] SHIFT_SCHEDULING guidance rewritten (user's draft, with review changes):
++# hard/soft constraints with priorities, never return nothing, estimate missing data from history,
++# weekly-rotation semantics, the program prints the report. The original is kept in the diff.
+ SHIFT_SCHEDULING = {
+   "guidelines": """
+ === General Guidelines for Shift Scheduling Problems ===
+ 
+-You are solving a real-world shift scheduling problem. Your task is to extend an existing schedule by generating valid staff assignments for a specified horizon (e.g., next 8 weeks) without altering any past data. All decisions must respect given inputs and constraints.
++You are solving a real-world shift scheduling problem. Your task is to extend an existing schedule by generating staff assignments for a specified horizon (e.g., next 8 weeks) without altering any past data. Real-world data rarely admits a schedule that satisfies every rule; deliver the best usable schedule and state clearly what it does not satisfy and why.
+ 
+ === Input Specification ===
+ Inputs may include:
+-- Staff profiles: names, roles, assigned groups/units, weekly hour limits, availability, vacations
++- Staff profiles: names, roles, assigned groups/units, hour limits, availability, absences
+ - Shift definitions: labels, time ranges, durations, days of week
+-- Demand data: required headcount per shift (static or varying by time)
++- Demand data: required headcount per shift or time slot (static, varying, or derived from other data)
+ - Existing schedule/template (e.g., Excel file)
+ - Holidays and non-working days
+-- Optional dynamic parameters (e.g., attendance, special weighting factors)
++- Optional dynamic parameters (e.g., expected workload, weighting factors)
+ 
+-Always use the provided data exactly as-is. Do not invent, infer, or hardcode placeholder values. Read child attendance and staff profile data directly from the input files; do not use dummy counts or arbitrary defaults.
++Use the provided data as-is; do not invent placeholder values or dummy counts. Where data is messy (name variants, notes in cells) or missing for future dates, make the most plausible interpretation or estimate from history, and list it in your report.
+ 
+-=== Hard Constraints ===
+-Your schedule must satisfy every constraint:
+-1. **One entry per cell:** Exactly one of: a staff name, "loma", "avustaja", or empty (if allowed). No lists or composites.
++=== Constraints ===
++Separate constraints into two kinds before solving. The input can move a rule between them; follow it. For example, if the input says staff work only in their own unit or group, that rule is hard.
++
++Hard (never violate):
++1. **One entry per cell:** a staff name, an absence/closure marker used in the template, or empty (if allowed). No lists or composites.
+ 2. **No overlap:** No employee on two overlapping shifts in the same day.
+-3. **Minimum rest:** At least 11 hours between shift end and next start.
+-4. **Weekly hours:** Do not exceed each employee’s weekly limit (e.g., 38h15m).
+-5. **Availability:** Respect vacations, leaves, and other unavailability.
+-6. **Grouping:** Assign staff only to their own group/unit.
+-7. **Coverage:** Fill all required shifts unless explicitly waived.
+-8. **Holidays:** Do not assign on listed holidays unless allowed.
++3. **Availability:** Respect absences and other unavailability.
++4. **Closures:** Do not assign on holidays or non-working days unless allowed.
++5. **Past data:** Do not change existing cells.
++6. **Legal rest and working time:** Minimum rest between shifts and limits set by law.
++
++Soft, in priority order (minimise violations and report them):
++7. **Coverage:** Meet required headcount or ratios per time slot.
++8. **Contracted hours:** Stay within each employee's contracted hours and reach them as closely as possible.
++9. **Grouping and skills:** Assign staff to their own unit/team and to shifts they are qualified for; cross-unit/team cover is allowed when it closes a coverage gap, unless the input makes grouping hard.
++10. **Fairness and continuity:** Spread unpopular shifts evenly; keep the existing rotation where possible.
++
++Never stop, loop, or return nothing because rules conflict: relax soft rules from the lowest priority up.
+ 
+ === Time Parsing Rules ===
+-When parsing shift times (e.g., "6.30-14.30", "(7.00) 7.30"), do not cast to float. Clean strings with regex (remove parentheses/whitespace), then parse via `datetime.strptime` supporting ":" or "." separators.
++Do not cast shift times to float (e.g., "6.30-14.30", "(7.00) 7.30"). Clean strings with regex and parse via `datetime.strptime` supporting ":" or "." separators. If parenthesised times carry meaning in the history (e.g., an alternative start), keep that meaning and note it. Durations such as weekly hours ("38:15") are hours and minutes, not clock times.
+ 
+ === Schedule Continuation Rules ===
+ - **Never overwrite** existing rows or cells. Save to a new file (e.g., `updated_...xlsx`).
+-- **Start at the first empty row** after the highest week number (column A).
+-- **Detect the highest week number** and begin new weeks at last + 1, generating exactly the requested number of weeks.
+-- **Append** new rows; do not modify historical data.
++- **Find the last scheduled week** by row order or date, not by the maximum week or day number, and start at the first empty row after it.
++- **Generate exactly the requested number of days or weeks**, numbered as ISO weeks: after 52 (or 53) comes 1.
+ - **Output file** must contain only newly generated weeks; do not include or reproduce past weeks.
++- **Weekly rotation templates:** if the template is a weekly rotation (one name per shift column per week), that person works that shift on every working day of that week. Keep that form; a daily breakdown may be added as an extra sheet, not instead of it.
+ 
+ === Output Requirements ===
+-- Use `openpyxl` for Excel I/O; preserve all formatting, headers, styles, formulas.
+-- Write each assignment via `ws.cell(row, col).value = ...`.
+-- Follow the template’s row/column structure exactly.
+-
+-=== Recommended Scheduling Logic ===
+-Decisions must be data-driven:
+-1. **Compute staffing demand per shift dynamically:** for each time slot, sum children present (applying special needs multipliers) by group, then apply group-specific staffing ratios (e.g., 1:4 under‑3, 1:7 over‑3, 1:1.75 mixed) to determine number of staff required.
+-2. Identify eligible staff per shift (availability, group, hours, rest).
+-3. Select staff via heuristic or metaheuristic:
+-   - Greedy (least hours first)
+-   - Genetic algorithm, local search, or IP for complex cases
+-4. Track running totals: hours per week, last shift end.
+-5. Apply backtracking or repair to resolve violations.
+-6. Mark official holidays or vacation days as "loma" only. Do not use "loma" as a generic fallback. If a shift cannot be filled outside holidays, leave the cell empty or use an approved marker (e.g., "avustaja").
++- Use `openpyxl` for Excel I/O; preserve formatting, headers, styles, formulas. Do not save a workbook loaded with `data_only=True`.
++- Follow the template's row/column structure and markers exactly. Use the template's absence marker only for actual absences or closures, never as a filler for unfilled shifts; leave those empty or use the template's unfilled marker.
++- The program must print a short report (method and why, solver status, assumptions, and every soft-constraint violation: shift/day, size, cause) of at most about 3000 characters; only the end of the printed output is passed on. Put longer details in the output workbook.
++
++=== Optimization Approach ===
++Write and run optimization code; do not assign by intuition. Choose the method from the problem and describe it in 1-3 sentences in the report.
++
++1. **Compute demand per time slot:** if demand is derived (e.g., from workload and staffing ratios), compute it for each time slot. Shifts overlap, so check coverage per slot, not only per shift.
++2. **Build a starting solution:** roll forward the rotation seen in past weeks if there is one; otherwise use a greedy rule (e.g., least hours first among eligible staff).
++3. **Pick the solver by size and difficulty:**
++   - Small or nearly feasible instance -> greedy start plus local repair.
++   - Typical instance (tens of staff, weeks, a few shift types) -> exact model (CP-SAT via OR-Tools, or MILP via PuLP/HiGHS): hard rules as constraints, soft rules as penalised slack with weights an order of magnitude apart by priority (or solved lexicographically). Set a time limit; use the starting solution as a hint.
++   - Large instance, or the exact model misses its time limit -> decompose (e.g., by week or unit, exact solver per subproblem) or use large neighbourhood search / local search seeded with the best known schedule.
++   Prefer the simplest method that reaches a good solution.
++4. **Validate independently:** run a separate checker over the final schedule for every rule; fix hard violations, report soft ones.
++"""
++  ,
++  "example": """
++### Few-Shot Examples - Shift Scheduling
+ 
+-=== Few-Shot Examples ===
+ #### 1. Basic Weekly Rotation
+ Input:
+ <structured_state>
+@@ -498,73 +513,45 @@
+   <response_format>Excel with one row</response_format>
+ </structured_state>
+ Output:
+-# Greedy rotation: assign earliest idle staff per shift
+-# Save Excel with 1 new week
++# Small instance: greedy rotation plus checker is enough
++# Save Excel with 1 new week; print method and that no rules were violated
+ 
+-#### 2. Vacation Handling
++#### 2. Absence Handling
+ Input:
+ <structured_state>
+-  <user_summary>Generate a one-week schedule skipping vacations</user_summary>
++  <user_summary>Generate a one-week schedule around pre-entered absences</user_summary>
+   <problem_type>Shift scheduling</problem_type>
+-  <resource_requirements>Preserve "loma" cells</resource_requirements>
++  <resource_requirements>Preserve absence markers</resource_requirements>
+   <response_format>Excel with 1 row</response_format>
+ </structured_state>
+ Output:
+-# Retain existing "loma"; assign remaining shifts fairly
++# Treat existing absence markers as fixed inputs; assign remaining shifts fairly
++# Uncovered shift: leave empty (or unfilled marker) and report shift, day, shortfall, cause
+ 
+ #### 3. Multi-Week Extension
+ Input:
+ <structured_state>
+-  <user_summary>Extend schedule by 8 weeks for daycare</user_summary>
++  <user_summary>Extend schedule by 8 weeks</user_summary>
+   <problem_type>Shift scheduling</problem_type>
+-  <resource_requirements>Group constraints; staffing ratios; 38h15m/week; holidays</resource_requirements>
++  <resource_requirements>Unit constraints; staffing ratios; weekly hours; holidays</resource_requirements>
+   <response_format>Excel with 8 rows</response_format>
+ </structured_state>
+ Output:
+-# Identify last week; append 8 rows
+-# Assign per group, hours, rest; save new file
+-"""
+-  ,
+-  "example": """
+-### Few-Shot Examples – Shift Scheduling Heuristics
+-
+-#### Example 1: Basic Weekly Rotation
+-Input:
+-<structured_state>
+-  <user_summary>Schedule 6 staff to two daily shifts for one week</user_summary>
+-  <problem_type>Shift scheduling</problem_type>
+-  <resource_requirements>Max 38h/week; min 11h rest</resource_requirements>
+-  <response_format>Excel with one row</response_format>
+-</structured_state>
+-
+-Output:
+-# Greedy rotation: assign earliest idle staff per shift
+-# Save Excel with 1 new week
+-
+-#### Example 2: Vacation Handling
+-Input:
+-<structured_state>
+-  <user_summary>Generate a one-week schedule skipping vacations</user_summary>
+-  <problem_type>Shift scheduling</problem_type>
+-  <resource_requirements>Preserve "loma" cells</resource_requirements>
+-  <response_format>Excel with 1 row</response_format>
+-</structured_state>
+-
+-Output:
+-# Retain existing "loma"; assign remaining shifts fairly
++# Find last week by row/date; generate 8 ISO weeks
++# Roll past rotation forward as start; repair with CP-SAT, soft rules as tiered slack, 60 s limit
++# Print method, solver status, violations; save new file
+ 
+-#### Example 3: Multi-Week Extension
++#### 4. Conflicting Requirements
+ Input:
+ <structured_state>
+-  <user_summary>Extend schedule by 8 weeks for daycare</user_summary>
++  <user_summary>Extend 4 weeks; two staff on sick leave; coverage cannot be met at opening</user_summary>
+   <problem_type>Shift scheduling</problem_type>
+-  <resource_requirements>Group constraints; staffing ratios; 38h15m/week; holidays</resource_requirements>
+-  <response_format>Excel with 8 rows</response_format>
++  <resource_requirements>Ratios; unit constraints; weekly hours</resource_requirements>
++  <response_format>Excel with 4 rows</response_format>
+ </structured_state>
+-
+ Output:
+-# Identify last week; append 8 rows
+-# Assign per group, hours, rest; save new file
++# Relax lowest-priority rules first (cross-unit cover if allowed, then hours averaged over the 4 weeks)
++# Remaining shortfall: leave cell empty, report slot and size; deliver schedule plus violations
+ """
+ }
+ 
 diff -ru -x generated -x __pycache__ -x .git mas2025/prompts/prompts.py mas2025v2/prompts/prompts.py
 --- mas2025/prompts/prompts.py	2026-11-16 18:29:21.956780782 +0200
-+++ mas2025v2/prompts/prompts.py	2026-11-17 14:48:43.143293372 +0200
-@@ -1009,3 +1009,32 @@
++++ mas2025v2/prompts/prompts.py	2026-11-17 16:51:29.067032502 +0200
+@@ -1009,3 +1009,49 @@
  )
  
  
@@ -106,6 +479,9 @@ diff -ru -x generated -x __pycache__ -x .git mas2025/prompts/prompts.py mas2025v
 +- Files the program writes into a mounted project folder are kept; only the last 4000
 +  characters of what the program prints are passed on for analysis, so the program should print
 +  its key results.
++- The program runs unattended and its output is a draft that the user will review. It must
++  always complete the computation with the information given and report its assumptions and any
++  gaps. It cannot wait for approvals, confirmations or extra files.
 +"""
 +
 +FULL_LOGS_INSTRUCTIONS = """
@@ -116,10 +492,24 @@ diff -ru -x generated -x __pycache__ -x .git mas2025/prompts/prompts.py mas2025v
 +last part of the complete build and run log together with the Dockerfile and compose.yaml, and
 +you are asked for the fix again. You cannot change the Dockerfile or compose.yaml yourself.
 +"""
++
++
++# [design patch v2] The code fixer decides where the fault is.
++FIXER_ROUTE_INSTRUCTIONS = """
++### Decide where the fault is ("route")
++- "code": the program itself is wrong. Return the fixed program.
++- "docker": the Dockerfile or compose.yaml is wrong (for example a wrong command, a missing
++  mount, files not reachable by their plain names, a ${VARIABLE} that is never set). You cannot
++  edit those files; return the program unchanged and describe the correction in "route_note".
++  The Docker files agent will correct them.
++- "give_up": this program cannot be made to work by further fixes (for example its approach is
++  wrong, or the same error keeps coming back). Return the program unchanged and give the reason
++  in "route_note"; the fix attempts stop and the next program is written knowing the reason.
++"""
 diff -ru -x generated -x __pycache__ -x .git mas2025/schemas.py mas2025v2/schemas.py
 --- mas2025/schemas.py	2026-11-16 18:29:21.956780782 +0200
-+++ mas2025v2/schemas.py	2026-11-17 14:48:43.143293372 +0200
-@@ -92,6 +92,13 @@
++++ mas2025v2/schemas.py	2026-11-17 16:51:29.067032502 +0200
+@@ -92,6 +92,21 @@
      original_error: str = Field(
          description="Summary of docker logs (provided error) what needed to be fixed and why."
      )
@@ -130,15 +520,27 @@ diff -ru -x generated -x __pycache__ -x .git mas2025/schemas.py mas2025v2/schema
 +    full_logs_reason: str = Field(  # [design patch v2]
 +        default="", description="Why the full logs are needed (when need_full_logs is true)."
 +    )
++    route: str = Field(  # [design patch v2]
++        default="code",
++        description='Where the fault is: "code" (fixed in fixed_python_code), "docker" (the Dockerfile or compose.yaml must change; the code is left as it is) or "give_up" (this program cannot be made to work; the reason goes in route_note).',
++    )
++    route_note: str = Field(  # [design patch v2]
++        default="",
++        description='For "docker": what is wrong in the Docker files and how to correct it. For "give_up": why this program cannot be made to work, so that the next program avoids it.',
++    )
  
  
  class DockerFiles(BaseModel):
-@@ -147,6 +154,8 @@
+@@ -147,6 +162,12 @@
      code: Code  # Python code and requirements
      dockerFiles: DockerFiles  # DockerFile and compose.yaml
      docker_output: str  # What running code in docker container outputs
 +    docker_full_log: str  # [design patch v2] tail of the unfiltered build + run log
 +    full_logs_requests: List[str]  # [design patch v2] reasons the fixer gave when it asked for the full logs
++    fix_routes: List[dict]  # [design patch v2] every routing decision of the code fixer
++    docker_fix_note: str  # [design patch v2] fixer -> Docker files agent: what to correct
++    gave_up: str  # [design patch v2] fixer gave up on this program: the reason
++    fix_history: List[str]  # [design patch v2] earlier fix attempts on the current program
      result: OutputOfCode  # Results of the code execution - answer, explanation, etc.
      results: List[OutputOfCode]
      solution_method: SolutionMethod
