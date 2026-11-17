@@ -45,7 +45,7 @@ like, every experiment is run again on the same setup, with repetitions.
 | E8 | Direct prompt | gpt-4o | A, B, C, D × 5 | 20 | 10 min | < €1 |
 | E9 | Direct prompt | gpt-4o-mini | A, B, C, D × 5 | 20 | 10 min | < €0.2 |
 | E10 | Direct prompt + domain skill | Terra | D × 5, C × 3, original text, all reused | 0 | – | – |
-| E12 | Direct prompt + domain skill | Terra, gpt-4o, gpt-4o-mini | A, B, C, D × 5 each, revised text | 60 | 30 min | ~€2 |
+| E12a, E12b, E12c | Direct prompt + domain skill | Terra (a), gpt-4o (b), gpt-4o-mini (c) | A, B, C, D × 5 each, revised text | 60 | 30 min | ~€2 |
 | E11 | Direct prompt + simulated manager | Terra | D × 3, C × 3, original text, all reused | 0 | – | – |
 
 A and B have no rule checker (no staff profiles). Direct answers for them use the same weekly

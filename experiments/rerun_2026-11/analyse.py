@@ -199,7 +199,8 @@ def direct_meta(name):
     if not m:
         return None
     if m.group(2):
-        exp = "E12" if m.group(4) else {"terra": "E7", "gpt-4o": "E8", "gpt-4o-mini": "E9"}[m.group(3)]
+        exp = ({"terra": "E12a", "gpt-4o": "E12b", "gpt-4o-mini": "E12c"} if m.group(4)
+               else {"terra": "E7", "gpt-4o": "E8", "gpt-4o-mini": "E9"})[m.group(3)]
         text = "revised" if m.group(5) else ("C prompt" if m.group(1) == "C" else "original")
     else:  # reused runs of 17 Nov, original text
         exp = "E10" if m.group(4) else ("E11" if m.group(6) else "E7-reused")
