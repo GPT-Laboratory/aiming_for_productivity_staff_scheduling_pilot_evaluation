@@ -409,6 +409,15 @@ def main():
     if os.getenv("HEADLESS_LLM_CODE_MODEL"):
         common.llm_code.model_name = os.environ["HEADLESS_LLM_CODE_MODEL"]
 
+    # Reasoning models accept only the default temperature; MAS 2025 sets temperature=0
+    # on the code model, which they reject with HTTP 400. HEADLESS_LLM_DEFAULT_TEMPERATURE=1
+    # leaves the temperature out of the requests of both models.
+    mas_temperature = {"llm": getattr(common.llm, "temperature", None),
+                       "llm_code": getattr(common.llm_code, "temperature", None)}
+    if os.getenv("HEADLESS_LLM_DEFAULT_TEMPERATURE") == "1":
+        for m in (common.llm, common.llm_code):
+            m.temperature = None
+
     # Output cap of the code model. MAS 2025 hard-codes max_tokens=4096 (the original
     # gpt-4o output limit); current gpt-4o allows 16384, and a whole program is returned
     # inside one structured (JSON) reply, so 4096 can cut it off. Raise the cap to
@@ -443,6 +452,7 @@ def main():
         "python": platform.python_version(),
         "models": {"llm": common.llm.model_name, "llm_code": common.llm_code.model_name},
         "llm_code_max_tokens": {"mas": mas_cap, "used": getattr(common.llm_code, "max_tokens", None)},
+        "temperature": {"mas": mas_temperature, "used": {"llm": common.llm.temperature, "llm_code": common.llm_code.temperature}},
         "api_base": os.getenv("OPENAI_API_BASE") or "https://api.openai.com/v1 (default)",
         "attachments": [f.name for f in attachments],
         "optimization_rounds_requested": None if args.sim_user else args.optimization_rounds,

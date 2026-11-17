@@ -117,7 +117,8 @@ class SimManager:
         reply, parsed = "", None
         for attempt in range(3):
             try:
-                r = self.client.chat.completions.create(model=self.model, messages=msgs, max_tokens=6000)
+                r = self.client.chat.completions.create(model=self.model, messages=msgs,
+                    **{"max_tokens" if "openrouter" in (os.getenv("OPENAI_API_BASE") or "") else "max_completion_tokens": 6000})
                 reply = r.choices[0].message.content or ""
             except Exception as exc:  # network etc.: wait and retry
                 reply = f"(api error {exc!r})"

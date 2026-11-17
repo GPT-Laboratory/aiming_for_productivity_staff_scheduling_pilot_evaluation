@@ -157,7 +157,9 @@ Prerequisites:
 
    With OpenAI directly, also change the model ids, because OpenAI model ids have no `openai/` prefix.
 
-   To use a second provider (for example Azure for one model), put its settings in `.env.<name>` and prefix a command with `UV_ENV_FILE=.env.<name>`. This works for the MAS harness and the direct-LLM script alike. Values in that file take precedence over `.env`, and each run records its endpoint and models.
+   To use a second provider (for example Azure for one model), put its settings in `.env.<name>` and prefix a command with `UV_ENV_FILE=.env.<name>`. This works for the MAS harness and the direct-LLM script alike. Values in that file take precedence over `.env`, and each run records its endpoint and models. The direct-LLM script and the simulated manager send the output cap as `max_completion_tokens`, which reasoning models on OpenAI and Azure require, and as `max_tokens` on OpenRouter.
+
+   The Terra runs from 17 Nov 2026 onwards use `gpt-6.1-terra` (not the pro variant) on Azure. The gpt-4o and gpt-4o-mini results were not rerun there: they come from OpenRouter's `openai/gpt-4o` and `openai/gpt-4o-mini`, whose snapshots the logs do not record. Azure serves gpt-4o-2024-11-20 and gpt-4o-mini-2024-07-18, so gpt-4o results on Azure need not match the earlier ones.
 
 3. Check that the MAS runs end to end with the small cutting-stock task. It takes about 2–3 minutes and costs about one cent.
 
@@ -194,6 +196,7 @@ How the harness works:
 * **Full recording.** Every agent step's input, output and state, the generated code, the Docker files and a run summary go to `runs/<timestamp>_<name>/`. Files the executed program writes (for example an Excel roster) are copied to the step's `outputs/` folder. Runs made before this was added lost those files; `mas_harness/reexecute_rounds.py <run>` re-executes the program behind each analysed round to recover them. Most programs are randomised, so a re-execution is not guaranteed to reproduce the original output.
 * **Compose wrapper.** `mas_harness/bin/docker-compose` forwards the MAS's `docker-compose` calls to Compose V2.
 * **Model override.** `HEADLESS_LLM_MODEL` and `HEADLESS_LLM_CODE_MODEL` replace the MAS's two models (gpt-4o-mini and gpt-4o) without changing its code; this is how the newer-model arm was run. `OPENAI_API_BASE` selects the provider.
+* **Temperature.** Reasoning models such as gpt-6.1-terra accept only the default temperature. The 2025 MAS sets `temperature=0` on its code model, and the 2024 MAS's LangChain version sends 0.7 by default; both are rejected with HTTP 400 on OpenAI and Azure. `HEADLESS_LLM_DEFAULT_TEMPERATURE=1` leaves the temperature out of the requests of both models. Each run records the temperatures in `summary.json`. (OpenRouter ignored the setting, so the earlier Terra runs there needed no override.)
 * **Output cap.** The 2025 MAS hard-codes `max_tokens=4096` for its code model (the original gpt-4o limit). A whole program comes back in one structured reply, so the harness raises the cap to 16384 (current gpt-4o's limit), or to `HEADLESS_LLM_CODE_MAX_TOKENS`. The 2024 MAS sets no cap and is left alone unless the variable is set. Replies cut off at the cap are logged as `llm_truncated` events.
 * **Unchanged limits.** The MAS's own step limit is kept: LangGraph's default of 25 for MAS 2024, 50 set by MAS 2025 itself. `--recursion-limit` changes it.
 * **Side effect.** The MAS runs `docker image prune -f` after every execution.

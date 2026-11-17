@@ -32,6 +32,12 @@ LIMIT = ("Each of your replies is limited to {n} output tokens, counting any rea
          "final csv block fits.")
 
 
+def cap_param(n):
+    """Output cap. OpenAI and Azure reasoning models accept only max_completion_tokens;
+    OpenRouter documents max_tokens (and translates it), so keep that there."""
+    return {"max_tokens" if "openrouter" in (os.getenv("OPENAI_API_BASE") or "") else "max_completion_tokens": n}
+
+
 def load_skill(path):
     """A SKILL.md as the model would see it once loaded: frontmatter and HTML comments removed."""
     text = Path(path).read_text(encoding="utf-8")
@@ -171,7 +177,7 @@ def main():
         turn_cap = a.max_turns + (a.max_reviews if sim else 0)
         for turn in range(1, turn_cap + 1):          # hard cap prevents endless revision loops
             try:
-                r = client.chat.completions.create(model=a.model, messages=msgs, max_tokens=a.max_tokens)
+                r = client.chat.completions.create(model=a.model, messages=msgs, **cap_param(a.max_tokens))
                 text = r.choices[0].message.content or ""
                 finish = r.choices[0].finish_reason
                 usage = r.usage.model_dump() if r.usage else {}
