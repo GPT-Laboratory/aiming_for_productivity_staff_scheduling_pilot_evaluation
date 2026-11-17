@@ -109,6 +109,7 @@ Evidence for these comes from running the MAS with a current reasoning model
 | + PR 4 items 8–11, original guidance | D | runs of 7–13 min; drafts "infeasible" or ~57 missing staff-hours a week (hour limit kept hard) |
 | + PR 4 items 8–12 | C | 6.8 min, 3 executions, 0 failures; rounds 2 and 3 satisfy all 11 rules, round 3 with one continuous shift per person per day |
 | + PR 4 items 8–11, task text with primary/secondary constraints | D | 8.7 min; 10.3 missing staff-hours a week (as a daily roster; best known weekly rotation 10.9) |
+| + PR 4 items 8–12, task text with primary/secondary constraints | D | 4.7 min, 3 executions, 0 failures; weekly rotation in the template's format, no empty slots, 10.8 missing staff-hours a week (best known 10.9; the model prompted directly 10.9–14.5) |
 
 With gpt-4o / gpt-4o-mini the same changes removed the Docker failures but did not lead to
 usable rosters; there the model, not the plumbing, is the limit.
