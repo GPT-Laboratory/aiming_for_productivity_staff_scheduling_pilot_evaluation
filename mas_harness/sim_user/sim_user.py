@@ -120,6 +120,12 @@ class SimManager:
                 r = self.client.chat.completions.create(model=self.model, messages=msgs,
                     **{"max_tokens" if "openrouter" in (os.getenv("OPENAI_API_BASE") or "") else "max_completion_tokens": 6000})
                 reply = r.choices[0].message.content or ""
+                u = r.usage.model_dump() if r.usage else {}  # token usage of the simulated manager, for costing
+                self.state.setdefault("usage", []).append({
+                    "model": getattr(r, "model", None), "prompt_tokens": u.get("prompt_tokens"),
+                    "completion_tokens": u.get("completion_tokens"),
+                    "cached_prompt_tokens": (u.get("prompt_tokens_details") or {}).get("cached_tokens"),
+                    "reasoning_tokens": (u.get("completion_tokens_details") or {}).get("reasoning_tokens")})
             except Exception as exc:  # network etc.: wait and retry
                 reply = f"(api error {exc!r})"
                 time.sleep(10)

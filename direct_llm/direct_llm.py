@@ -254,7 +254,10 @@ def main():
             (out / f"answer_turn{turn}.md").write_text(text, encoding="utf-8")
             parsed, errs = validate(text)
             log["turns"].append({"turn": turn, "validity_errors": errs, "answer_chars": len(text), "finish_reason": finish,
-                                 "completion_tokens": usage.get("completion_tokens"), "prompt_tokens": usage.get("prompt_tokens")})
+                                 "completion_tokens": usage.get("completion_tokens"), "prompt_tokens": usage.get("prompt_tokens"),
+                                 "cached_prompt_tokens": (usage.get("prompt_tokens_details") or {}).get("cached_tokens"),
+                                 "reasoning_tokens": (usage.get("completion_tokens_details") or {}).get("reasoning_tokens"),
+                                 "model_version": getattr(r, "model", None)})
             print(f"[direct {a.case} r{n}] turn {turn}: {len(errs)} validity errors"
                   + (" (cut off at the output cap)" if finish == "length" else ""), flush=True)
             if not errs:
