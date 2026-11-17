@@ -19,13 +19,14 @@ mas() {  # mas <mas dir> <models: 4o|terra> <dataset dir> <prompt file> <name>
   env $m MAS_DIR=$REPO/$dir mas_harness/run_batch.sh "datasets/$ds" "$name" $N $ROUNDS $TIMEOUT "$pf"
 }
 
-direct() {  # direct <model> <tag> [extra args]
-  model=$1; tag=$2; shift 2
+direct() {  # direct <model> <tag> [all|rev]: all = D original, D revised, C; rev = D revised only
+  model=$1; tag=$2; which=${3:-all}
   R="uv run --no-project --python 3.11 --with-requirements requirements.txt direct_llm/direct_llm.py"
-  echo "--- direct $tag $(date +%H:%M)"
-  $R D 5 --model "$model" --tag "_rr_${tag}_orig" --prompt prompt.txt "$@"
-  $R D 5 --model "$model" --tag "_rr_${tag}_rev" --prompt prompt_revised.txt "$@"
-  $R C 3 --model "$model" --tag "_rr_${tag}" "$@"
+  echo "--- direct $tag $which $(date +%H:%M)"
+  [ "$which" = all ] && $R D 5 --model "$model" --tag "_rr_${tag}_orig" --prompt prompt.txt
+  $R D 5 --model "$model" --tag "_rr_${tag}_rev" --prompt prompt_revised.txt
+  [ "$which" = all ] && $R C 3 --model "$model" --tag "_rr_${tag}"
+  true
 }
 
 v2set() {  # v2set <models>: A, B, D revised; C; D original
@@ -50,16 +51,11 @@ for e in "$@"; do
     E2) origset mas2025 terra mas2025 ;;
     E3) v2set 4o ;;
     E4) v2set terra ;;
-    E5) origset mas2024 4o mas2024 ;;
-    E6) origset mas2024 terra mas2024 ;;
-    E7) direct gpt-6.1-terra terra ;;
+    E5|E6) echo "$e dropped (MAS 2024 is no longer part of the comparison)" ;;
+    E7) direct gpt-6.1-terra terra rev ;;  # D original and C: reused runs of 17 Nov, see PLAN.md
     E8) direct gpt-4o gpt-4o ;;
     E9) direct gpt-4o-mini gpt-4o-mini ;;
-    E10) R="uv run --no-project --python 3.11 --with-requirements requirements.txt direct_llm/direct_llm.py"
-         S=direct_llm/skills/finnish-daycare-scheduling/SKILL.md
-         $R D 5 --model gpt-6.1-terra --tag _rr_terra_skill --skill $S; $R C 3 --model gpt-6.1-terra --tag _rr_terra_skill --skill $S ;;
-    E11) R="uv run --no-project --python 3.11 --with-requirements requirements.txt direct_llm/direct_llm.py"
-         $R D 3 --model gpt-6.1-terra --tag _rr_terra_sim --sim-user; $R C 3 --model gpt-6.1-terra --tag _rr_terra_sim --sim-user ;;
+    E10|E11) echo "$e: reused runs of 17 Nov, see PLAN.md" ;;
     *) echo "unknown experiment $e" ;;
   esac > "$LOGS/$e.log" 2>&1
   echo "=== $e done $(date '+%F %H:%M')" | tee -a "$LOGS/queue.log"

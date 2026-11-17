@@ -32,25 +32,31 @@ like, every experiment is run again on the same setup, with repetitions.
 
 ## Run list
 
-| ID | System | Model | Datasets × task text | Runs | Est. time | Est. cost |
+| ID | System | Model | Datasets × task text | Runs to make | Est. time | Est. cost |
 |---|---|---|---|---|---|---|
 | E1 | MAS 2025 as delivered (bit-rot patch only) | 4o | A, B, C, D × original | 12 | 45 min | < €1 |
 | E2 | MAS 2025 as delivered | Terra | A, B, C, D × original | 12 | 3.5 h (most stop at the step limit) | ~€15 |
 | E3 | MAS 2025 v2 | 4o | A, B, D × revised; C; D × original | 15 | 1 h | < €1 |
 | E4 | MAS 2025 v2 | Terra | A, B, D × revised; C; D × original | 15 | 1.5 h | ~€5 |
-| E5 | MAS 2024 with the evaluation patch | 4o | A, B, C, D × original | 12 | 45 min | < €1 |
-| E6 | MAS 2024 with the evaluation patch | Terra | A, B, C, D × original | 12 | 2–3 h | ~€10 |
-| E7 | Direct prompt | Terra | D × original (5), D × revised (5), C (3) | 13 | 15 min | ~€1 |
-| E8 | Direct prompt | gpt-4o | as E7 | 13 | 5 min | < €0.5 |
-| E9 | Direct prompt | gpt-4o-mini | as E7 | 13 | 5 min | < €0.1 |
-| E10 | Direct prompt + domain skill | Terra | D × original (5), C (3) | 8 | 10 min | ~€0.6 |
-| E11 | Direct prompt + simulated manager | Terra | D × original (3), C (3) | 6 | 25 min | ~€1 |
+| E5, E6 | MAS 2024 | – | dropped: MAS 2024 is no longer part of the comparison | 0 | – | – |
+| E7 | Direct prompt | Terra | D × revised (5); D × original (5) and C (3) reused | 5 | 5 min | ~€0.4 |
+| E8 | Direct prompt | gpt-4o | D × original (5), D × revised (5), C (3) | 13 | 5 min | < €0.5 |
+| E9 | Direct prompt | gpt-4o-mini | as E8 | 13 | 5 min | < €0.1 |
+| E10 | Direct prompt + domain skill | Terra | D × original (5), C (3), all reused | 0 | – | – |
+| E11 | Direct prompt + simulated manager | Terra | D × original (3), C (3), all reused | 0 | – | – |
 
-Total if all are run: 131 runs, about 10–11 hours, about €35. Estimates for the MAS runs come from
-single runs today and may be off by a factor of two.
+Reused runs: the 22 direct runs with `gpt-6.1-terra` made on 17 Nov 2026 between 10:58 and 11:25
+were made on exactly this setup (Azure, 16384-token cap stated in the prompt,
+`max_completion_tokens`, original task text). They were moved back from the archive to `runs/`
+under their original names: `*_directD_terra_r0*`, `*_directC_terra_r0*` (E7),
+`*_direct?_terra_skill_r0*` (E10), `*_direct?_terra_sim_r0*` (E11). The direct runs of
+16 Nov (OpenRouter, `gpt-6.1-terra-pro` and gpt-4o) stay in the archive.
+
+Total to make: 85 runs, about 7 hours, about €23. Estimates for the MAS runs come from single
+runs and may be off by a factor of two.
 
 Suggested order (the core comparison first, the long as-delivered Terra runs last):
-E4, E3, E7, E8, E9, E1, E5, then E10, E11, E6, E2.
+E4, E3, E7, E8, E9, E1, E2.
 
 Not repeated: the earlier OpenRouter runs with `gpt-6.1-terra-pro` (that model is not deployed
 on Azure); they stay in the archive and in the README as earlier results.
