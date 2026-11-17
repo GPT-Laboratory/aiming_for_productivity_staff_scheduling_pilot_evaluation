@@ -47,8 +47,7 @@ origset() {  # origset <mas dir> <models> <label>: A-D, original texts
 for e in "$@"; do
   echo "=== $e start $(date '+%F %H:%M')" | tee -a "$LOGS/queue.log"
   case $e in
-    E1) origset mas2025 4o mas2025 ;;
-    E2) origset mas2025 terra mas2025 ;;
+    E1|E2) echo "$e dropped (MAS 2025 as delivered is no longer part of the comparison)" ;;
     E3) v2set 4o ;;
     E4) v2set terra ;;
     E5|E6) echo "$e dropped (MAS 2024 is no longer part of the comparison)" ;;

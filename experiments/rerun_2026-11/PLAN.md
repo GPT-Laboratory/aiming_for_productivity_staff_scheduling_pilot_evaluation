@@ -34,8 +34,7 @@ like, every experiment is run again on the same setup, with repetitions.
 
 | ID | System | Model | Datasets × task text | Runs to make | Est. time | Est. cost |
 |---|---|---|---|---|---|---|
-| E1 | MAS 2025 as delivered (bit-rot patch only) | 4o | A, B, C, D × original | 12 | 45 min | < €1 |
-| E2 | MAS 2025 as delivered | Terra | A, B, C, D × original | 12 | 3.5 h (most stop at the step limit) | ~€15 |
+| E1, E2 | MAS 2025 as delivered | – | dropped: its flaws are documented (fix-loop analysis, archived results); the final report compares v2 with direct prompting | 0 | – | – |
 | E3 | MAS 2025 v2 | 4o | A, B, D × revised; C; D × original | 15 | 1 h | < €1 |
 | E4 | MAS 2025 v2 | Terra | A, B, D × revised; C; D × original | 15 | 1.5 h | ~€5 |
 | E5, E6 | MAS 2024 | – | dropped: MAS 2024 is no longer part of the comparison | 0 | – | – |
@@ -52,11 +51,10 @@ under their original names: `*_directD_terra_r0*`, `*_directC_terra_r0*` (E7),
 `*_direct?_terra_skill_r0*` (E10), `*_direct?_terra_sim_r0*` (E11). The direct runs of
 16 Nov (OpenRouter, `gpt-6.1-terra-pro` and gpt-4o) stay in the archive.
 
-Total to make: 85 runs, about 7 hours, about €23. Estimates for the MAS runs come from single
+Total to make: 61 runs, about 3 hours, about €7. Estimates for the MAS runs come from single
 runs and may be off by a factor of two.
 
-Suggested order (the core comparison first, the long as-delivered Terra runs last):
-E4, E3, E7, E8, E9, E1, E2.
+Order: E4, E3, E7, E8, E9.
 
 Not repeated: the earlier OpenRouter runs with `gpt-6.1-terra-pro` (that model is not deployed
 on Azure); they stay in the archive and in the README as earlier results.
