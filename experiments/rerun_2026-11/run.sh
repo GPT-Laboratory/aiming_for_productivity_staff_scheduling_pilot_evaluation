@@ -5,7 +5,7 @@
 cd "$(dirname "$0")/../.." || exit 1
 REPO=$PWD; LOGS=$REPO/experiments/rerun_2026-11/logs; mkdir -p "$LOGS"
 export UV_ENV_FILE=.env.azure
-TIMEOUT=1800; ROUNDS=2; N=3
+TIMEOUT=1800; ROUNDS=2; N=5
 
 mas() {  # mas <mas dir> <models: 4o|terra> <dataset dir> <prompt file> <name>
   dir=$1; models=$2; ds=$3; pf=$4; name=$5

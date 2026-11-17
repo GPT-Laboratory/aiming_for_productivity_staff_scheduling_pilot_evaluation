@@ -38,8 +38,8 @@ like, every experiment is run again on the same setup, with repetitions.
 | ID | System | Model | Datasets | Runs to make | Est. time | Est. cost |
 |---|---|---|---|---|---|---|
 | E1, E2 | MAS 2025 as delivered | – | dropped: its flaws are documented (fix-loop analysis, archived results) | 0 | – | – |
-| E3 | MAS 2025 v2 | 4o | A, B, C, D × 3 | 12 | 1 h | < €1 |
-| E4 | MAS 2025 v2 | Terra | A, B, C, D × 3 | 12 | 1.2 h | ~€4 |
+| E3 | MAS 2025 v2 | 4o | A, B, C, D × 5 | 20 | 1.7 h | ~€1 |
+| E4 | MAS 2025 v2 | Terra | A, B, C, D × 5 | 20 | 2 h | ~€6.5 |
 | E5, E6 | MAS 2024 | – | dropped: no longer part of the comparison | 0 | – | – |
 | E7 | Direct prompt | Terra | A, B, D × 5; C × 2 (+ 3 reused) | 17 | 20 min | ~€1.5 |
 | E8 | Direct prompt | gpt-4o | A, B, C, D × 5 | 20 | 10 min | < €1 |
@@ -58,7 +58,7 @@ They were moved back from the archive to `runs/` under their original names: `*_
 the pilot text), `*_direct?_terra_skill_r0*` (E10), `*_direct?_terra_sim_r0*` (E11). The direct runs
 of 16 Nov (OpenRouter, `gpt-6.1-terra-pro` and gpt-4o) stay in the archive.
 
-Total to make: 81 runs, about 3 hours, about €7. Estimates for the MAS runs come from single
+Total to make: 97 runs, about 4.5 hours, about €10. Estimates for the MAS runs come from single
 runs and may be off by a factor of two.
 
 Order: E4, E3, E7, E8, E9.
