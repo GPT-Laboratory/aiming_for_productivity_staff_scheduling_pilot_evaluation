@@ -23,10 +23,33 @@ RUNS, RES = REPO / "runs", REPO / "results"
 sys.path.insert(0, str(REPO / "datasets" / "C_reconstructed")); import check_schedule as cs
 sys.path.insert(0, str(REPO / "datasets" / "D_synthetic")); import synthetic_daycare as sd, score_daily_detail as sdd
 CX = REPO / "datasets" / "C_reconstructed" / "daycare_structure_example.xlsx"
-# EUR per million tokens, Azure "EU Data Zone Standard", short context (list given by the user,
-# 17 Nov 2026). An earlier quote for the same model was 1.08 / 0.06 / 5.39. gpt-4o and gpt-4o-mini
-# prices are not known yet: their runs get token counts only.
-PRICE = {"input": 0.99, "cached": 0.054, "output": 4.94}
+# Prices per million tokens, Azure "EU Data Zone Standard", short context, as given by the user on
+# 17 Nov 2026. gpt-6.1-terra in EUR (an earlier quote was 1.08 / 0.06 / 5.39); gpt-4o and
+# gpt-4o-mini in USD, from third-party price aggregators (Microsoft's page shows no text figures).
+# gpt-4o-mini has no cached-input price listed: cached input is charged at the input price.
+# Costs are kept in each model's currency; no exchange rate is applied.
+PRICES = {
+    "gpt-6.1-terra": ("EUR", 0.99, 0.054, 4.94),
+    "gpt-4o": ("USD", 2.75, 1.38, 11.00),
+    "gpt-4o-mini": ("USD", 0.165, 0.165, 0.66),
+}
+
+
+def price_of(model_name):
+    m = str(model_name)
+    key = "gpt-4o-mini" if "gpt-4o-mini" in m else ("gpt-4o" if "gpt-4o" in m else ("gpt-6.1-terra" if "terra" in m else None))
+    return PRICES.get(key)
+
+
+def cost(model_name, inp, cached, out):
+    """-> (currency, amount) or (None, None)."""
+    p = price_of(model_name)
+    if not p:
+        return None, None
+    cur, pi, pc, po = p
+    return cur, round(((inp - cached) * pi + cached * pc + out * po) / 1e6, 4)
+
+
 CURRENT = {"Staff01", "Staff02", "Staff03", "Staff04", "Staff05", "Staff06", "Staff07", "Staff09", "Staff10", "Staff11", "Assistant"}
 
 
@@ -154,6 +177,11 @@ def analyse_mas():
         inp = sum(v["input"] for v in u.values()); ca = sum(v["cached_input"] for v in u.values())
         out = sum(v["output"] for v in u.values()); rea = sum(v["reasoning"] for v in u.values())
         final = next((r for r in scored if r["picked"]), scored[-1] if scored else None)
+        costs = {}
+        for mname, v in u.items():
+            cur, amt = cost(mname, v["input"], v["cached_input"], v["output"])
+            if cur:
+                costs[cur] = round(costs.get(cur, 0) + amt, 4)
         runs.append(meta | {"run": d.name, "outcome": "step limit" if "Recursion" in str(s.get("error")) else s["outcome"],
                             "steps": s["n_steps"], "executions": s["n_docker_executions"], "failed_executions": s["n_docker_failures"],
                             "rounds": s["n_results"], "minutes": round(s["duration_s"] / 60, 1), "final_report_pick": pick,
@@ -164,7 +192,7 @@ def analyse_mas():
                             "best_round_score": (max if meta["dataset"] == "C" else min)([r["score"] for r in scored if r["score"] is not None], default=None),
                             "llm_calls": sum(v["calls"] for v in u.values()), "input_tokens": inp, "cached_input_tokens": ca,
                             "output_tokens": out, "reasoning_tokens": rea,
-                            "cost_eur": cost(inp, ca, out) if meta["model"] == "terra" else None})
+                            "cost_eur": costs.get("EUR"), "cost_usd": costs.get("USD")})
     return runs, rounds
 
 
@@ -209,7 +237,8 @@ def analyse_direct():
                             **{k: sc.get(k) for k in ("score", "failed", "understaffed_min", "empty", "conflicts", "repeats", "staff08")},
                             "input_tokens": inp, "cached_input_tokens": ca, "output_tokens": out, "reasoning_tokens": rea,
                             "tokens_detail": "full" if any("cached_prompt_tokens" in t for t in tu) else "prompt+completion only",
-                            "cost_eur": cost(inp, ca, out) if meta["model"] == "terra" else None})
+                            **(lambda c: {"cost_eur": c[1] if c[0] == "EUR" else None, "cost_usd": c[1] if c[0] == "USD" else None})(
+                                cost(meta["model"], inp, ca, out))})
     return rows
 
 
@@ -248,9 +277,10 @@ def summarise(mas, direct):
         mins = [r.get("minutes") or (r.get("seconds") or 0) / 60 for r in rows]
         row |= {"mean_minutes": round(st.mean(mins), 1),
                 "mean_tokens_in": round(st.mean(r["input_tokens"] for r in rows)), "mean_tokens_out": round(st.mean(r["output_tokens"] for r in rows))}
-        costs = [r["cost_eur"] for r in rows if r.get("cost_eur") is not None]
-        if costs:
-            row["mean_cost_eur"] = round(st.mean(costs), 3)
+        for cur in ("eur", "usd"):
+            costs = [r[f"cost_{cur}"] for r in rows if r.get(f"cost_{cur}") is not None]
+            if costs:
+                row[f"mean_cost_{cur}"] = round(st.mean(costs), 4)
         if "steps" in rows[0]:
             row |= {"mean_steps": round(st.mean(r["steps"] for r in rows), 1), "step_limit": sum(1 for r in rows if r["outcome"] == "step limit")}
         out.append(row)
@@ -283,4 +313,4 @@ if __name__ == "__main__":
         print(f"{r['experiment']:<9} {r['setup']:<44} {r['dataset']}  n={r['runs']:<2} scored={r['scored']:<2} "
               f"mean={r.get('mean', '–')!s:<5} range={r.get('min', '–')}–{r.get('max', '–')}{extra}  "
               f"{r['mean_minutes']} min" + (f"  steps {r['mean_steps']} (limit {r['step_limit']})" if "mean_steps" in r else "")
-              + (f"  €{r['mean_cost_eur']}" if "mean_cost_eur" in r else ""))
+              + (f"  €{r['mean_cost_eur']}" if "mean_cost_eur" in r else "") + (f"  ${r['mean_cost_usd']}" if "mean_cost_usd" in r else ""))
