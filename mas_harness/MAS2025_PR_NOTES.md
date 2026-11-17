@@ -7,6 +7,12 @@ Target: <https://github.com/JoniHonkanen/heuristic-multi-agent-system>, based on
   version "as delivered" in the evaluation);
 * `mas2025v2_design_patches.diff`: design changes, applied on top of the first (`mas2025v2/`).
 
+*Status 17 Nov 2026:* prepared for submission as three PRs: "make it run again" (items 1–7, with
+the PuLP fix of item 2 corrected), "fixer workflow" (items 8–11) and "shift-scheduling guidance"
+(item 12). The same fixes are prepared for the 2024 version (`ucs-llm-code-docker-optimizer` and
+its copy `GPT-Laboratory/ai-code-optimizer`), plus a limit on fix attempts, which that version
+lacks. Not yet submitted.
+
 They are split below into separate PRs, smallest first. Each item says what was wrong, how it
 showed up, what was changed, and which files are touched. Line numbers refer to `e8c2077`.
 
@@ -15,11 +21,13 @@ showed up, what was changed, and which files are touched. Line numbers refer to 
 1. **Docker Compose V2.** `docker-compose` (V1) is no longer shipped with Docker. The run agent
    now calls `docker compose build`, `docker compose up …` and `docker compose down`.
    File: `agents/docker_execution_agent.py`.
-2. **PuLP needs numpy.** PuLP ≥ 3.3 imports numpy but does not depend on it, so every generated
-   program with an unpinned `PuLP` requirement fails at import unless something else pulls numpy
-   in. The run agent appends `numpy` to `requirements.txt` when `pulp` is listed without it.
-   File: `agents/docker_execution_agent.py`. (Alternative for upstream: tell the code-writing
-   prompts to list numpy with PuLP.)
+2. **PuLP 4.** *Corrected 17 Nov 2026:* the `No module named 'numpy'` errors came from PuLP 4.0
+   (September 2026, Python ≥ 3.12), not 3.3: PuLP 4 imports numpy without depending on it, and it
+   also removed `PULP_CBC_CMD` and renamed the `LpVariable` bounds that generated programs use.
+   PuLP 3.x works without numpy. The eval patch appends `numpy` to `requirements.txt` when `pulp`
+   is listed without it, which only moves the failure to the API change. The pull request instead
+   caps an unpinned PuLP below 4.
+   File: `agents/docker_execution_agent.py`.
 3. **`requirements.txt` does not resolve.** It is a pip freeze with conflicts (chainlit 2.4.0
    needs a newer uptrace; langchain-anthropic 0.3.9 needs a newer langchain-core) and two
    merged lines. Our harness uses `requirements-mas2025.txt` (the direct imports only, resolved

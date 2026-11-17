@@ -196,7 +196,7 @@ Prerequisites:
 
    The patch fixes bit rot and gaps against the intended use, without changing prompts, models or agent logic:
    * it calls `docker compose`, because Compose V1 is no longer available;
-   * it adds `numpy` when the requirements list PuLP, because PuLP 3.3 needs numpy but does not install it;
+   * it adds `numpy` when the requirements list PuLP. The reason given at the time, "PuLP 3.3 needs numpy", was wrong: the `No module named 'numpy'` errors came from PuLP 4 (September 2026, Python ≥ 3.12), which imports numpy without depending on it. With numpy added, PuLP 4 programs then failed on its changed API (`lowBound`, `PULP_CBC_CMD`). The upstream pull request caps an unpinned PuLP below 4 instead. None of the rerun's MAS programs used PuLP, so its results are not affected;
    * it gives the code fixer the tail of the build and run log, because build and start-up errors used to reach it as a single line;
    * it regenerates the Docker files after a fix, because the fixer could not repair a broken Dockerfile or compose file;
    * it asks the user what to change when they request a new plan, and lets them give optional feedback for the next round;
