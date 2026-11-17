@@ -27,7 +27,9 @@ PLAN = [
 
 
 def runs_of(pattern):
-    done, running, minutes = 0, 0, []
+    """-> finished runs, runs in progress, minutes per finished run, steps per finished MAS run,
+    step reached by the MAS run in progress (None if none)."""
+    done, running, minutes, steps, now_step = 0, 0, [], [], None
     for d in sorted(RUNS.glob("*")):
         if not re.search(pattern, d.name):
             continue
@@ -36,9 +38,13 @@ def runs_of(pattern):
             done += 1
             r = json.loads(f.read_text(encoding="utf-8"))
             minutes.append((r.get("duration_s") or 0) / 60)
+            if r.get("n_steps") is not None:
+                steps.append(r["n_steps"])
         else:
             running += 1
-    return done, running, minutes
+            if (d / "steps").exists():
+                now_step = len([x for x in (d / "steps").iterdir() if x.is_dir()])
+    return done, running, minutes, steps, now_step
 
 
 def queue_times():
@@ -77,7 +83,7 @@ def main():
     plan_cursor, proj_end = start, now
     plan_total = sum(p[3] for p in PLAN)
     for eid, label, n, plan_min, pat in PLAN:
-        done, running, mins = runs_of(pat)
+        done, running, mins, steps, now_step = runs_of(pat)
         tot_done += done; tot_plan += n
         w0 = plan_cursor; plan_cursor += dt.timedelta(minutes=plan_min)
         plan_frac = (now - w0).total_seconds() / 60 / plan_min
@@ -99,6 +105,14 @@ def main():
         mean_run = f"{sum(mins) / len(mins):.1f} min/run" if mins else ""
         print(f"{BOLD}{eid:<4}{RESET} {label:<26} plan   {bar(plan_frac, '▒', BLUE)} {plan_frac:>4.0%}")
         print(f"{'':<31} actual {bar(act_frac, '█', col)} {act_frac:>4.0%}  {done:>2}/{n:<2} {mean_run:<13} {status}")
+        if steps or now_step is not None:
+            line = ""
+            if steps:
+                line = (f"steps per run: {' '.join(map(str, steps))}  (mean {sum(steps) / len(steps):.1f}, "
+                        f"{min(steps)}–{max(steps)}; 14 = no fixes, 50 = step limit)")
+            if now_step is not None:
+                line += ("  ·  " if line else "") + f"run in progress at step {now_step}"
+            print(f"{'':<31}        {GREY}{line}{RESET}")
     plan_frac = max(0.0, min(1.0, (now - start).total_seconds() / 60 / plan_total))
     act = tot_done / tot_plan
     col = GREEN if act >= plan_frac else YELLOW
