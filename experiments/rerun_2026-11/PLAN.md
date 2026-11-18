@@ -92,18 +92,32 @@ to `experiments/rerun_2026-11/logs/` (git-ignored). Nothing is started without t
 * E7's C set was made all fresh: 3 more runs after E12 (`e7c_extra.sh`, logged as E7c). The 3
   reused C runs of 17 Nov count as extra repetitions, not in the main table.
 
-## To do: expert evaluation (agreed 17 Nov 2026, not started)
+## Expert evaluation (agreed 17 Nov 2026; selection fixed 18 Nov 2026)
 
-Revisit the human evaluation form (`results/scoresheet_template.csv`, currently one row per MAS
-round). Only the best and most reliable outputs go to the expert: two final rosters on dataset D,
-the realistic case.
+Only two final rosters on dataset D, the realistic case, go to the daycare's expert: one from the
+best MAS setup and one from the best direct setup, each the **second-best of its five runs**, so
+that a good but not exceptional result is judged.
 
-* One from the best MAS setup (MAS v2 · Terra, E4) and one from the best direct setup (direct ·
-  Terra, E7 or E12a).
-* Selection rule, fixed before looking at the rosters and stated in the report: lowest missing
-  staff-hours per week; ties broken by the fairness measures (early/late balance, rotation about
-  every three weeks), then by the shorter run. (On D, three E4 runs reach 10.8; the best direct
-  run is E7 · D r05 at 11.2.)
-* Blind: both shown in the same weekly format as "Roster X" and "Roster Y" in random order,
-  possibly with the daycare's own rotation (weeks 14–17 replayed) as an anonymised third.
-* Rework the form to one row per roster (usability, safety, fairness, what would need changing).
+* **Setups.** MAS 2025 v2 · Terra (E4) and direct · Terra (E7). E7 rather than E12a (with the
+  skill): on C the skill helps (4 / 5 against 1 / 5 rosters meeting all rules), but on D it does
+  not. With the skill, D's missing staff-hours were no lower (median 14.0 against 13.1), same-shift
+  repeats were higher (10–23 against 7–9), weekly hours were the same, and one run left the
+  assistant out (34.6).
+* **Rule.** Rank the runs by missing staff-hours per week, then fewer same-shift repeats, then the
+  shorter run, and take the second. For the MAS, the roster is the one its final report picked.
+  * **E4:** r05 (10.3, weekday sheets) is first, so **r03** (10.8, 3 repeats, 7.3 min; final
+    pick: round 2) is second.
+  * **E7:** r05 (11.2) is first, so **r04** (12.9, 9 repeats) is second.
+* **Blind.** Both are shown in the daycare's weekly format as "Ehdotus A" and "Ehdotus B", in a
+  seeded random order, with real staff names restored. The PDFs and the key are in the private
+  folder, not here. The daycare's own rotation is not included as a third roster.
+* **Form.** One page per roster, asking:
+  * usable as is, with small changes, or not;
+  * child safety and regulations;
+  * fairness of early and late shifts and of workload;
+  * what to change;
+  * what the roster's maker should have known.
+
+  Then general questions: which is better and why, the time needed by hand, group binding, and
+  weekly rotation. `results/scoresheet_template.csv` (one row per MAS round) is superseded by
+  this form.
