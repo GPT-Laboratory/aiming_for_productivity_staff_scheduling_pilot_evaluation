@@ -62,9 +62,9 @@ variants:
 
 | Variant | What was changed in the MAS's code | Runs |
 |---|---|---|
-| **MAS 2024 (unpatched)** | nothing; the harness forwards `docker-compose` to Compose V2 | 16 runs with gpt-4o / gpt-4o-mini on A–D, 3 with `gpt-6.1-terra-pro` on D (earlier experiments) |
-| **MAS 2024 + evaluation patch** | Compose V2; numpy added next to PuLP; a log tail for the code fixer; Docker files regenerated after each fix; the user's typed answer used for a new plan and between rounds; step limit 50. Unlike v1 below, this changes behaviour. | 3 runs with `gpt-6.1-terra` on D (earlier experiments) |
-| **MAS 2025 v1 ("as delivered")** | bit-rot fixes only: Compose V2, numpy added next to PuLP, and a reset of the fix counter that avoids a crash. No prompt or model is changed, and the agents' logic is unchanged apart from the counter reset. | 12 runs with gpt-4o / gpt-4o-mini on A–D (made before the counter reset was added; 2 crashed on it), 2 reruns of C with it, 12 runs with `gpt-6.1-terra` on A–D (earlier experiments) |
+| **MAS 2024 (unpatched)** | nothing; the harness forwards `docker-compose` to Compose V2 | 16 runs with gpt-4o / gpt-4o-mini on A–D, 3 with `gpt-6.1-terra-pro` on D ([earlier experiments](EARLIER_EXPERIMENTS.md)) |
+| **MAS 2024 + evaluation patch** | Compose V2; numpy added next to PuLP; a log tail for the code fixer; Docker files regenerated after each fix; the user's typed answer used for a new plan and between rounds; step limit 50. Unlike v1 below, this changes behaviour. | 3 runs with `gpt-6.1-terra` on D ([earlier experiments](EARLIER_EXPERIMENTS.md)) |
+| **MAS 2025 v1 ("as delivered")** | bit-rot fixes only: Compose V2, numpy added next to PuLP, and a reset of the fix counter that avoids a crash. No prompt or model is changed, and the agents' logic is unchanged apart from the counter reset. | 12 runs with gpt-4o / gpt-4o-mini on A–D (made before the counter reset was added; 2 crashed on it), 2 reruns of C with it, 12 runs with `gpt-6.1-terra` on A–D ([earlier experiments](EARLIER_EXPERIMENTS.md)) |
 | **MAS 2025 v2** | v1 plus five design changes: the agents are told how the program is built and run; the code fixer can ask for the full log; the fixer can route a fault to the Docker files or give up; the fixer sees its earlier attempts; and the shift-scheduling guidance is rewritten into hard and soft rules in priority order (details in [Setup](#setup)) | the final rerun: E3 (gpt-4o / gpt-4o-mini) and E4 (`gpt-6.1-terra`) on A–D, 5 runs each |
 
 Some settings come from the harness and apply to all four variants, without changing the MAS's
@@ -147,43 +147,22 @@ directly gets close at a fraction of the cost and time; the MAS's generated code
 on the staffing arithmetic of the realistic case (D). These conclusions rest on synthetic data
 and rule checkers, not on validation by the daycare.
 
-### Earlier experiments (16–17 Nov 2026, archived)
+### How we got here
 
-These runs led to the design changes and the rerun. They used different providers (OpenRouter,
-then Azure), model variants (`gpt-6.1-terra-pro`, then `gpt-6.1-terra`), the pilot's original task
-text, and MAS 2024 (unpatched and with the evaluation patch) and MAS 2025 v1. Their results are in `results/archive/2026-11-17_before_rerun/`.
+The final comparison was preceded by two days of earlier experiments (16–17 Nov 2026), on mixed
+providers and models, the pilot's original task text, and MAS 2024 and MAS 2025 v1. In short:
 
-| Experiment | Runs | Analysed rounds | Rounds the system rated "goal achieved" | Usable schedules |
-|---|---|---|---|---|
-| MAS 2024 (unpatched), gpt-4o / gpt-4o-mini, datasets A–D | 16 | 43 | 25 | 0 |
-| MAS 2024 (unpatched) with `openai/gpt-6.1-terra-pro` as both models, dataset D | 3 | 3 | 0 | 0 |
-| MAS 2025 v1, gpt-4o / gpt-4o-mini, datasets A–D (12 runs before the counter reset was added, plus 2 C reruns with it) | 12 + 2 | 28 + 1 | 11 + 1 | 0 |
-| Direct prompt, `openai/gpt-6.1-terra-pro`, dataset D | 5 | – | – | 5 valid tables |
-| Direct prompt, `openai/gpt-6.1-terra-pro`, dataset C | 3 | – | – | 3 satisfy all 11 rules |
-| Direct prompt, current prompt, without / with the domain skill, dataset D | 5 / 5 | – | – | 5 / 5 valid tables; mean 11.5 / 34.5 missing staff-hours a week |
-| Direct prompt, current prompt, without / with the domain skill, dataset C | 3 / 3 | – | – | 3 / 3 satisfy all 11 rules |
-| MAS 2025 v1, `gpt-6.1-terra` (Azure) as both models, datasets A–D | 12 | 10 | 1 | 0 (2 near-usable on C: 10 of 11 rules) |
-| MAS 2024 + evaluation patch, `gpt-6.1-terra` (Azure), dataset D | 3 | 7 | 0 | 0 |
-| Direct prompt, `gpt-6.1-terra` (Azure): without the skill / with the skill / with the simulated manager, dataset D | 5 / 5 / 3 | – | – | all valid; mean 13.2 / 34.0 / 35.0 missing staff-hours a week |
-| Direct prompt, `gpt-6.1-terra` (Azure): without the skill / with the skill / with the simulated manager, dataset C | 3 / 3 / 3 | – | – | 2 / 2 / 2 satisfy all 11 rules (each miss: R10 only) |
+* **The MAS as delivered failed.** Neither MAS 2024 nor MAS 2025 v1 produced a usable roster with
+  gpt-4o, yet they rated many rounds "goal achieved".
+* **A newer model did not help inside the MAS**, although it solved the task when prompted
+  directly.
+* **For the strong model, the obstacle was the workflow.** A fix-loop analysis of MAS 2025 v1 with
+  `gpt-6.1-terra` traced most failures to Docker files that no agent could repair and to errors
+  that never reached the code fixer.
+* **These findings became MAS 2025 v2 and the revised task text.** Both worked in single runs, so
+  everything was rerun on one setup.
 
-* **MAS 2024 produced no usable roster.** The typical failures were infeasible models caused by the generated code's own bugs, schedules that are structurally impossible, output at the wrong decision level, and the input history reprinted instead of new weeks. 55 of 98 code executions crashed, and 3 of 16 runs stopped at LangGraph's 25-step limit.
-* **The MAS's self-assessment was unreliable.** It declared success in 25 of 43 rounds, none of which was usable.
-* **MAS 2025, most likely the pilot's version, did no better.** It has shift-scheduling instructions written for this kind of task, and it classified every run as shift scheduling and chose a heuristic. Of its 28 analysed rounds, 12 reprinted the input history without new weeks, 11 were structurally impossible (for example the same two people in every shift, or one name per row), 3 were at the wrong decision level (groups instead of names), 1 broke the critical rules badly and 1 produced nothing. On dataset C, 68–79% of group time was understaffed and nobody worked the contracted 38 h 15 min. 54 of 82 code executions failed. It rated 11 rounds as achieved. In 15 rounds the program wrote the roster to an Excel file and printed only a confirmation such as "saved to …xlsx". The output analyser sees only the printed output, so it never saw these rosters, yet it rated 9 of them as achieved. Two runs crashed on a routing bug in the MAS (see [Setup](#setup)); with the fix, one rerun stopped at the step limit. The other produced one round (46% of group time understaffed, rated achieved) and then hit the 25-minute timeout while a generated heuristic ran.
-* **A newer model did not help inside the MAS** (`gpt-6.1-terra-pro` via OpenRouter, MAS 2024 before the evaluation patch). It wrote 390–510-line programs that recognised missing policy decisions, but the fixed workflow gave it no way to ask about them or to fix its Docker environment. All three runs stopped at the step limit.
-* **Inside MAS 2025, `gpt-6.1-terra` was blocked by the Docker plumbing, not by the task.** 11 of 12 runs stopped at the 50-step limit, and 215 of 225 program executions failed. `mas_harness/fix_loop_analysis.py` traces 188 of the failures to the Docker files or the folder layout: in 147 the compose file mounted `./data` and passed `/data/<file>.xlsx` while the MAS puts the inputs in the project folder, and in 41 `compose.yaml` required a variable (`${YEAR}`, `${WEEKS}`) that the MAS never sets. The code fixer rewrites only the program; it is never shown the Dockerfile or `compose.yaml` and cannot change them, and there is no agent that can. So 161 retries ran with unchanged Docker files, four fix attempts at a time, until a new program brought new Docker files. In 148 failures the fixer was shown only an exit code: the MAS passes on only lines matching `Traceback`, `ERROR:` or `exited with code`, and the model's programs reported their own errors as `error: …` and exited. Where an error in the program itself did reach the fixer, it was fixed within one or two attempts. Within these limits the model produced two near-usable rosters on dataset C (0 minutes understaffed, everyone at 38 h 15 min, home groups kept; only the opening rotation R10 missed), one of them rated achieved. Its self-assessment was accurate: it rated 1 of 10 rounds achieved, against 11 of 28 for gpt-4o. Most other rounds ended with a program that stopped to ask for policy decisions or approval flags, or printed diagnostics, which the fixed workflow has no way to answer.
-* **With the 2024 evaluation patch the model saw its errors but still produced no roster on D.** The patch passes the last log lines to the fixer and regenerates the Docker files after each fix, so the fixer was never left with only an exit code and no retry ran with unchanged Docker files. 2 of 3 runs completed, but 26 of 33 executions still failed, 22 of them on the input path layout (the Docker files agent is not told where the MAS puts the inputs), and every program stopped for policy decisions, a self-test or diagnostics.
-* **The same newer model prompted directly solved the task.**
-  * On dataset C, all 3 runs satisfied every rule on the first answer.
-  * On dataset D, all 5 runs produced valid tables with 10.9–14.5 missing staff-hours a week (mean 12.8). For comparison, the best known schedule has 10.9, the company's own rotation replayed has 17.4 and random rotations about 20.7.
-  * The weak point was rotation: the same person stayed in the same shift in consecutive weeks 4–8 times per run.
-  * Repeated with the current prompt (16384-token cap stated in it): C 3/3 satisfied every rule again; D 5/5 valid with 10.9–12.8 missing staff-hours a week (mean 11.5), same-shift repeats 6–10. gpt-4o on the same prompt: D 16.0–39.6, C 0/3 meeting all rules.
-* **The domain skill made D worse.** With `--skill`, the newer model still satisfied every rule on C (3/3), but on D it left the part-time assistant unscheduled in every week of all 5 runs: three full shifts would exceed the assistant's 19:08 weekly target, and the skill says part-time staff work only their contracted hours. Missing staff-hours rose to 34.1–35.6 a week (mean 34.5), three times the runs without the skill. The model explained the omission and listed the resulting gaps, as the skill asks, but it put the hour target before the ratio, against the skill's own priority order. For gpt-4o the skill made no clear difference (D 19.7–39.7, C 0/3).
-* **A simulated manager did not improve the direct answers.** With the persona of `mas_harness/sim_user/SKILL.md` reviewing each answer, C was accepted in 2 of 3 trials; in the third the manager gave up because the roster stayed a long CSV list with staff IDs, although it met every rule. On D the manager accepted neither completed trial (13.1 and 13.3 missing staff-hours a week, about the same as without the manager); a third trial was stopped and is not counted.
-* **The non-pro `gpt-6.1-terra` (Azure) prompted directly was close behind.** D: 5/5 valid, 12.0–14.4 missing staff-hours a week (mean 13.2); C: 2 of 3 satisfied every rule, and the third missed only R10. About 30 s per answer. With the skill it again left the assistant unscheduled on D (mean 34.0). With the simulated manager, D got worse for the same reason: the manager kept asking it to respect the weekly hour targets, and it dropped the assistant (mean 35.0, no roster accepted); on C the manager accepted 1 of 3, and in one trial kept asking to fix an Eskarit gap that the checker does not find.
-* **Cost was not the limiting factor.** A MAS run with gpt-4o cost $0.04–0.18, a MAS run with the newer model about $1.10, and a direct-prompt run about $0.05. At Azure's prices for `gpt-6.1-terra` on 17 Nov 2026 (€1.08 per million input tokens, €0.06 cached input, €5.39 output), the 22 direct runs used 0.44 M input and 0.20 M output tokens, about €0.07 a run. The harness did not yet record tokens for the MAS runs on Azure.
-
-At that point our interpretation was that the fixed generate–run–describe workflow was the main bottleneck, more than model capability: nothing in the loop checked the result against the rules, and information was lost between agents. The rerun above shows that fixing those gaps lets a strong model succeed inside the MAS.
+The details, tables and results files are in [EARLIER_EXPERIMENTS.md](EARLIER_EXPERIMENTS.md).
 
 ## Repository layout
 
@@ -200,6 +179,7 @@ mas_harness/                       headless runner for the MAS (the MAS's code i
                                    the patches to the MAS and their notes (MAS2025_PR_NOTES.md)
 direct_llm/                        direct frontier-LLM experiment (no tools, simple revision loop)
 experiments/rerun_2026-11/         plan, run list and analysis of the final rerun
+EARLIER_EXPERIMENTS.md             the experiments before the rerun, and how they led to it
 analysis/                          run aggregation and cost split from an OpenRouter export
 results/                           aggregated results (see below)
 ```
@@ -272,7 +252,7 @@ Prerequisites:
    * it asks the user what to change when they request a new plan, and lets them give optional feedback for the next round;
    * it sets the LangGraph step limit explicitly to 50 instead of the implicit default of 25.
 
-   The original results were produced without this patch.
+   The earlier MAS 2024 runs with gpt-4o / gpt-4o-mini and with `gpt-6.1-terra-pro` were made without this patch.
 
    **MAS 2025** ([heuristic-multi-agent-system](https://github.com/JoniHonkanen/heuristic-multi-agent-system), Feb–May 2025), the optimization tool derived from MAS 2024 and most likely the pilot's version. It adds problem classification, a heuristic agent and problem-class instructions, including instructions for shift scheduling. Clone it and point `MAS_DIR` at it:
 
@@ -290,7 +270,7 @@ Prerequisites:
 
    The patch also fixes one bug in the MAS's own control flow. After 4 failed fixes, MAS 2025 regenerates the code, but it resets the fix counter only in its new-round agent. The next execution therefore routes to a node that is missing from the routing table and the run crashes with `KeyError: 'heuristic'` (or `'code_generator'`); this happened in 2 of the first 12 runs, both on dataset C. The patch resets the counter when code is regenerated, as the new-round agent already does. Runs that keep failing then stop at the MAS's own step limit of 50. Runs made with the patch are named `*_mas2025fix_*`.
 
-   **MAS 2025 v2 (design variant).** The runs with `gpt-6.1-terra` showed gaps in the MAS's design rather than bit rot (see [Main findings](#main-findings)). `mas_harness/mas2025v2_design_patches.diff`, applied on top of the evaluation patch in a separate checkout `mas2025v2/` (`MAS_DIR=$PWD/mas2025v2`), makes five changes: (1) the agents that write programs, the Docker files agent and the code fixer are told how the program is built and run (inputs side by side in the build context, `docker compose build` and `up` with no variables, arguments or interaction, unattended: finish with stated assumptions); (2) the run agent keeps the tail of the unfiltered log, and the code fixer can ask for it (`need_full_logs`), getting a second call in the same step; (3) the code fixer decides where the fault is: `code`, `docker` (the Docker files agent corrects its files with the fixer's note) or `give_up` (the round ends as a failed round, and the next program is written knowing why); (4) the code fixer sees its earlier attempts on the same program; (5) the shift-scheduling guidance (`SHIFT_SCHEDULING` in `prompts/instuctions.py`) separates hard rules from soft rules in priority order and says never to return nothing. Runs with v2 are named `*_mas2025v2_*` and reported separately from v1. To build the v2 checkout:
+   **MAS 2025 v2 (design variant).** The runs with `gpt-6.1-terra` showed gaps in the MAS's design rather than bit rot (see [EARLIER_EXPERIMENTS.md](EARLIER_EXPERIMENTS.md)). `mas_harness/mas2025v2_design_patches.diff`, applied on top of the evaluation patch in a separate checkout `mas2025v2/` (`MAS_DIR=$PWD/mas2025v2`), makes five changes: (1) the agents that write programs, the Docker files agent and the code fixer are told how the program is built and run (inputs side by side in the build context, `docker compose build` and `up` with no variables, arguments or interaction, unattended: finish with stated assumptions); (2) the run agent keeps the tail of the unfiltered log, and the code fixer can ask for it (`need_full_logs`), getting a second call in the same step; (3) the code fixer decides where the fault is: `code`, `docker` (the Docker files agent corrects its files with the fixer's note) or `give_up` (the round ends as a failed round, and the next program is written knowing why); (4) the code fixer sees its earlier attempts on the same program; (5) the shift-scheduling guidance (`SHIFT_SCHEDULING` in `prompts/instuctions.py`) separates hard rules from soft rules in priority order and says never to return nothing. Runs with v2 are named `*_mas2025v2_*` and reported separately from v1. To build the v2 checkout:
 
    ```bash
    git clone https://github.com/JoniHonkanen/heuristic-multi-agent-system.git mas2025v2
@@ -312,7 +292,7 @@ Prerequisites:
 
    To use a second provider (for example Azure for one model), put its settings in `.env.<name>` and prefix a command with `UV_ENV_FILE=.env.<name>`. This works for the MAS harness and the direct-LLM script alike. Values in that file take precedence over `.env`, and each run records its endpoint and models. The direct-LLM script and the simulated manager send the output cap as `max_completion_tokens`, which reasoning models on OpenAI and Azure require, and as `max_tokens` on OpenRouter.
 
-   The Terra runs from 17 Nov 2026 onwards use `gpt-6.1-terra` (not the pro variant) on Azure. The gpt-4o and gpt-4o-mini results were not rerun there: they come from OpenRouter's `openai/gpt-4o` and `openai/gpt-4o-mini`, whose snapshots the logs do not record. Azure serves gpt-4o-2024-11-20 and gpt-4o-mini-2024-07-18, so gpt-4o results on Azure need not match the earlier ones.
+   The rerun used Azure (`UV_ENV_FILE=.env.azure`) for every model: `gpt-6.1-terra`, gpt-4o-2024-11-20 and gpt-4o-mini-2024-07-18. The earlier experiments also used OpenRouter; see [EARLIER_EXPERIMENTS.md](EARLIER_EXPERIMENTS.md).
 
 3. Check that the MAS runs end to end with the small cutting-stock task. It takes about 2–3 minutes and costs about one cent.
 
@@ -330,18 +310,19 @@ The direct-LLM experiment and the dataset scripts need only uv and the API key, 
 
 ```bash
 # one run
-mas_harness/run.sh --prompt-file datasets/D_synthetic/prompt.txt \
+mas_harness/run.sh --prompt-file datasets/D_synthetic/prompt_revised.txt \
     --file datasets/D_synthetic/synthetic_daycare.xlsx --optimization-rounds 2 --name D_mas_r01
 
-# a batch: <dataset dir> <name> <runs> <optimization rounds> [timeout s, default 1500]
-mas_harness/run_batch.sh datasets/D_synthetic D_mas 5 2
+# a batch: <dataset dir> <name> <runs> <optimization rounds> [timeout s, default 1500] [prompt file]
+mas_harness/run_batch.sh datasets/D_synthetic D_mas 5 2 1800 prompt_revised.txt
 
-# newer-model arm: the same, with both MAS models overridden
-HEADLESS_LLM_MODEL=openai/gpt-6.1-terra-pro HEADLESS_LLM_CODE_MODEL=openai/gpt-6.1-terra-pro \
-    mas_harness/run_batch.sh datasets/D_synthetic D_mas_newmodel 3 2
+# as in the rerun's E4: MAS 2025 v2 with gpt-6.1-terra as both models, on Azure
+UV_ENV_FILE=.env.azure MAS_DIR=$PWD/mas2025v2 \
+HEADLESS_LLM_MODEL=gpt-6.1-terra HEADLESS_LLM_CODE_MODEL=gpt-6.1-terra HEADLESS_LLM_DEFAULT_TEMPERATURE=1 \
+    mas_harness/run_batch.sh datasets/D_synthetic rr_D_v2_terra_rev 5 2 1800 prompt_revised.txt
 ```
 
-Runs take 2–5 minutes each with gpt-4o and up to 25 minutes with the newer model; the harness timeout is 25 minutes per run in batches.
+`experiments/rerun_2026-11/run.sh E3 E4 E7 …` runs the rerun's experiments as listed in its `PLAN.md`. In the rerun a MAS 2025 v2 run took 2.4 min on average with gpt-4o and 6.1 min with `gpt-6.1-terra`; the timeout was 30 minutes per run.
 
 How the harness works:
 * **No user interface.** It replaces the MAS's Chainlit UI with a stand-in module and calls the MAS's own `main()` handler, so file ingestion, prompt formatting and the LangGraph workflow are the original code.
@@ -350,7 +331,7 @@ How the harness works:
 * **Token usage.** Every LLM call is logged as an `llm_usage` event (step, model, input, cached input, output and reasoning tokens) and summed per model in `summary.json` (`token_usage`). Runs before 17 Nov 2026, 15:00 have no token counts.
 * **Fix-loop analysis.** `mas_harness/fix_loop_analysis.py <run> ...` goes through the recorded run–fix loops: for each failed program execution it shows what the code fixer was given, triages the cause from the saved Dockerfile and compose.yaml (variables the MAS never sets, input files not reachable in the container) and says whether the cause lies in a file the fixer can edit. It reruns nothing unless `--replay` is given, which rebuilds the failed steps to recover errors the MAS did not pass on.
 * **Compose wrapper.** `mas_harness/bin/docker-compose` forwards the MAS's `docker-compose` calls to Compose V2.
-* **Model override.** `HEADLESS_LLM_MODEL` and `HEADLESS_LLM_CODE_MODEL` replace the MAS's two models (gpt-4o-mini and gpt-4o) without changing its code; this is how the newer-model arm was run. `OPENAI_API_BASE` selects the provider.
+* **Model override.** `HEADLESS_LLM_MODEL` and `HEADLESS_LLM_CODE_MODEL` replace the MAS's two models (gpt-4o-mini and gpt-4o) without changing its code; this is how the Terra runs were made. `OPENAI_API_BASE` selects the provider.
 * **Temperature.** Reasoning models such as gpt-6.1-terra accept only the default temperature. The 2025 MAS sets `temperature=0` on its code model, and the 2024 MAS's LangChain version sends 0.7 by default; both are rejected with HTTP 400 on OpenAI and Azure. `HEADLESS_LLM_DEFAULT_TEMPERATURE=1` leaves the temperature out of the requests of both models. Each run records the temperatures in `summary.json`. (OpenRouter ignored the setting, so the earlier Terra runs there needed no override.)
 * **Structured replies.** The agents ask for structured (JSON) replies through LangChain. The 2024 MAS's LangChain uses function calling for that, which gpt-6.1-terra on Azure's chat-completions endpoint refuses while reasoning is on (HTTP 400; the agent then fails with a `KeyError`). `HEADLESS_STRUCTURED_OUTPUT_METHOD=json_schema` makes it use a JSON-schema response format instead, which is what the 2025 MAS's newer LangChain does by default. The schemas and prompts are unchanged.
 * **Root-owned leftovers.** Docker Compose creates missing bind-mount folders as root, and a generated program may write into them. The harness clears the MAS's `generated/` folder before each run and removes such leftovers through a container.
@@ -384,29 +365,13 @@ uv run --no-project --python 3.11 --with-requirements requirements.txt direct_ll
 | `results/rerun_mas_rounds.csv` | rerun, one row per analysed MAS round: score, failed rules, the workbook it came from, whether the final report picked it |
 | `results/rerun_direct_runs.csv` | rerun, one row per direct run (and the reused direct runs of 17 Nov): score, answers needed, tokens and cost |
 | `results/rerun_llm_extract.csv` | rerun, every MAS round's roster as extracted by an LLM into a fixed JSON schema and scored (see below) |
-| `results/archive/2026-11-17_before_rerun/` | the results files as they were before the rerun |
-| `results/experiments_summary.csv` | per experiment: runs, completed, stopped at step limit, code executions and failures, analysed rounds, rounds self-rated as achieved, usable schedules |
-| `results/mas_round_classification.csv` | every analysed MAS round classified by failure type, with the MAS's own verdict and a short note |
-| `results/mas2025_round_classification.csv` | the same for MAS 2025 v1, plus how faithfully each round's program re-executed (see below) |
-| `results/mas_terra_round_classification.csv` | every analysed round of the MAS runs with `gpt-6.1-terra` on Azure (MAS 2025 v1, MAS 2024 + evaluation patch) |
-| `results/direct_llm_runs.csv` | direct-LLM runs with checker scores. Run names give the variant: `direct` (first runs, 30000-token cap), `noskill` and `skill` (current prompt, without and with `--skill`), `gpt-4o_*` (gpt-4o on the same prompt), `sim` (reviewed by the simulated manager) |
-| `results/cost_by_experiment.csv` | API calls, tokens and cost per experiment, from the OpenRouter activity export of 16 Nov 2026, split by timestamp; the export ends before the last 4 direct runs |
 | `results/scoresheet_template.csv` | blank rubric for human evaluators, one row per MAS round (to be reworked for the final expert evaluation of two rosters; see `experiments/rerun_2026-11/PLAN.md`) |
-
-The 2025 runs were made before the harness kept the files the programs write, so their rosters were recovered by re-executing each round's saved program on the same input (`mas_harness/reexecute_rounds.py`). 21 of the 29 re-executions (28 rounds plus the rerun's one) reproduced the original printed output exactly, or the last 4000 characters the MAS kept; the other 8 differ because the heuristics are randomised, and their output has the same form. For dataset C, programs that printed staff presence per time slot were scored with `datasets/C_reconstructed/score_presence_output.py`, which places the floating employee where it helps most.
 
 **Cross-check by LLM extraction.** For every analysed round of the 40 rerun MAS runs (119 rounds), `mas_harness/llm_extract.py` had `gpt-6.1-terra` copy the roster from what the program printed and wrote into a fixed JSON schema, which was then scored with the same checkers (`results/rerun_llm_extract.csv`; about €1.65, 6 s per round). It agrees with the workbook-based scores in all 119 rounds: the same score in 30 C/D rounds, no roster in 29, and the same presence or absence of a named table in all 60 A/B rounds. The first pass found three faults that were then fixed: the workbook scorer read only the Monday sheet of a roster given per weekday (E4 · D r05, now 10.3 instead of 18.8); the extraction schema had no way to hold such a roster; and the model, not told where the reproduced history ends, refused to extract a table that continued it. Where the programs left the roster empty and gave only "unverified suggestions", the model copied the empty table and said so, as instructed.
 
-The round classification is the third evaluator's (an AI-assisted evaluation harness). Two human evaluators score the same rounds with the template. The raw run logs are not published.
-
 The rerun's tables come from `experiments/rerun_2026-11/analyse.py`, which scores every MAS round's workbook and every direct answer with the checkers; prices are set at its top. `datasets/D_synthetic/recount_independent.py <table.csv> --compare` recounts D's missing staff-hours with independent code (written from the workbook and the task text, sharing no code with the checker) and was used to spot-check the scores; it agrees with the checker on the reference, the replayed human rotation and rerun rosters. `experiments/rerun_2026-11/progress.py` shows the progress of a running rerun against the plan.
 
-To reproduce the earlier tables from your own runs:
-
-```bash
-python3 analysis/aggregate_runs.py runs results/experiments_summary.csv
-python3 analysis/cost_by_experiment.py openrouter_activity.csv --runs runs --utc-offset 2
-```
+The results files of the earlier experiments, and how to reproduce them, are listed in [EARLIER_EXPERIMENTS.md](EARLIER_EXPERIMENTS.md#results-files). The raw run logs are not published.
 
 ## Data and anonymisation
 
@@ -428,7 +393,7 @@ python3 analysis/cost_by_experiment.py openrouter_activity.csv --runs runs --utc
 
   Deviations like these are normal in practice and can be agreed locally, so they are not counted as rule violations. The best-known and replayed human rosters both have 11–12 minor deviations in 44 person-weeks and none needing attention.
 * The human decisions in the MAS were fixed, so the effect of interactive steering was not measured.
-* There were 3–5 runs per condition (5 in the rerun): enough to show consistent failure or success, not to estimate exact rates.
+* The rerun made 5 runs per cell (the earlier experiments 3–5): enough to show consistent failure or success, not to estimate exact rates.
 * Rule R10 ("opening and closing shifts are distributed as evenly as possible") is checked as: each employee's number of openings, and of closings, differs by at most one from every other employee's. Most remaining C failures are R10 under this reading.
 * Datasets A and B have no rule checker; for them we report only whether a table of the requested weeks with current staff was produced. The revised task text (`prompt_revised.txt`) is our revision, not the pilot's.
 * MAS rosters come in many forms. The rerun scores the workbooks the programs wrote, located by sheet and column names; `mas_harness/llm_extract.py` extracts them independently with an LLM as a cross-check (see Results).
