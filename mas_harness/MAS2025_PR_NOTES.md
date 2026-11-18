@@ -7,11 +7,15 @@ Target: <https://github.com/JoniHonkanen/heuristic-multi-agent-system>, based on
   version "as delivered" in the evaluation);
 * `mas2025v2_design_patches.diff`: design changes, applied on top of the first (`mas2025v2/`).
 
-*Status 17 Nov 2026:* prepared for submission as three PRs: "make it run again" (items 1–7, with
-the PuLP fix of item 2 corrected), "fixer workflow" (items 8–11) and "shift-scheduling guidance"
-(item 12). The same fixes are prepared for the 2024 version (`ucs-llm-code-docker-optimizer` and
-its copy `GPT-Laboratory/ai-code-optimizer`), plus a limit on fix attempts, which that version
-lacks. Not yet submitted.
+*Status 18 Nov 2026:* submitted as three PRs:
+
+* [#1 "make it run again"](https://github.com/JoniHonkanen/heuristic-multi-agent-system/pull/1): items 1–7, with the PuLP fix of item 2 corrected;
+* [#3 "fixer workflow"](https://github.com/JoniHonkanen/heuristic-multi-agent-system/pull/3): items 8–11, built on #1;
+* [#2 "shift-scheduling guidance"](https://github.com/JoniHonkanen/heuristic-multi-agent-system/pull/2): item 12.
+
+The same fixes, plus a limit on fix attempts that the 2024 version lacks, are submitted to the
+2024 version ([ucs-llm-code-docker-optimizer #1, #2](https://github.com/JoniHonkanen/ucs-llm-code-docker-optimizer/pull/1)) and to its copy
+([GPT-Laboratory/ai-code-optimizer #1, #2](https://github.com/GPT-Laboratory/ai-code-optimizer/pull/1)).
 
 They are split below into separate PRs, smallest first. Each item says what was wrong, how it
 showed up, what was changed, and which files are touched. Line numbers refer to `e8c2077`.

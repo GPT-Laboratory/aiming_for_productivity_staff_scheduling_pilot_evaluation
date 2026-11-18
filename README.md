@@ -28,7 +28,7 @@ productivity?*.
 This repository contains everything used to evaluate it, except the MAS itself:
 
 * a **headless harness** that runs the MAS repeatably, without its user interface, and records every step;
-* the **patches** applied to the MAS: bit-rot fixes for running it as delivered, and the design changes found in the evaluation (offered upstream as pull requests);
+* the **patches** applied to the MAS: bit-rot fixes for running it as delivered, and the design changes found in the evaluation (offered upstream as [pull requests](#the-mas-versions));
 * four **datasets**: the pilot task (pseudonymised) and synthetic, fully specified variants;
 * **rule checkers** with reference solutions, so outputs can be scored independently of the MAS's own self-assessment;
 * a **direct frontier-LLM experiment** that asks a current model to produce the roster by reasoning alone, with no tools and no code;
@@ -72,14 +72,15 @@ code: the models, the temperature, structured output by JSON schema (MAS 2024 on
 code model's output cap (MAS 2025: 16384 instead of 4096) and clearing `generated/` between runs.
 See [How the harness works](#running-the-mas-evaluation).
 
-**The pull requests** carry the v1 and v2 changes upstream:
+**The pull requests** (opened 18 Nov 2026) carry the v1 and v2 changes upstream:
 
 * **heuristic-multi-agent-system**, three PRs:
-  1. *Make it run again:* the v1 fixes, plus model settings read from `.env`. Here PuLP is capped
-     below 4 instead of adding numpy, because the numpy errors came from PuLP 4.
-  2. *Fixer workflow:* v2's changes 1–4.
-  3. *Shift-scheduling guidance:* v2's change 5.
-* **ucs-llm-code-docker-optimizer and ai-code-optimizer:** the first two, ported to MAS 2024.
+  * [#1 *Make it run again*](https://github.com/JoniHonkanen/heuristic-multi-agent-system/pull/1): the v1 fixes, plus model settings read from `.env`. Here
+    PuLP is capped below 4 instead of adding numpy, because the numpy errors came from PuLP 4.
+  * [#3 *Fixer workflow*](https://github.com/JoniHonkanen/heuristic-multi-agent-system/pull/3): v2's changes 1–4. It builds on #1.
+  * [#2 *Shift-scheduling guidance*](https://github.com/JoniHonkanen/heuristic-multi-agent-system/pull/2): v2's change 5.
+* **ucs-llm-code-docker-optimizer** ([#1](https://github.com/JoniHonkanen/ucs-llm-code-docker-optimizer/pull/1), [#2](https://github.com/JoniHonkanen/ucs-llm-code-docker-optimizer/pull/2)) **and ai-code-optimizer**
+  ([#1](https://github.com/GPT-Laboratory/ai-code-optimizer/pull/1), [#2](https://github.com/GPT-Laboratory/ai-code-optimizer/pull/2)): the first two, ported to MAS 2024.
 
 The PR branches were only smoke-tested; all results here come from the variants above.
 `mas_harness/MAS2025_PR_NOTES.md` lists every change with its reason and evidence.
@@ -282,7 +283,7 @@ Prerequisites:
    export MAS_DIR=$PWD/mas2025v2
    ```
 
-   `mas_harness/MAS2025_PR_NOTES.md` lists every change to the MAS with its reason. The changes are prepared as pull requests to heuristic-multi-agent-system; there, the PuLP fix caps an unpinned PuLP below 4 instead of adding numpy, and the model settings that the harness sets from outside (output cap, temperature, token usage) are read from `.env`.
+   `mas_harness/MAS2025_PR_NOTES.md` lists every change to the MAS with its reason. The changes are submitted as pull requests to heuristic-multi-agent-system ([#1](https://github.com/JoniHonkanen/heuristic-multi-agent-system/pull/1), [#2](https://github.com/JoniHonkanen/heuristic-multi-agent-system/pull/2), [#3](https://github.com/JoniHonkanen/heuristic-multi-agent-system/pull/3)); there, the PuLP fix caps an unpinned PuLP below 4 instead of adding numpy, and the model settings that the harness sets from outside (output cap, temperature, token usage) are read from `.env`.
 
 2. Configure the API access:
 
