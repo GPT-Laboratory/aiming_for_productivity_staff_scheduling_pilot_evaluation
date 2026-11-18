@@ -38,16 +38,51 @@ No personal data is included. See [Data and anonymisation](#data-and-anonymisati
 
 ## The MAS versions
 
-| Label | Repository and commit | What it is | Used here |
-|---|---|---|---|
-| **MAS 2024** | [ucs-llm-code-docker-optimizer](https://github.com/JoniHonkanen/ucs-llm-code-docker-optimizer) `7656ad9` (= [GPT-Laboratory/ai-code-optimizer](https://github.com/GPT-Laboratory/ai-code-optimizer) `9a1a7b2`) | the original LLM code optimizer: problem analysis, code generation, Docker execution, code fixing, output analysis, new rounds | earlier experiments, as delivered and with `mas_harness/mas_eval_patches.diff` |
-| **MAS 2025** | [heuristic-multi-agent-system](https://github.com/JoniHonkanen/heuristic-multi-agent-system) `e8c2077` (Feb–May 2025) | the optimization tool derived from MAS 2024: adds problem classification, a heuristic agent and problem-class guidance (`SHIFT_SCHEDULING` among them); most likely the pilot's version | earlier experiments "as delivered", with only bit-rot fixes (`mas_harness/mas2025_eval_patches.diff`) |
-| **MAS v2** | MAS 2025 + `mas_harness/mas2025v2_design_patches.diff` | MAS 2025 with the design changes found in the evaluation (see [Setup](#setup)) | the rerun (E3, E4) |
+Joni Honkanen's two repositories hold two different systems. We evaluated them in four
+variants:
 
-The fixes and design changes have been prepared as pull requests to
-heuristic-multi-agent-system (three PRs: make it run again, fixer workflow, shift-scheduling
-guidance) and, where they apply, to the 2024 version and its copy. `mas_harness/MAS2025_PR_NOTES.md`
-lists every change with its reason and evidence.
+* **MAS 2024** is
+  [ucs-llm-code-docker-optimizer](https://github.com/JoniHonkanen/ucs-llm-code-docker-optimizer)
+  at commit `7656ad9`, the original LLM code optimizer.
+  [GPT-Laboratory/ai-code-optimizer](https://github.com/GPT-Laboratory/ai-code-optimizer) at
+  `9a1a7b2` has identical files. Its agents analyse the problem, write the program and its Docker
+  files, run it, fix it when it fails, analyse its output and start new rounds. It has no
+  problem-specific guidance. Two variants were run:
+  * **MAS 2024 (unpatched):** the commit as published.
+  * **MAS 2024 + evaluation patch:** with `mas_harness/mas_eval_patches.diff`.
+* **MAS 2025** is
+  [heuristic-multi-agent-system](https://github.com/JoniHonkanen/heuristic-multi-agent-system) at
+  commit `e8c2077` (developed February–May 2025). It is the optimization tool derived from MAS
+  2024: it adds problem classification, a heuristic agent and guidance for each problem class,
+  among them `SHIFT_SCHEDULING`, which was written for this daycare task. The pilot most likely
+  used this version, at this commit or an earlier one, without any of the changes below. Two
+  variants were run:
+  * **MAS 2025 v1 ("as delivered"):** `e8c2077` with `mas_harness/mas2025_eval_patches.diff`.
+  * **MAS 2025 v2 (also "MAS v2"):** v1 plus `mas_harness/mas2025v2_design_patches.diff`.
+
+| Variant | What was changed in the MAS's code | Runs |
+|---|---|---|
+| **MAS 2024 (unpatched)** | nothing; the harness forwards `docker-compose` to Compose V2 | 16 runs with gpt-4o / gpt-4o-mini on A–D, 3 with `gpt-6.1-terra-pro` on D (earlier experiments) |
+| **MAS 2024 + evaluation patch** | Compose V2; numpy added next to PuLP; a log tail for the code fixer; Docker files regenerated after each fix; the user's typed answer used for a new plan and between rounds; step limit 50. Unlike v1 below, this changes behaviour. | 3 runs with `gpt-6.1-terra` on D (earlier experiments) |
+| **MAS 2025 v1 ("as delivered")** | bit-rot fixes only: Compose V2, numpy added next to PuLP, and a reset of the fix counter that avoids a crash. No prompt or model is changed, and the agents' logic is unchanged apart from the counter reset. | 12 runs with gpt-4o / gpt-4o-mini on A–D (made before the counter reset was added; 2 crashed on it), 2 reruns of C with it, 12 runs with `gpt-6.1-terra` on A–D (earlier experiments) |
+| **MAS 2025 v2** | v1 plus five design changes: the agents are told how the program is built and run; the code fixer can ask for the full log; the fixer can route a fault to the Docker files or give up; the fixer sees its earlier attempts; and the shift-scheduling guidance is rewritten into hard and soft rules in priority order (details in [Setup](#setup)) | the final rerun: E3 (gpt-4o / gpt-4o-mini) and E4 (`gpt-6.1-terra`) on A–D, 5 runs each |
+
+Some settings come from the harness and apply to all four variants, without changing the MAS's
+code: the models, the temperature, structured output by JSON schema (MAS 2024 on Azure), the
+code model's output cap (MAS 2025: 16384 instead of 4096) and clearing `generated/` between runs.
+See [How the harness works](#running-the-mas-evaluation).
+
+**The pull requests** carry the v1 and v2 changes upstream:
+
+* **heuristic-multi-agent-system**, three PRs:
+  1. *Make it run again:* the v1 fixes, plus model settings read from `.env`. Here PuLP is capped
+     below 4 instead of adding numpy, because the numpy errors came from PuLP 4.
+  2. *Fixer workflow:* v2's changes 1–4.
+  3. *Shift-scheduling guidance:* v2's change 5.
+* **ucs-llm-code-docker-optimizer and ai-code-optimizer:** the first two, ported to MAS 2024.
+
+The PR branches were only smoke-tested; all results here come from the variants above.
+`mas_harness/MAS2025_PR_NOTES.md` lists every change with its reason and evidence.
 
 ## Main findings
 
@@ -57,12 +92,12 @@ All experiments were run again on one setup: Azure (EU Data Zone), 5 runs per ce
 task text for A, B and D (see [Datasets](#datasets)), C with its own prompt, token use logged for
 every call. Plan, run list and scripts: `experiments/rerun_2026-11/`. "4o" is the MAS's own model
 pair (gpt-4o-mini for the agents, gpt-4o for the code); "Terra" is `gpt-6.1-terra` for both.
-MAS v2 is MAS 2025 with the design changes described in [Setup](#setup).
+MAS 2025 v1 and v2 are defined in [The MAS versions](#the-mas-versions).
 
 | Setup | C: rosters meeting all 11 rules | D: missing staff-hours / week, mean (range) | A and B: four-week table with current staff only | Min / run | € / run |
 |---|---|---|---|---|---|
-| **MAS v2 · Terra** (E4) | 2 / 5 as picked by the MAS, 3 / 5 in the best round; the rest miss only R10; 0 min understaffed in all 15 rounds | **11.5** (10.3–14.6); 3 of 5 at 10.8, one per-weekday roster at 10.3 | A 0 / 5 (one run planned only week 18, four wrote no table), B 0 / 5 (two runs planned three weeks with Staff08, three wrote no table) | 6.1 | 0.29 |
-| MAS v2 · 4o (E3) | 0 / 5, no roster | no roster (5 / 5) | A 0 / 5 (3 tables, all with Staff08), B 0 / 5 | 2.4 | 0.23 |
+| **MAS 2025 v2 · Terra** (E4) | 2 / 5 as picked by the MAS, 3 / 5 in the best round; the rest miss only R10; 0 min understaffed in all 15 rounds | **11.5** (10.3–14.6); 3 of 5 at 10.8, one per-weekday roster at 10.3 | A 0 / 5 (one run planned only week 18, four wrote no table), B 0 / 5 (two runs planned three weeks with Staff08, three wrote no table) | 6.1 | 0.29 |
+| MAS 2025 v2 · 4o (E3) | 0 / 5, no roster | no roster (5 / 5) | A 0 / 5 (3 tables, all with Staff08), B 0 / 5 | 2.4 | 0.23 |
 | Direct · Terra (E7) | 1 / 5; misses are mostly the staffing ratio | 14.1 (11.2–17.6) | 10 / 10 | 0.6 | 0.02 |
 | **Direct · Terra + skill** (E12a) | **4 / 5** | 18.0 (13.0–34.6); one run left the assistant out | A 3 / 5 (Staff08 in 2), B 5 / 5 | 0.7 | 0.02 |
 | Direct · gpt-4o (E8) | 0 / 5 | 21.0 (18.1–25.3); 1 invalid | 7 / 10 (Staff08 in 3) | 0.4 | 0.04 |
@@ -74,7 +109,7 @@ Baselines for D: the best known rotation misses 10.9 staff-hours a week, the day
 rotation replayed 17.4, random rotations about 20.7. A and B have no rule checker (no staff
 profiles); Staff08 appears in the old rotation but is not on the staff any more.
 
-* **With a current model and the design fixes, the MAS does what it was built for.** MAS v2 with
+* **With a current model and the design fixes, the MAS does what it was built for.** MAS 2025 v2 with
   Terra completed every run in 14–20 steps (2–10 min; no run near the 50-step limit) and produced
   the best rosters of all setups on D: three of five runs reached 10.8 missing staff-hours a week,
   slightly better than the best known rotation, and a fourth 10.3 with a roster that varies by
@@ -98,7 +133,7 @@ profiles); Staff08 appears in the old rotation but is not on the staff any more.
   picked round 1 over two rounds that met all rules, citing a 48:15 week for one employee in
   round 2; that employee's shifts add up to 38:15, as the program printed. Every round is
   therefore scored, not only the pick (`results/rerun_mas_rounds.csv`).
-* **Cost and tokens.** The whole rerun (160 runs) used about €13; a MAS v2 run with Terra about
+* **Cost and tokens.** The whole rerun (160 runs) used about €13; a MAS 2025 v2 run with Terra about
   100k input and 45k output tokens on D. Prices: Azure EU Data Zone Standard, Terra €0.99 /
   €0.054 / €4.94 per million input / cached input / output tokens; gpt-4o and gpt-4o-mini
   converted from USD third-party list prices at 0.8977 EUR/USD. Everything run on the Azure
@@ -116,19 +151,19 @@ and rule checkers, not on validation by the daycare.
 
 These runs led to the design changes and the rerun. They used different providers (OpenRouter,
 then Azure), model variants (`gpt-6.1-terra-pro`, then `gpt-6.1-terra`), the pilot's original task
-text and both MAS versions as delivered. Their results are in `results/archive/2026-11-17_before_rerun/`.
+text, and MAS 2024 (unpatched and with the evaluation patch) and MAS 2025 v1. Their results are in `results/archive/2026-11-17_before_rerun/`.
 
 | Experiment | Runs | Analysed rounds | Rounds the system rated "goal achieved" | Usable schedules |
 |---|---|---|---|---|
-| MAS 2024 version, gpt-4o / gpt-4o-mini, datasets A–D | 16 | 43 | 25 | 0 |
-| MAS 2024 version with `openai/gpt-6.1-terra-pro` as both models, dataset D | 3 | 3 | 0 | 0 |
-| MAS 2025 version, gpt-4o / gpt-4o-mini, datasets A–D (plus 2 C reruns with the counter fix) | 12 + 2 | 28 + 1 | 11 + 1 | 0 |
+| MAS 2024 (unpatched), gpt-4o / gpt-4o-mini, datasets A–D | 16 | 43 | 25 | 0 |
+| MAS 2024 (unpatched) with `openai/gpt-6.1-terra-pro` as both models, dataset D | 3 | 3 | 0 | 0 |
+| MAS 2025 v1, gpt-4o / gpt-4o-mini, datasets A–D (12 runs before the counter reset was added, plus 2 C reruns with it) | 12 + 2 | 28 + 1 | 11 + 1 | 0 |
 | Direct prompt, `openai/gpt-6.1-terra-pro`, dataset D | 5 | – | – | 5 valid tables |
 | Direct prompt, `openai/gpt-6.1-terra-pro`, dataset C | 3 | – | – | 3 satisfy all 11 rules |
 | Direct prompt, current prompt, without / with the domain skill, dataset D | 5 / 5 | – | – | 5 / 5 valid tables; mean 11.5 / 34.5 missing staff-hours a week |
 | Direct prompt, current prompt, without / with the domain skill, dataset C | 3 / 3 | – | – | 3 / 3 satisfy all 11 rules |
-| MAS 2025 version, `gpt-6.1-terra` (Azure) as both models, datasets A–D, as delivered | 12 | 10 | 1 | 0 (2 near-usable on C: 10 of 11 rules) |
-| MAS 2024 version with the evaluation patch, `gpt-6.1-terra` (Azure), dataset D | 3 | 7 | 0 | 0 |
+| MAS 2025 v1, `gpt-6.1-terra` (Azure) as both models, datasets A–D | 12 | 10 | 1 | 0 (2 near-usable on C: 10 of 11 rules) |
+| MAS 2024 + evaluation patch, `gpt-6.1-terra` (Azure), dataset D | 3 | 7 | 0 | 0 |
 | Direct prompt, `gpt-6.1-terra` (Azure): without the skill / with the skill / with the simulated manager, dataset D | 5 / 5 / 3 | – | – | all valid; mean 13.2 / 34.0 / 35.0 missing staff-hours a week |
 | Direct prompt, `gpt-6.1-terra` (Azure): without the skill / with the skill / with the simulated manager, dataset C | 3 / 3 / 3 | – | – | 2 / 2 / 2 satisfy all 11 rules (each miss: R10 only) |
 
@@ -245,7 +280,7 @@ Prerequisites:
    git clone https://github.com/JoniHonkanen/heuristic-multi-agent-system.git mas2025
    git -C mas2025 checkout e8c2077
    git -C mas2025 apply ../mas_harness/mas2025_eval_patches.diff   # Compose V2, PuLP/numpy (see above), fix-counter reset
-   export MAS_DIR=$PWD/mas2025
+   export MAS_DIR=$PWD/mas2025      # MAS 2025 v1
    ```
 
    Three things differ when it runs:
@@ -255,7 +290,7 @@ Prerequisites:
 
    The patch also fixes one bug in the MAS's own control flow. After 4 failed fixes, MAS 2025 regenerates the code, but it resets the fix counter only in its new-round agent. The next execution therefore routes to a node that is missing from the routing table and the run crashes with `KeyError: 'heuristic'` (or `'code_generator'`); this happened in 2 of the first 12 runs, both on dataset C. The patch resets the counter when code is regenerated, as the new-round agent already does. Runs that keep failing then stop at the MAS's own step limit of 50. Runs made with the patch are named `*_mas2025fix_*`.
 
-   **Design variant (v2).** The runs with `gpt-6.1-terra` showed gaps in the MAS's design rather than bit rot (see [Main findings](#main-findings)). `mas_harness/mas2025v2_design_patches.diff`, applied on top of the evaluation patch in a separate checkout `mas2025v2/` (`MAS_DIR=$PWD/mas2025v2`), makes five changes: (1) the agents that write programs, the Docker files agent and the code fixer are told how the program is built and run (inputs side by side in the build context, `docker compose build` and `up` with no variables, arguments or interaction, unattended: finish with stated assumptions); (2) the run agent keeps the tail of the unfiltered log, and the code fixer can ask for it (`need_full_logs`), getting a second call in the same step; (3) the code fixer decides where the fault is: `code`, `docker` (the Docker files agent corrects its files with the fixer's note) or `give_up` (the round ends as a failed round, and the next program is written knowing why); (4) the code fixer sees its earlier attempts on the same program; (5) the shift-scheduling guidance (`SHIFT_SCHEDULING` in `prompts/instuctions.py`) separates hard rules from soft rules in priority order and says never to return nothing. Runs with v2 are named `*_mas2025v2_*` and reported separately from the version as delivered. To build the v2 checkout:
+   **MAS 2025 v2 (design variant).** The runs with `gpt-6.1-terra` showed gaps in the MAS's design rather than bit rot (see [Main findings](#main-findings)). `mas_harness/mas2025v2_design_patches.diff`, applied on top of the evaluation patch in a separate checkout `mas2025v2/` (`MAS_DIR=$PWD/mas2025v2`), makes five changes: (1) the agents that write programs, the Docker files agent and the code fixer are told how the program is built and run (inputs side by side in the build context, `docker compose build` and `up` with no variables, arguments or interaction, unattended: finish with stated assumptions); (2) the run agent keeps the tail of the unfiltered log, and the code fixer can ask for it (`need_full_logs`), getting a second call in the same step; (3) the code fixer decides where the fault is: `code`, `docker` (the Docker files agent corrects its files with the fixer's note) or `give_up` (the round ends as a failed round, and the next program is written knowing why); (4) the code fixer sees its earlier attempts on the same program; (5) the shift-scheduling guidance (`SHIFT_SCHEDULING` in `prompts/instuctions.py`) separates hard rules from soft rules in priority order and says never to return nothing. Runs with v2 are named `*_mas2025v2_*` and reported separately from v1. To build the v2 checkout:
 
    ```bash
    git clone https://github.com/JoniHonkanen/heuristic-multi-agent-system.git mas2025v2
@@ -352,8 +387,8 @@ uv run --no-project --python 3.11 --with-requirements requirements.txt direct_ll
 | `results/archive/2026-11-17_before_rerun/` | the results files as they were before the rerun |
 | `results/experiments_summary.csv` | per experiment: runs, completed, stopped at step limit, code executions and failures, analysed rounds, rounds self-rated as achieved, usable schedules |
 | `results/mas_round_classification.csv` | every analysed MAS round classified by failure type, with the MAS's own verdict and a short note |
-| `results/mas2025_round_classification.csv` | the same for the 2025 version, plus how faithfully each round's program re-executed (see below) |
-| `results/mas_terra_round_classification.csv` | every analysed round of the MAS runs with `gpt-6.1-terra` on Azure (MAS 2025 as delivered, MAS 2024 with the evaluation patch) |
+| `results/mas2025_round_classification.csv` | the same for MAS 2025 v1, plus how faithfully each round's program re-executed (see below) |
+| `results/mas_terra_round_classification.csv` | every analysed round of the MAS runs with `gpt-6.1-terra` on Azure (MAS 2025 v1, MAS 2024 + evaluation patch) |
 | `results/direct_llm_runs.csv` | direct-LLM runs with checker scores. Run names give the variant: `direct` (first runs, 30000-token cap), `noskill` and `skill` (current prompt, without and with `--skill`), `gpt-4o_*` (gpt-4o on the same prompt), `sim` (reviewed by the simulated manager) |
 | `results/cost_by_experiment.csv` | API calls, tokens and cost per experiment, from the OpenRouter activity export of 16 Nov 2026, split by timestamp; the export ends before the last 4 direct runs |
 | `results/scoresheet_template.csv` | blank rubric for human evaluators, one row per MAS round (to be reworked for the final expert evaluation of two rosters; see `experiments/rerun_2026-11/PLAN.md`) |
