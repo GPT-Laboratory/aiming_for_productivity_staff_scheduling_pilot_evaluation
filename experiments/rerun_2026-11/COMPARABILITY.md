@@ -23,9 +23,9 @@ two measures of one roster. A setup that does well on both is consistent evidenc
 numbers cannot be put on D's scale or the other way round. The two numbers also cannot be
 combined, for example as missing hours per broken rule.
 
-**Charts.** The infographic shows D's mean as the bar length and C's broken-rule count as dots
-inside the bar. Each mark is honest on its own, but drawing both on one bar invites reading them
-as one roster. Label the dots as coming from the other case, or draw them in their own column.
+**Charts.** The infographic now takes both of its measures from D: the bar is the mean missing
+staff-hours, and the dots count the hard-rule violations in the same five rosters. C's results
+appear only as text.
 
 ## What can be compared within D (missing staff-hours per week)
 
@@ -40,6 +40,26 @@ Comparable across every rerun setup:
 * **One E4 roster (r05)** came as one sheet per weekday, not as a weekly rotation. It was scored
   with `score_daily_detail.py`, which applies the same rules and numbers per day. It is
   comparable in missing staff-hours, but it is not in the requested format.
+
+**Hard-rule violations on D** (`hard_violations_total` in `synthetic_daycare.score`; the
+`violations` column of the rerun results). These are the hard rules other than the ratio, which
+is scored as missing staff-hours:
+
+* **What is counted:** a shift left empty (blank or "loma"), a person in two slots, a name not on
+  the staff, a person on leave all week, and an available person left out.
+* **One mistake, one count.** A blank or a double booking also leaves someone out, so each week
+  counts the larger of the slot problems and the people left out.
+* **Rules this format cannot break:** own group, part-time days, partial leave and rest periods.
+  The required share of qualified staff holds whenever nobody is left out.
+* **Fixed 18 Nov 2026:** the checker did not count "loma" written into a slot as an empty shift.
+  That changed the `empty` counts of 10 weak-model rosters. No missing-staff-hours score changed.
+* **Assumption:** the assistant counts toward the Lark group's ratio. If the assistant were
+  child-specific, the law would not count them, and every roster would miss more staff-hours.
+* **Results (five rosters each):**
+  * agentic pipeline with Terra 0, direct Terra 0, best known and random rotations 0;
+  * direct gpt-4o 2;
+  * direct gpt-4o-mini 29;
+  * direct Terra with the skill 4, all in the one run that left the assistant out.
 
 The reference points need care:
 

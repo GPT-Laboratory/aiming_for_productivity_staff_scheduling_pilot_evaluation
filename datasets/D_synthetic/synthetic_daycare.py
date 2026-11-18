@@ -109,7 +109,7 @@ def score(table, kids=None, staff=None):
     slot_hist = {s: [] for s in by}
     for w, row in sorted(table.items()):
         names = [x for x in row if x and x.lower() != "loma"]
-        rep["empty_slots"] += sum(1 for x in row if not x)
+        rep["empty_slots"] += sum(1 for x in row if not x or x.lower() == "loma")   # "loma" in a slot: nobody works it
         rep["unknown_names"] += [x for x in names if x not in by]
         rep["duplicate_assignments"] += len(names) - len(set(names))
         rep["staff_missing_from_week"] += sum(1 for s in by if s not in names and off_days(by[s], w) != set(DAYS))
@@ -157,6 +157,23 @@ def score(table, kids=None, staff=None):
                 hrs["needs_attention"].append(item)
     rep["working_hours_info"] = hrs
     rep["valid_table"] = not rep["unknown_names"] and rep["duplicate_assignments"] == 0 and bool(table)
+    # Hard rules other than the ratio (which is scored as missing staff-hours). Own group, part-time
+    # days, partial leave and rest periods cannot be broken in this format; the staff's mix of
+    # qualifications holds whenever nobody is left out.
+    hv = {"double_booked": rep["duplicate_assignments"], "empty_shifts": rep["empty_slots"],
+          "available_person_left_out": rep["staff_missing_from_week"], "on_leave_all_week": rep["vacation_or_offday_conflicts"],
+          "not_on_staff": len(rep["unknown_names"])}
+    rep["hard_violations"] = {k: v for k, v in hv.items() if v}
+    # One mistake shows up twice (a blank or a duplicate also leaves a person out), so per week the
+    # total is the larger of the slot problems and the people left out.
+    total = 0
+    for w, row in sorted(table.items()):
+        names = [x for x in row if x and x.lower() != "loma"]
+        slot_problems = (sum(1 for x in row if not x or x.lower() == "loma") + len(names) - len(set(names))
+                         + sum(1 for x in set(names) if x not in by) + sum(1 for x in set(names) if x in by and off_days(by[x], w) == set(DAYS)))
+        left_out = sum(1 for x in by if x not in names and off_days(by[x], w) != set(DAYS))
+        total += max(slot_problems, left_out)
+    rep["hard_violations_total"] = total
     return rep
 
 

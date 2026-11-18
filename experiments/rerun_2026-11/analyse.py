@@ -7,7 +7,9 @@
   results/rerun_summary.csv      per experiment x dataset: mean, range and count of the main score
 
 Scores: C = rule groups met of 7 (7 = all 11 rules) and minutes of understaffed group time;
-D = missing staff-hours per week (weekly rotation; per-day roster if the weekly sheet is empty);
+D = missing staff-hours per week (weekly rotation; per-day roster if the weekly sheet is empty), plus
+the count of hard-rule violations other than the ratio (double bookings, empty shifts, available
+staff left out, work during whole-week leave, names not on the staff);
 A, B = no rule checker: empty cells, whether Staff08 (no longer on the staff) is scheduled, and
 the same person in the same slot two weeks running. Costs use Azure's gpt-6.1-terra prices (EU Data
 Zone Standard, see PRICE); gpt-4o and gpt-4o-mini get token counts only.
@@ -102,18 +104,35 @@ def weekday_sheets(x):
     return daily or None
 
 
+def daily_violations(wd, dd):
+    """Hard-rule violations of a roster given per day, comparable with sd.score's hard_violations_total.
+    A slot left open counts only beyond the slots that must stay open because staff are off that day
+    (in the weekly form those days off are implicit)."""
+    kids, staff = sd.load()
+    empty = 0
+    for (w, d), row in wd.items():
+        if (w, d) in sd.CLOSED:
+            continue
+        available = sum(1 for st_ in staff if d not in sd.off_days(st_, w))
+        filled = len({i for i, x in row if x.lower() != "loma"})
+        empty += max(0, available - filled)
+    return empty + dd["double_booked_person_days"] + dd["assigned_on_day_off"] + len(dd["unknown_names"])
+
+
 def score_d_workbook(f):
     x = pd.ExcelFile(f)
     wd = weekday_sheets(x)
     if wd:
         dd = sdd.score_daily(wd)
         return {"score": dd["ratio"]["missing_staff_hours_per_week"], "empty": dd["empty_slots"],
-                "conflicts": dd["assigned_on_day_off"], "repeats": None, "form": "weekday sheets"}
+                "conflicts": dd["assigned_on_day_off"], "repeats": None, "form": "weekday sheets",
+                "violations": daily_violations(wd, dd)}
     t = weekly_table(x)
     if t:
         r = sd.score(t)
         return {"score": r["ratio"]["missing_staff_hours_per_week"], "empty": r["empty_slots"],
-                "conflicts": r["vacation_or_offday_conflicts"], "repeats": r["rotation"]["same_slot_two_weeks_running"], "form": "weekly"}
+                "conflicts": r["vacation_or_offday_conflicts"], "repeats": r["rotation"]["same_slot_two_weeks_running"], "form": "weekly",
+                "violations": r["hard_violations_total"]}
     if any("daily" in n.lower() for n in x.sheet_names):
         dd = sdd.score_daily(sdd.read_daily(f))
         if dd["days_given"]:
@@ -189,7 +208,7 @@ def analyse_mas():
             ach = str((s["results"][i - 1] if i <= len(s["results"]) else {}).get("is_goal_achieved", ""))
             row = meta | {"run": d.name, "round": i, "program_step": p.name[:2], "picked": i == pick,
                           "self_rated_achieved": ach.strip().lower().startswith(("true", "yes")),
-                          **{k: r.get(k) for k in ("score", "failed", "understaffed_min", "empty", "conflicts", "repeats", "staff08", "form", "file")}}
+                          **{k: r.get(k) for k in ("score", "failed", "understaffed_min", "empty", "conflicts", "repeats", "violations", "staff08", "form", "file")}}
             rounds.append(row); scored.append(row)
         u = s.get("token_usage") or {}
         inp = sum(v["input"] for v in u.values()); ca = sum(v["cached_input"] for v in u.values())
@@ -207,6 +226,7 @@ def analyse_mas():
                             "scorable_rounds": sum(1 for r in scored if r["form"]),
                             "empty": final["empty"] if final else None, "staff08": final["staff08"] if final else None,
                             "repeats": final["repeats"] if final else None,
+                            "violations": final["violations"] if final else None,
                             "best_round_score": (max if meta["dataset"] == "C" else min)([r["score"] for r in scored if r["score"] is not None], default=None),
                             "llm_calls": sum(v["calls"] for v in u.values()), "input_tokens": inp, "cached_input_tokens": ca,
                             "output_tokens": out, "reasoning_tokens": rea,
@@ -239,13 +259,17 @@ def analyse_direct():
         r = json.loads((d / "result.json").read_text())
         c = r.get("checker") or {}
         sc = {}
+        if meta["dataset"] == "D" and (d / "final_table.csv").exists():   # counted for invalid tables too
+            sc["violations"] = sd.score(sd.read_table(d / "final_table.csv"))["hard_violations_total"]
         if r["valid"] and c:
             if meta["dataset"] == "C":
                 sc = {"score": sum(c["rules_satisfied"].values()), "failed": " ".join(k for k, v in c["rules_satisfied"].items() if not v),
                       "understaffed_min": c["R2_R6_ratio"]["group_minutes_understaffed"]}
-            elif meta["dataset"] == "D":
+            elif meta["dataset"] == "D":   # rescored with the current checker, not the one saved at run time
+                c = sd.score(sd.read_table(d / "final_table.csv"))
                 sc = {"score": c["ratio"]["missing_staff_hours_per_week"], "empty": c["empty_slots"],
-                      "conflicts": c["vacation_or_offday_conflicts"], "repeats": c["rotation"]["same_slot_two_weeks_running"]}
+                      "conflicts": c["vacation_or_offday_conflicts"], "repeats": c["rotation"]["same_slot_two_weeks_running"],
+                      "violations": c["hard_violations_total"]}
             else:
                 t = sd.read_table(d / "final_table.csv")
                 sc = describe_ab(t)
@@ -253,7 +277,7 @@ def analyse_direct():
         inp = sum(t.get("prompt_tokens") or 0 for t in tu); out = sum(t.get("completion_tokens") or 0 for t in tu)
         ca = sum(t.get("cached_prompt_tokens") or 0 for t in tu); rea = sum(t.get("reasoning_tokens") or 0 for t in tu)
         rows.append(meta | {"run": d.name, "valid": r["valid"], "answers": r["n_turns"], "seconds": round(r["duration_s"]),
-                            **{k: sc.get(k) for k in ("score", "failed", "understaffed_min", "empty", "conflicts", "repeats", "staff08")},
+                            **{k: sc.get(k) for k in ("score", "failed", "understaffed_min", "empty", "conflicts", "repeats", "violations", "staff08")},
                             "input_tokens": inp, "cached_input_tokens": ca, "output_tokens": out, "reasoning_tokens": rea,
                             "tokens_detail": "full" if any("cached_prompt_tokens" in t for t in tu) else "prompt+completion only",
                             **(lambda c: {"cost_eur": c[1] if c[0] == "EUR" else None, "cost_usd": c[1] if c[0] == "USD" else None})(
@@ -287,7 +311,10 @@ def summarise(mas, direct):
                 row["mean_best_round"] = round(st.mean(b), 1)
         elif ds == "D":
             row |= {"metric": "missing staff-hours per week (best known 10.9, random 20.7)"}
-        else:
+        if ds == "D":
+            vs = [r.get("violations") for r in rows if r.get("violations") is not None]
+            row |= {"hard_violations_total": sum(vs) if vs else None, "rosters_with_hard_violations": sum(1 for v in vs if v)}
+        if ds not in ("C", "D"):
             row |= {"metric": "no checker", "staff08_scheduled": sum(1 for r in rows if r.get("staff08")),
                     "with_a_table": sum(1 for r in rows if r.get("empty") is not None),
                     "with_empty_cells": sum(1 for r in rows if r.get("empty"))}
