@@ -108,6 +108,9 @@ MAS 2025 v1 and v2 are defined in [The MAS versions](#the-mas-versions).
 Baselines for D: the best known rotation misses 10.9 staff-hours a week, the daycare's own
 rotation replayed 17.4, random rotations about 20.7. A and B have no rule checker (no staff
 profiles); Staff08 appears in the old rotation but is not on the staff any more.
+C and D are two different daycares, so their scores cannot be combined, and the replayed rotation
+fits the daycare's real pattern to invented staff and children; see
+`experiments/rerun_2026-11/COMPARABILITY.md`.
 
 * **With a current model and the design fixes, the MAS does what it was built for.** MAS 2025 v2 with
   Terra completed every run in 14–20 steps (2–10 min; no run near the 50-step limit) and produced
