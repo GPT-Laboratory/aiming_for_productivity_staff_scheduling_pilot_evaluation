@@ -9,8 +9,8 @@ analyses the output and iterates as needed or as the user requests. This reposit
 extended tests and experiments that evaluated the MAS afterwards (November 2026), on the pilot
 task and on synthetic, fully specified variants of it.
 
-The MAS was developed by Joni Honkanen in the AKKE-funded GPT-Lab Seinäjoki project, in two
-versions (see [The MAS versions](#the-mas-versions)):
+The MAS was developed by Joni Honkanen in the AKKE-funded GPT-Lab Seinäjoki project, and later completed as part of his MSc thesis project. Two
+different iterations of the tool were included in this evaluation (see [The MAS versions](#the-mas-versions)):
 
 * **2024:** the original LLM code optimizer,
   [ucs-llm-code-docker-optimizer](https://github.com/JoniHonkanen/ucs-llm-code-docker-optimizer)
