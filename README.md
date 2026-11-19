@@ -18,7 +18,7 @@ different iterations of the tool were included in this evaluation (see [The MAS 
 * **2025:** the optimization tool derived from it,
   [heuristic-multi-agent-system](https://github.com/JoniHonkanen/heuristic-multi-agent-system),
   which adds problem classification, a heuristic agent and problem-class guidance, including
-  guidance for shift scheduling. The pilot most likely used this version, before the fixes
+  guidance for shift scheduling. The final experiments of the 2025 pilot runs used this version, before the fixes
   described here.
 
 Developing the MAS was not part of *AIming for productivity?*, and the MAS is not part of this
